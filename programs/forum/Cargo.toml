@@ -1,0 +1,28 @@
+[package]
+name = "forum"
+version = "0.1.0"
+description = "forum program"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "forum"
+doctest = false
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { version="0.24.2", features = ["init-if-needed"] }
+anchor-spl = "0.24.2"
+bitflags = "1.3.2"
+bytemuck = "1.7.2"
+static_assertions = "1.1.0"
+thiserror = "1.0.30"
+metaplex-token-metadata = { version = "0.0.1", features = ["no-entrypoint"] }
+prog_common = {path='../../lib/prog_common'}
+proc_macros = {path='../../lib/proc_macros'}
+arrayref = "0.3.6"

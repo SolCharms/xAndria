@@ -1,0 +1,19 @@
+// To use app builder
+
+Anchor.toml 						line 2 program_name = "program_id"
+package.json						line 2, 4, 12, 22, 24 Program_Name, line 17 program_description
+tsconfig.json						line 13   "include": ["src/*", "src/cli/program-name-cli.ts"]
+README.md						line 1 Program_Name
+/programs/program_name					directory name
+/programs/program_name/cargo.toml			line 2, 9 program_name, line 4 program_description
+src/program-name					directory name
+src/index.ts						line 4, 6 program-name, line 7 "program_id"
+
+
+
+Unfinished
+--------------------------------------------------------------------------------------------------------------------------------------
+Anchor.toml 						line 2 program_name = "program_id"
+tsconfig.json						line 13   "include": ["src/*", "src/cli/program-name-cli.ts"]
+README.md						line 1 Program_Name
+src/index.ts						line 4, 6 program-name, line 7 "program_id"+
