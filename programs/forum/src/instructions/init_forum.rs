@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Forum, LATEST_FORUM_VERSION};
+use crate::state::{Forum, ForumFees, ReputationMatrix, LATEST_FORUM_VERSION};
 
 #[derive(Accounts)]
 #[instruction(bump_forum_auth: u8)]
@@ -26,7 +26,7 @@ pub struct InitForum<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<InitForum>, forum_profile_fee: u64, forum_question_fee: u64, forum_bounty_minimum: u64) -> Result<()> {
+pub fn handler(ctx: Context<InitForum>, forum_fees: ForumFees, reputation_matrix: ReputationMatrix) -> Result<()> {
 
     let forum = &mut ctx.accounts.forum;
 
@@ -49,14 +49,16 @@ pub fn handler(ctx: Context<InitForum>, forum_profile_fee: u64, forum_question_f
     forum.forum_authority_bump_seed = [bump_forum_auth];
 
     forum.forum_treasury = ctx.accounts.forum_treasury.key();
-    forum.forum_profile_fee = forum_profile_fee;
-    forum.forum_question_fee = forum_question_fee;
-    forum.forum_question_bounty_minimum = forum_bounty_minimum;
+    forum.forum_fees = forum_fees;
 
-    forum.forum_profile_count = 0;
-    forum.forum_question_count = 0;
-    forum.forum_answer_count = 0;
-    forum.forum_comment_count = 0;
+    forum.forum_counts.forum_profile_count = 0;
+    forum.forum_counts.forum_big_notes_count = 0;
+    forum.forum_counts.forum_question_count = 0;
+    forum.forum_counts.forum_answer_count = 0;
+    forum.forum_counts.forum_comment_count = 0;
+    forum.forum_counts.extra_space = [0; 64];
+
+    forum.reputation_matrix = reputation_matrix;
 
     msg!("New forum account with pubkey {} initialized", ctx.accounts.forum.key());
     Ok(())

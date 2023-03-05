@@ -53,9 +53,11 @@ pub enum ErrorCode {
     #[msg("the content in the about me cannot exceed 512 characters")]
     AboutMeContentTooLong, //0x177F
 
-    Reserved16, //0x1780
+    #[msg("about me PDA must be closed prior to deleting user profile account")]
+    AboutMePDANotClosed, //0x1780
 
-    Reserved17, //0x1781
+    #[msg("the provided profile must have moderator privileges")]
+    ProfileIsNotModerator, //0x1781
 
     Reserved18, //0x1782
 

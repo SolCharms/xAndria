@@ -4,6 +4,5 @@ export * from './prog-common';
 export * from './forum';
 
 export const FORUM_PROG_ID = new PublicKey(
-    'CZNkXA1HaESTi21XtaFmfvGYASHPaVdzdwHFanFLmaek'
+    'FoRUMUrDyBL5wh1N5Lntac21rVNRcktQFmkigLaUp4ab'
 );
-

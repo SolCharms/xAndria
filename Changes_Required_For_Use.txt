@@ -16,4 +16,4 @@ Unfinished
 Anchor.toml 						line 2 program_name = "program_id"
 tsconfig.json						line 13   "include": ["src/*", "src/cli/program-name-cli.ts"]
 README.md						line 1 Program_Name
-src/index.ts						line 4, 6 program-name, line 7 "program_id"+
+src/index.ts						line 4, 6 program-name, line 7 "program_id"

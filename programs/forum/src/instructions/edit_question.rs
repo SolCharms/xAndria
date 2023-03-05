@@ -64,35 +64,27 @@ pub fn handler(ctx: Context<EditQuestion>, new_title: String, new_content: Strin
         return Err(error!(ErrorCode::TitleTooLong));
     }
 
-    // Ensure that content does not exceed 65536 characters
-    if new_content_length > 65536 {
-        return Err(error!(ErrorCode::ContentTooLong));
-    }
-
     // Calculate data sizes and convert data to slice arrays
     let mut title_buffer: Vec<u8> = Vec::new();
     new_title.serialize(&mut title_buffer).unwrap();
 
     let title_buffer_as_slice: &[u8] = title_buffer.as_slice();
     let title_buffer_slice_length: usize = title_buffer_as_slice.len();
-    let title_slice_end_byte = 96 + title_buffer_slice_length;
 
     let mut content_buffer: Vec<u8> = Vec::new();
     new_content.serialize(&mut content_buffer).unwrap();
 
     let content_buffer_as_slice: &[u8] = content_buffer.as_slice();
     let content_buffer_slice_length: usize = content_buffer_as_slice.len();
-    let content_slice_end_byte = title_slice_end_byte + content_buffer_slice_length;
 
     let mut tag_buffer: Vec<u8> = Vec::new();
     new_tags.serialize(&mut tag_buffer).unwrap();
 
     let tag_buffer_as_slice: &[u8] = tag_buffer.as_slice();
     let tag_buffer_slice_length: usize = tag_buffer_as_slice.len();
-    let _tag_slice_end_byte = content_slice_end_byte + tag_buffer_slice_length;
 
     // Calculate total space required for the addition of the new data
-    let new_data_bytes_amount: usize = 96 + title_buffer_slice_length + content_buffer_slice_length + tag_buffer_slice_length + 1;
+    let new_data_bytes_amount: usize = 128 + title_buffer_slice_length + content_buffer_slice_length + tag_buffer_slice_length + 1;
     let old_data_bytes_amount: usize = ctx.accounts.question.to_account_info().data_len();
 
     if new_data_bytes_amount > old_data_bytes_amount {

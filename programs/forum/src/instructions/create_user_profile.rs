@@ -49,10 +49,9 @@ impl<'info> CreateUserProfile<'info> {
 pub fn handler(ctx: Context<CreateUserProfile>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
-    let forum_profile_fee = ctx.accounts.forum.forum_profile_fee;
+    let forum_profile_fee = ctx.accounts.forum.forum_fees.forum_profile_fee;
 
     if forum_profile_fee > 0 {
-
         ctx.accounts.transfer_payment_ctx(forum_profile_fee)?;
     }
 
@@ -63,19 +62,24 @@ pub fn handler(ctx: Context<CreateUserProfile>) -> Result<()> {
     user_profile.profile_created_ts = now_ts;
     user_profile.most_recent_engagement_ts = now_ts;
 
+    user_profile.big_notes_posted = 0;
+    user_profile.big_notes_contributions = 0;
     user_profile.questions_asked = 0;
     user_profile.questions_answered = 0;
     user_profile.comments_added = 0;
     user_profile.answers_accepted = 0;
     user_profile.total_bounty_received = 0;
     user_profile.reputation_score = 0;
+    user_profile.extra_reputation_space = [0; 64];
 
     // user_profile.nft_pfp_token_mint = ;
+    user_profile.has_about_me = false;
+    user_profile.has_had_about_me = false;
     user_profile.is_moderator = false;
 
     // Increment user profile count in forum state's account
     let forum = &mut ctx.accounts.forum;
-    forum.forum_profile_count.try_add_assign(1)?;
+    forum.forum_counts.forum_profile_count.try_add_assign(1)?;
 
     msg!("New user profile created for user with wallet address {}", ctx.accounts.profile_owner.key());
     Ok(())

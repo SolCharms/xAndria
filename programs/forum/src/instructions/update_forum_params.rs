@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Forum};
+use crate::state::{Forum, ForumFees, ReputationMatrix};
 
 #[derive(Accounts)]
 pub struct UpdateForumParams<'info> {
@@ -14,15 +14,13 @@ pub struct UpdateForumParams<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<UpdateForumParams>, new_forum_profile_fee: u64, new_forum_question_fee: u64, new_forum_question_bounty_minimum: u64) -> Result<()> {
+pub fn handler(ctx: Context<UpdateForumParams>, new_forum_fees: ForumFees, new_reputation_matrix: ReputationMatrix) -> Result<()> {
 
     let forum = &mut ctx.accounts.forum;
-    forum.forum_profile_fee = new_forum_profile_fee;
-    forum.forum_question_fee = new_forum_question_fee;
-    forum.forum_question_bounty_minimum = new_forum_question_bounty_minimum;
+    forum.forum_fees = new_forum_fees;
+    forum.reputation_matrix = new_reputation_matrix;
 
-    msg!("Forum profile fee now {}", forum.forum_profile_fee);
-    msg!("Forum question fee now {}", forum.forum_question_fee);
-    msg!("Forum bounty minimum now {}", forum.forum_question_bounty_minimum);
+    msg!("Forum profile fees now {:?}", forum.forum_fees);
+    msg!("Forum reputation matrix now {:?}", forum.reputation_matrix);
     Ok(())
 }

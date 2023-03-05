@@ -1,8 +1,8 @@
 use anchor_lang::prelude::*;
 use instructions::*;
-use crate::state::Tags;
+use crate::state::{ForumFees, ReputationMatrix, Tags};
 
-declare_id!("CZNkXA1HaESTi21XtaFmfvGYASHPaVdzdwHFanFLmaek");
+declare_id!("FoRUMUrDyBL5wh1N5Lntac21rVNRcktQFmkigLaUp4ab");
 
 pub mod instructions;
 pub mod state;
@@ -17,31 +17,27 @@ pub mod forum {
     pub fn init_forum(
         ctx: Context<InitForum>,
         _bump_forum_auth: u8,
-        forum_profile_fee: u64,
-        forum_question_fee: u64,
-        forum_question_bounty_minimum: u64,
+        forum_fees: ForumFees,
+        reputation_matrix: ReputationMatrix,
     ) -> Result<()> {
         msg!("initializing forum");
         instructions::init_forum::handler(
             ctx,
-            forum_profile_fee,
-            forum_question_fee,
-            forum_question_bounty_minimum
+            forum_fees,
+            reputation_matrix,
         )
     }
 
     pub fn update_forum_params(
         ctx: Context<UpdateForumParams>,
-        new_forum_profile_fee: u64,
-        new_forum_question_fee: u64,
-        new_forum_question_bounty_minimum: u64,
+        new_forum_fees: ForumFees,
+        new_reputation_matrix: ReputationMatrix,
     ) -> Result<()> {
         msg!("updating forum fees");
         instructions::update_forum_params::handler(
             ctx,
-            new_forum_profile_fee,
-            new_forum_question_fee,
-            new_forum_question_bounty_minimum
+            new_forum_fees,
+            new_reputation_matrix,
         )
     }
 
@@ -167,6 +163,19 @@ pub mod forum {
         )
     }
 
+    pub fn add_content_to_question(
+        ctx: Context<AddContentToQuestion>,
+        _bump_user_profile: u8,
+        _bump_question: u8,
+        new_content: String,
+    ) -> Result<()> {
+        msg!("adding content to question");
+        instructions::add_content_to_question::handler(
+            ctx,
+            new_content
+        )
+    }
+
     pub fn edit_question(
         ctx: Context<EditQuestion>,
         _bump_user_profile: u8,
@@ -186,6 +195,7 @@ pub mod forum {
 
     pub fn delete_question(
         ctx: Context<DeleteQuestion>,
+        _bump_moderator_profile: u8,
         _bump_user_profile: u8,
         _bump_question: u8,
     ) -> Result<()> {

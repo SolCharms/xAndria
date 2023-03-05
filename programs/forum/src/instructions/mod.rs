@@ -1,3 +1,4 @@
+pub mod add_content_to_question;
 pub mod add_moderator;
 pub mod ask_question;
 pub mod close_forum;
@@ -14,6 +15,7 @@ pub mod payout_from_treasury;
 pub mod remove_moderator;
 pub mod update_forum_params;
 
+pub use add_content_to_question::*;
 pub use add_moderator::*;
 pub use ask_question::*;
 pub use close_forum::*;

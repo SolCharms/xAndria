@@ -1,8 +1,9 @@
 use anchor_lang::prelude::*;
 
 pub const LATEST_FORUM_VERSION: u16 = 0;
+pub use crate::state::{ForumCounts, ForumFees, ReputationMatrix};
 
-#[proc_macros::assert_size(192)] // +5 to make it divisible by 8
+#[proc_macros::assert_size(464)] // +5 to make it divisible by 8
 #[repr(C)]
 #[account]
 #[derive(Debug)]
@@ -17,25 +18,19 @@ pub struct Forum {
 
     pub forum_authority_bump_seed: [u8; 1],
 
-    // --------------- Forum fees, in lamports
-
     pub forum_treasury: Pubkey,
 
-    pub forum_profile_fee: u64,
+    // --------------- Forum fees, in lamports
 
-    pub forum_question_fee: u64,
+    pub forum_fees: ForumFees,
 
-    pub forum_question_bounty_minimum: u64,
+    // --------------- Forum PDA counts
 
-    // --------------- PDA counts
+    pub forum_counts: ForumCounts,
 
-    pub forum_profile_count: u64,
+    // --------------- Forum Reputation Matrix
 
-    pub forum_question_count: u64,
-
-    pub forum_answer_count: u64,
-
-    pub forum_comment_count: u64,
+    pub reputation_matrix: ReputationMatrix
 }
 
 impl Forum {

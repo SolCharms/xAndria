@@ -28,10 +28,10 @@ pub struct CloseForum<'info> {
 
 pub fn handler(ctx: Context<CloseForum>) -> Result<()> {
 
-    let forum = &mut ctx.accounts.forum;
+    let forum_counts = &mut ctx.accounts.forum.forum_counts;
 
     // Ensure count PDAs associated to forum have already been closed
-    if (forum.forum_profile_count > 0) || (forum.forum_question_count > 0) || (forum.forum_answer_count > 0) || (forum.forum_comment_count > 0) {
+    if (forum_counts.forum_profile_count > 0) || (forum_counts.forum_big_notes_count > 0) || (forum_counts.forum_question_count > 0) || (forum_counts.forum_answer_count > 0) || (forum_counts.forum_comment_count > 0) {
         return Err(error!(ErrorCode::NotAllForumPDAsClosed));
     }
 

@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use prog_common::{close_account};
+use prog_common::{now_ts, close_account};
 use crate::state::{AboutMe, UserProfile};
 
 #[derive(Accounts)]
@@ -28,12 +28,19 @@ pub struct DeleteAboutMe<'info> {
 
 pub fn handler(ctx: Context<DeleteAboutMe>) -> Result<()> {
 
+    let now_ts = now_ts()?;
+
     // Set the receiver of the lamports to be reclaimed from the rent of the accounts to be closed
     let receiver = &mut ctx.accounts.receiver;
 
     // Close the user profile state account
     let about_me_account_info = &mut (*ctx.accounts.about_me).to_account_info();
     close_account(about_me_account_info, receiver)?;
+
+    // Update user profile account's most recent engagement timestamp and flip has about me boolean
+    let user_profile = &mut ctx.accounts.user_profile;
+    user_profile.most_recent_engagement_ts = now_ts;
+    user_profile.has_about_me = false;
 
     msg!("About Me PDA account with address {} now closed", ctx.accounts.about_me.key());
     Ok(())

@@ -1,7 +1,5 @@
 use anchor_lang::prelude::*;
 
-pub const CREATE_ABOUT_ME_REPUTATION_BONUS: u64 = 100;
-
 #[repr(C)]
 #[account]
 #[derive(Debug)]
@@ -13,7 +11,7 @@ pub struct AboutMe {
     // ------------- Timestamps
     pub about_me_created_ts: u64,
 
-    pub most_recent_engagement_ts: u64,
+    pub most_recent_update_ts: u64,
 
     // ------------- About Me Info
 

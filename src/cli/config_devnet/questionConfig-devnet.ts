@@ -42,3 +42,5 @@ export const questionConfig: QuestionConfig =
         tags: Tags.Development,
         bountyAmount: new BN(250_000_000)
     }
+
+export const additionalContent: string = "This is some additional content to add to the already existing content in the question";

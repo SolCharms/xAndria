@@ -5,34 +5,35 @@ use crate::state::{Tags};
 #[repr(C)]
 #[account]
 #[derive(Debug)]
-pub struct Question {
+pub struct BigNote {
 
-    // Forum for which question belongs
+    // Forum for which big note belongs
     pub forum: Pubkey,
 
-    // Profile of user asking question
+    // Profile of user creating big note
     pub user_profile: Pubkey,
 
-    // Seed used to generate unique question account PDA address
-    pub question_seed: Pubkey,
+    // Seed used to generate unique big note account PDA address
+    pub big_note_seed: Pubkey,
 
     // ------------- Timestamps
-    pub question_posted_ts: u64,
+    pub big_note_created_ts: u64,
 
-    pub most_recent_engagement_ts: u64,
+    pub most_recent_update_ts: u64,
 
     // ------------- Bounty Amount
     pub bounty_amount: u64,
 
-    // ------------- Question Info
+    pub soliciting_contibutors: bool,
+
+    // ------------- Big note Info
+
+    pub tag: Tags,
 
     pub title: String, // Max 256 characters
 
     pub content: String, // Max 65536 characters
 
-    pub tag: Tags,
-
     // Is Bounty Awarded
     pub bounty_awarded: bool,
-
 }

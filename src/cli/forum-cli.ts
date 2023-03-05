@@ -7,17 +7,13 @@ import * as anchor from '@coral-xyz/anchor';
 import { IDL as ForumIDL } from '../types/forum';
 import { FORUM_PROG_ID } from '../index';
 import { stringifyPKsAndBNs } from '../prog-common';
-import {
-    findForumAuthorityPDA,
-    findForumTreasuryPDA,
-    findQuestionPDA,
-    findUserProfilePDA,
-} from '../forum/forum.pda';
+import { findForumAuthorityPDA } from '../forum/forum.pda';
+import { ForumFees, ReputationMatrix } from '../forum/forum.client';
 
 import { networkConfig } from "../cli/config_devnet/networkConfig-devnet";
 import { forumConfig } from "../cli/config_devnet/forumConfig-devnet";
 import { aboutMeConfig } from "../cli/config_devnet/aboutMeConfig-devnet";
-import { questionConfig } from "../cli/config_devnet/questionConfig-devnet";
+import { additionalContent, questionConfig } from "../cli/config_devnet/questionConfig-devnet";
 
 // ----------------------------------------------- Legend ---------------------------------------------------------
 
@@ -68,17 +64,15 @@ const parser = yargs(process.argv.slice(2)).options({
                  );
 
                  const forum = Keypair.generate();
-                 const forumProfileFee: anchor.BN = forumConfig.forumProfileFee;
-                 const forumQuestionFee: anchor.BN = forumConfig.forumQuestionFee;
-                 const forumBountyMinimum: anchor.BN = forumConfig.forumBountyMinimum;
+                 const forumFees: ForumFees = forumConfig.forumFees;
+                 const reputationMatrix: ReputationMatrix = forumConfig.reputationMatrix;
 
                  if (!argv.dryRun) {
                      const forumInstance = await forumClient.initForum(
                          forum,
                          wallet.payer,
-                         forumProfileFee,
-                         forumQuestionFee,
-                         forumBountyMinimum
+                         forumFees,
+                         reputationMatrix,
                      );
                      console.log(stringifyPKsAndBNs(forumInstance));
                  } else {
@@ -109,17 +103,15 @@ const parser = yargs(process.argv.slice(2)).options({
                  );
 
                  const forumKey = new PublicKey(argv.forumPubkey);
-                 const newForumProfileFee: anchor.BN = forumConfig.forumProfileFee;
-                 const newForumQuestionFee: anchor.BN = forumConfig.forumQuestionFee;
-                 const newForumBountyMinimum: anchor.BN = forumConfig.forumBountyMinimum;
+                 const forumFees: ForumFees = forumConfig.forumFees;
+                 const reputationMatrix: ReputationMatrix = forumConfig.reputationMatrix;
 
                  if (!argv.dryRun) {
                      const updateForumParamsInstance = await forumClient.updateForumParams(
                          forumKey,
                          wallet.payer,
-                         newForumProfileFee,
-                         newForumQuestionFee,
-                         newForumBountyMinimum
+                         forumFees,
+                         reputationMatrix,
                      );
                      console.log(stringifyPKsAndBNs(updateForumParamsInstance));
                  } else {
@@ -428,6 +420,94 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// Add moderator privilege to a user profile account
+    .command('add-moderator', 'Add moderator privilege to a user profile account', {
+        forumPubkey: {
+            alias: 'f',
+            type: 'string',
+            demandOption: true,
+            description: 'forum account pubkey'
+        },
+        userProfilePubkey: {
+            alias: 'p',
+            type: 'string',
+            demandOption: true,
+            description: 'user profile account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey = new PublicKey(argv.forumPubkey);
+                 const userProfileKey = new PublicKey(argv.userProfilePubkey);
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 if (!argv.dryRun) {
+                     const addModeratorInstance = await forumClient.addModerator(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey
+                     );
+                     console.log(stringifyPKsAndBNs(addModeratorInstance));
+                 } else {
+                     console.log('Adding moderator privilege to user profile account with address', userProfileKey.toBase58());
+                 }
+             })
+
+
+
+// Remove moderator privilege from a user profile account
+    .command('remove-moderator', 'Remove moderator privilege from a user profile account', {
+        forumPubkey: {
+            alias: 'f',
+            type: 'string',
+            demandOption: true,
+            description: 'forum account pubkey'
+        },
+        userProfilePubkey: {
+            alias: 'p',
+            type: 'string',
+            demandOption: true,
+            description: 'user profile account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey = new PublicKey(argv.forumPubkey);
+                 const userProfileKey = new PublicKey(argv.userProfilePubkey);
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 if (!argv.dryRun) {
+                     const removeModeratorInstance = await forumClient.removeModerator(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey
+                     );
+                     console.log(stringifyPKsAndBNs(removeModeratorInstance));
+                 } else {
+                     console.log('Removing moderator privilege from user profile account with address', userProfileKey.toBase58());
+                 }
+             })
+
+
+
 // -------------------------------------------------- user interaction instructions ------------------------------------------
 
 
@@ -464,6 +544,48 @@ const parser = yargs(process.argv.slice(2)).options({
                      console.log(stringifyPKsAndBNs(questionInstance));
                  } else {
                      console.log('Asking question for user profile with wallet pubkey', stringifyPKsAndBNs(wallet.publicKey));
+                 }
+             })
+
+
+
+// Add content to question
+// Must config question parameters in questionConfig
+    .command('add-to-question', 'Add content to question', {
+        questionPubkey: {
+            alias: 'q',
+            type: 'string',
+            demandOption: true,
+            description: 'question account pubkey'
+        },
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey: PublicKey = questionConfig.forum;
+                 const newContent: string = additionalContent;
+
+                 const questionKey = new PublicKey(argv.questionPubkey);
+                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
+                 const questionSeed = questionAcct.questionSeed;
+
+                 if (!argv.dryRun) {
+                     const addContentToQuestionInstance = await forumClient.addContentToQuestion(
+                         forumKey,
+                         wallet.payer,
+                         questionSeed,
+                         newContent,
+                     );
+                     console.log(stringifyPKsAndBNs(addContentToQuestionInstance));
+                 } else {
+                     console.log('Adding content to question with account address', questionKey.toBase58());
                  }
              })
 
@@ -564,10 +686,6 @@ const parser = yargs(process.argv.slice(2)).options({
                      console.log('Deleting question with account address', questionKey.toBase58());
                  }
              })
-
-
-
-
 
 
 
@@ -751,6 +869,81 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  } else {
                      console.log('Found user profile PDA for owner pubkey:', profileOwnerKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch user about me PDA by Pubkey
+// User about me account pubkey required in command
+    .command('fetch-about-me-by-key', 'Fetch user about me PDA account info by pubkey', {
+        aboutMePubkey: {
+            alias: 'k',
+            type: 'string',
+            demandOption: true,
+            description: 'user about me account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const aboutMeKey: PublicKey = new PublicKey(argv.aboutMePubkey);
+
+                 if (!argv.dryRun) {
+
+                     const aboutMePDA = await forumClient.fetchAboutMeAccount(aboutMeKey);
+
+                     console.log('Displaying account info for user about me with pubkey: ', aboutMeKey.toBase58());
+                     console.dir(stringifyPKsAndBNs(aboutMePDA), {depth: null});
+
+                 } else {
+                     console.log('Found user about me PDA for pubkey:', aboutMeKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch user about me PDA by user profile
+// User profile account pubkey required in command
+    .command('fetch-about-me-by-profile', 'Fetch user about me PDA account info by pubkey', {
+        userProfilePubkey: {
+            alias: 'p',
+            type: 'string',
+            demandOption: true,
+            description: 'user profile account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const userProfileKey: PublicKey = new PublicKey(argv.userProfilePubkey);
+
+                 if (!argv.dryRun) {
+
+                     console.log('Fetching about me PDA for user profile with pubkey: ', userProfileKey.toBase58());
+                     const aboutMePDAs = await forumClient.fetchAboutMeForProfile(userProfileKey);
+
+                     // Loop over all PDAs and display account info
+                     for (let num = 1; num <= aboutMePDAs.length; num++) {
+                         console.log('About me account', num, ':');
+                         console.dir(stringifyPKsAndBNs(aboutMePDAs[num - 1]), {depth: null});
+                     }
+                 } else {
+                     console.log('Found user about me PDA for user profile with pubkey:', userProfileKey.toBase58());
                  }
              })
 

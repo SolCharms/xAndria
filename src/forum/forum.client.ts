@@ -29,6 +29,37 @@ export const Tags = {
     Trading: { trading:{}}
 }
 
+export interface ForumCounts {
+    forumProfileCount: BN;
+    forumBigNotesCount: BN;
+    forumQuestionCount: BN;
+    forumAnswerCount: BN;
+    forumCommentCount: BN;
+    extraSpace: number[];
+}
+
+export interface ForumFees {
+    forumProfileFee: BN;
+    forumQuestionFee: BN;
+    forumBigNotesFee: BN;
+    forumQuestionBountyMinimum: BN;
+    forumBigNotesBountyMinimum: BN;
+    extraSpace: number[];
+}
+
+export interface ReputationMatrix {
+    aboutMeRep: BN;
+    postBigNotesRep: BN;
+    contributeBigNotesRep: BN;
+    questionRep: BN;
+    answerRep: BN;
+    commentRep: BN;
+    acceptedAnswerRep: BN;
+    extraSpace: number[];
+}
+
+
+
 export class ForumClient extends AccountUtils {
     wallet: anchor.Wallet;
     provider!: anchor.Provider;
@@ -80,6 +111,10 @@ export class ForumClient extends AccountUtils {
         return this.forumProgram.account.userProfile.fetch(userProfile);
     }
 
+    async fetchAboutMeAccount(aboutMe: PublicKey) {
+        return this.forumProgram.account.aboutMe.fetch(aboutMe);
+    }
+
     async fetchQuestionAccount(question: PublicKey) {
         return this.forumProgram.account.question.fetch(question);
     }
@@ -112,7 +147,7 @@ export class ForumClient extends AccountUtils {
             ? [
                 {
                     memcmp: {
-                        offset: 8, //need to prepend 8 bytes for anchor's disc and 2 for version: u16
+                        offset: 8, //need to prepend 8 bytes for anchor's disc
                         bytes: profileOwner.toBase58(),
                     },
                 },
@@ -120,6 +155,22 @@ export class ForumClient extends AccountUtils {
             : [];
         const pdas = await this.forumProgram.account.userProfile.all(filter);
         console.log('Found a total of', pdas.length, 'user profile PDAs');
+        return pdas;
+    }
+
+    async fetchAboutMeForProfile(userProfile: PublicKey) {
+        const filter = userProfile
+            ? [
+                {
+                    memcmp: {
+                        offset: 8, //need to prepend 8 bytes for anchor's disc
+                        bytes: userProfile.toBase58(),
+                    },
+                },
+            ]
+            : [];
+        const pdas = await this.forumProgram.account.aboutMe.all(filter);
+        console.log('Found a total of', pdas.length, 'about me PDAs');
         return pdas;
     }
 
@@ -144,9 +195,8 @@ export class ForumClient extends AccountUtils {
     async initForum(
         forum: Keypair,
         forumManager: PublicKey | Keypair,
-        forumProfileFee: BN,
-        forumQuestionFee: BN,
-        forumBountyMinimum: BN,
+        forumFees: ForumFees,
+        reputationMatrix: ReputationMatrix,
     ) {
         // Derive PDAs
         const [forumAuthority, forumAuthBump] = await findForumAuthorityPDA(forum.publicKey);
@@ -162,9 +212,8 @@ export class ForumClient extends AccountUtils {
         const txSig = await this.forumProgram.methods
             .initForum(
                 forumAuthBump,
-                forumProfileFee,
-                forumQuestionFee,
-                forumBountyMinimum,
+                forumFees,
+                reputationMatrix,
             )
             .accounts({
                 forum: forum.publicKey,
@@ -189,9 +238,8 @@ export class ForumClient extends AccountUtils {
     async updateForumParams(
         forum: PublicKey,
         forumManager: PublicKey | Keypair,
-        newForumProfileFee: BN,
-        newForumQuestionFee: BN,
-        newForumBountyMinimum: BN,
+        forumFees: ForumFees,
+        reputationMatrix: ReputationMatrix,
     ) {
         // Create Signers Array
         const signers = [];
@@ -202,9 +250,8 @@ export class ForumClient extends AccountUtils {
         // Transaction
         const txSig = await this.forumProgram.methods
             .updateForumParams(
-                newForumProfileFee,
-                newForumQuestionFee,
-                newForumBountyMinimum,
+                forumFees,
+                reputationMatrix,
             )
             .accounts({
                 forum: forum,
@@ -670,6 +717,52 @@ export class ForumClient extends AccountUtils {
         }
     }
 
+    async addContentToQuestion(
+        forum: PublicKey,
+        profileOwner: PublicKey | Keypair,
+        questionSeed: PublicKey,
+        newContent: string,
+    ) {
+        const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
+
+        // Derive PDAs
+        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [question, questionBump] = await findQuestionPDA(forum, userProfile, questionSeed);
+
+        // Create Signers Array
+        const signers = [];
+        if (isKp(profileOwner)) signers.push(<Keypair>profileOwner);
+
+        console.log('editing question with pubkey: ', question.toBase58());
+
+        // Transaction
+        const txSig = await this.forumProgram.methods
+            .addContentToQuestion(
+                userProfileBump,
+                questionBump,
+                newContent,
+            )
+            .accounts({
+                forum: forum,
+                profileOwner: isKp(profileOwner)? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner,
+                userProfile: userProfile,
+                question: question,
+                questionSeed: questionSeed,
+                systemProgram: SystemProgram.programId,
+            })
+            .signers(signers)
+            .rpc();
+
+        return {
+            userProfile,
+            userProfileBump,
+            question,
+            questionBump,
+            txSig
+        }
+    }
+
+
     async editQuestion(
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
@@ -721,30 +814,35 @@ export class ForumClient extends AccountUtils {
 
     async deleteQuestion(
         forum: PublicKey,
-        forumManager: PublicKey | Keypair,
+        moderator: PublicKey | Keypair,
         profileOwner: PublicKey,
         questionSeed: PublicKey,
         receiver: PublicKey,
     ) {
+        const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
+
         // Derive PDAs
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(moderatorKey);
         const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwner);
         const [question, questionBump] = await findQuestionPDA(forum, userProfile, questionSeed);
 
         // Create Signers Array
         const signers = [];
-        if (isKp(forumManager)) signers.push(<Keypair>forumManager);
+        if (isKp(moderator)) signers.push(<Keypair>moderator);
 
-        console.log('editing question with pubkey: ', question.toBase58());
+        console.log('deleting question with pubkey: ', question.toBase58());
 
         // Transaction
         const txSig = await this.forumProgram.methods
             .deleteQuestion(
+                moderatorProfileBump,
                 userProfileBump,
                 questionBump
             )
             .accounts({
                 forum: forum,
-                forumManager: isKp(forumManager)? (<Keypair>forumManager).publicKey : <PublicKey>forumManager,
+                moderator: isKp(moderator)? (<Keypair>moderator).publicKey : <PublicKey>moderator,
+                moderatorProfile: moderatorProfile,
                 profileOwner: profileOwner,
                 userProfile: userProfile,
                 question: question,

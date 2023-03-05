@@ -6,7 +6,6 @@ use anchor_lang::solana_program::system_instruction::{create_account};
 
 use prog_common::{now_ts, TryAdd, errors::ErrorCode};
 use crate::state::{Forum, UserProfile};
-use crate::state::{CREATE_ABOUT_ME_REPUTATION_BONUS};
 
 #[derive(Accounts)]
 #[instruction(bump_user_profile: u8)]
@@ -32,9 +31,10 @@ pub struct CreateAboutMe<'info> {
 
 pub fn handler(ctx: Context<CreateAboutMe>, content: String) -> Result<()> {
 
-    let content_length = content.len();
-
     let now_ts: u64 = now_ts()?;
+
+    // Record character length of content data to be added
+    let content_length = content.len();
 
     // Ensure that the length of content string is non-zero
     if content_length == 0 {
@@ -64,7 +64,7 @@ pub fn handler(ctx: Context<CreateAboutMe>, content: String) -> Result<()> {
 
         let content_buffer_as_slice: &[u8] = content_buffer.as_slice();
         let content_buffer_slice_length: usize = content_buffer_as_slice.len();
-        let content_slice_end_byte = 88 + content_buffer_slice_length;
+        let content_slice_end_byte = 56 + content_buffer_slice_length;
 
         create_pda_with_space(
             &[
@@ -83,39 +83,33 @@ pub fn handler(ctx: Context<CreateAboutMe>, content: String) -> Result<()> {
         let disc = hash("account:AboutMe".as_bytes());
 
         // Pack byte data into Listing account
-        let mut listing_account_raw = ctx.accounts.about_me.data.borrow_mut();
-        listing_account_raw[..8].clone_from_slice(&disc.to_bytes()[..8]);
-        listing_account_raw[8..40].clone_from_slice(&ctx.accounts.user_profile.key().to_bytes());
-        listing_account_raw[40..48].clone_from_slice(&now_ts.to_le_bytes());
-        listing_account_raw[48..56].clone_from_slice(&now_ts.to_le_bytes());
-        listing_account_raw[56..content_slice_end_byte].clone_from_slice(content_buffer_as_slice);
+        let mut about_me_account_raw = ctx.accounts.about_me.data.borrow_mut();
+        about_me_account_raw[..8].clone_from_slice(&disc.to_bytes()[..8]);
+        about_me_account_raw[8..40].clone_from_slice(&ctx.accounts.user_profile.key().to_bytes());
+        about_me_account_raw[40..48].clone_from_slice(&now_ts.to_le_bytes());
+        about_me_account_raw[48..56].clone_from_slice(&now_ts.to_le_bytes());
+        about_me_account_raw[56..content_slice_end_byte].clone_from_slice(content_buffer_as_slice);
+
+        // Update user profile's most recent engagement timestamp and flip has about me boolean
+        let user_profile = &mut ctx.accounts.user_profile;
+        user_profile.most_recent_engagement_ts = now_ts;
+        user_profile.has_about_me = true;
+
+        // Update user profile's reputation score if has had about me boolean is false
+        if !user_profile.has_had_about_me {
+            let about_me_rep = ctx.accounts.forum.reputation_matrix.about_me_rep;
+            user_profile.reputation_score.try_add_assign(about_me_rep)?;
+            user_profile.has_had_about_me = true;
+        }
+
+        msg!("About Me PDA account with address {} now created", ctx.accounts.about_me.key());
+    }
+    else {
+        msg!("About Me PDA account with address {} already exists", ctx.accounts.about_me.key());
     }
 
-    // Update user most recent engagement ts and reputation score
-    let user_profile = &mut ctx.accounts.user_profile;
-    user_profile.most_recent_engagement_ts = now_ts;
-    user_profile.reputation_score.try_add_assign(CREATE_ABOUT_ME_REPUTATION_BONUS)?;
-
-    msg!("About Me PDA account with address {} now created", ctx.accounts.about_me.key());
     Ok(())
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // Auxiliary helper functions

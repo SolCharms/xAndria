@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 
 use crate::state::{Forum, UserProfile};
+use prog_common::errors::ErrorCode;
 use prog_common::{close_account, TrySub};
 
 #[derive(Accounts)]
@@ -28,6 +29,10 @@ pub struct DeleteUserProfile<'info> {
 
 pub fn handler(ctx: Context<DeleteUserProfile>) -> Result<()> {
 
+    if ctx.accounts.user_profile.has_about_me {
+        return Err(error!(ErrorCode::AboutMePDANotClosed));
+    }
+
     // Set the receiver of the lamports to be reclaimed from the rent of the accounts to be closed
     let receiver = &mut ctx.accounts.receiver;
 
@@ -37,10 +42,10 @@ pub fn handler(ctx: Context<DeleteUserProfile>) -> Result<()> {
 
     // Decrement forum profile count in forum's state
     let forum = &mut ctx.accounts.forum;
-    forum.forum_profile_count.try_sub_assign(1)?;
+    forum.forum_counts.forum_profile_count.try_sub_assign(1)?;
 
     msg!("User profile with address {} now closed", ctx.accounts.user_profile.key());
-    msg!("Forum {} now has {} user profiles", ctx.accounts.forum.key(), ctx.accounts.forum.forum_profile_count);
+    msg!("Forum {} now has {} user profiles", ctx.accounts.forum.key(), ctx.accounts.forum.forum_counts.forum_profile_count);
 
     Ok(())
 }
