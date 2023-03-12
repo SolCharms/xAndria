@@ -59,9 +59,11 @@ pub enum ErrorCode {
     #[msg("the provided profile must have moderator privileges")]
     ProfileIsNotModerator, //0x1781
 
-    Reserved18, //0x1782
+    #[msg("comments can only be added to either a question or an answer account")]
+    InvalidAccountDiscriminator, //0x1782
 
-    Reserved19, //0x1783
+    #[msg("the bounty has already been awarded")]
+    BountyAlreadyAwarded, //0x1783
 
     Reserved20, //0x1784
 

@@ -1,7 +1,7 @@
 pub mod about_me;
-// pub mod answer;
+pub mod answer;
 pub mod big_note;
-// pub mod comment;
+pub mod comment;
 pub mod forum;
 pub mod forum_counts;
 pub mod forum_fees;
@@ -11,9 +11,9 @@ pub mod tags;
 pub mod user_profile;
 
 pub use about_me::*;
-// pub use answer::*;
+pub use answer::*;
 pub use big_note::*;
-// pub use comment::*;
+pub use comment::*;
 pub use forum::*;
 pub use forum_counts::*;
 pub use forum_fees::*;

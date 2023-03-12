@@ -13,11 +13,15 @@ import { ForumFees, ReputationMatrix } from '../forum/forum.client';
 import { networkConfig } from "../cli/config_devnet/networkConfig-devnet";
 import { forumConfig } from "../cli/config_devnet/forumConfig-devnet";
 import { aboutMeConfig } from "../cli/config_devnet/aboutMeConfig-devnet";
-import { additionalContent, questionConfig } from "../cli/config_devnet/questionConfig-devnet";
+import { additionalQuestionContent, questionConfig } from "../cli/config_devnet/questionConfig-devnet";
+import { additionalAnswerContent, answerConfig } from "../cli/config_devnet/answerConfig-devnet";
+import { commentConfig } from "../cli/config_devnet/commentConfig-devnet";
+import { additionalBigNoteContent, bigNoteConfig } from "../cli/config_devnet/bigNoteConfig-devnet";
 
 // ----------------------------------------------- Legend ---------------------------------------------------------
 
 // -a answer account address (answer)
+// -b big note account address (big note)
 // -c comment account address (comment)
 // -d destination (token) account address (destination)
 // -f forum account address (forum)
@@ -28,8 +32,9 @@ import { additionalContent, questionConfig } from "../cli/config_devnet/question
 // -q question account address (question)
 // -r receiver account address (receiver)
 // -s token account address (spl-token)
-// -t mint address (minT)
+// -t token mint address (minT)
 // -u unix timestamp (unix)
+// -x supplemental bounty amount (eXtra)
 // -z dryRun
 
 
@@ -420,6 +425,10 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// ---------------------------------------------- adding/removing moderator privilege instructions ------------------------------------------
+
+
+
 // Add moderator privilege to a user profile account
     .command('add-moderator', 'Add moderator privilege to a user profile account', {
         forumPubkey: {
@@ -570,20 +579,22 @@ const parser = yargs(process.argv.slice(2)).options({
                  );
 
                  const forumKey: PublicKey = questionConfig.forum;
-                 const newContent: string = additionalContent;
+                 const newContent: string[] = additionalQuestionContent;
 
                  const questionKey = new PublicKey(argv.questionPubkey);
                  const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
                  const questionSeed = questionAcct.questionSeed;
 
                  if (!argv.dryRun) {
-                     const addContentToQuestionInstance = await forumClient.addContentToQuestion(
-                         forumKey,
-                         wallet.payer,
-                         questionSeed,
-                         newContent,
-                     );
-                     console.log(stringifyPKsAndBNs(addContentToQuestionInstance));
+                     for (let i=0; i < newContent.length; i++) {
+                         const addContentToQuestionInstance = await forumClient.addContentToQuestion(
+                             forumKey,
+                             wallet.payer,
+                             questionSeed,
+                             newContent[i],
+                         );
+                         console.log(stringifyPKsAndBNs(addContentToQuestionInstance));
+                     }
                  } else {
                      console.log('Adding content to question with account address', questionKey.toBase58());
                  }
@@ -637,7 +648,7 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
-// Delete question (signer required: forum manager)
+// Delete question (signer required: moderator)
     .command('delete-question', 'Delete question', {
         questionPubkey: {
             alias: 'q',
@@ -662,12 +673,12 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
-                 const forumKey: PublicKey = questionConfig.forum;
                  const receiverKey: PublicKey = argv.receiverPubkey ? new PublicKey(argv.receiverPubkey) : wallet.publicKey;
 
                  const questionKey = new PublicKey(argv.questionPubkey);
                  const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
                  const questionSeed = questionAcct.questionSeed;
+                 const forumKey = questionAcct.forum;
                  const userProfileKey = questionAcct.userProfile;
 
                  const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
@@ -686,6 +697,635 @@ const parser = yargs(process.argv.slice(2)).options({
                      console.log('Deleting question with account address', questionKey.toBase58());
                  }
              })
+
+
+
+// Supplement question bounty (signer required: moderator)
+    .command('supplement-question-bounty', 'Supplement question bounty', {
+        questionPubkey: {
+            alias: 'q',
+            type: 'string',
+            demandOption: true,
+            description: 'question account pubkey'
+        },
+        supplementalBountyAmount: {
+            alias: 'x',
+            type: 'string',
+            demandOption: true,
+            description: 'supplemental bounty amount'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const supplementalBountyAmount = new anchor.BN(argv.supplementalBountyAmount);
+
+                 const questionKey = new PublicKey(argv.questionPubkey);
+                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
+                 const questionSeed = questionAcct.questionSeed;
+                 const forumKey = questionAcct.forum;
+                 const userProfileKey = questionAcct.userProfile;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 if (!argv.dryRun) {
+                     const supplementQuestionBountyInstance = await forumClient.supplementQuestionBounty(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey,
+                         questionSeed,
+                         supplementalBountyAmount,
+                     );
+                     console.log(stringifyPKsAndBNs(supplementQuestionBountyInstance));
+                 } else {
+                     console.log('Deleting question with account address', questionKey.toBase58());
+                 }
+             })
+
+
+
+// Accept answer
+    .command('accept-answer', 'Accept answer', {
+        questionPubkey: {
+            alias: 'q',
+            type: 'string',
+            demandOption: true,
+            description: 'question account pubkey'
+        },
+        answerPubkey: {
+            alias: 'a',
+            type: 'string',
+            demandOption: true,
+            description: 'answer account pubkey'
+        },
+        receiverPubkey: {
+            alias: 'r',
+            type: 'string',
+            demandOption: false,
+            description: 'receiver account pubkey for reclaimed rent lamports'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const questionKey = new PublicKey(argv.questionPubkey);
+                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
+                 const questionSeed = questionAcct.questionSeed;
+                 const forumKey = questionAcct.forum;
+
+                 const answerKey = new PublicKey(argv.answerPubkey);
+                 const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
+                 const answerSeed = answerAcct.answerSeed;
+                 const answerProfileOwnerKey = answerAcct.profileOwner;
+
+                 const receiverKey = new PublicKey(argv.receiverPubkey);
+
+                 if (!argv.dryRun) {
+                     const acceptAnswerInstance = await forumClient.acceptAnswer(
+                         forumKey,
+                         wallet.payer,
+                         answerProfileOwnerKey,
+                         questionSeed,
+                         answerSeed,
+                         receiverKey,
+                     );
+                     console.log(stringifyPKsAndBNs(acceptAnswerInstance));
+                 } else {
+                     console.log('Accepting answer with account address', answerKey.toBase58());
+                 }
+             })
+
+
+
+// Answer Question
+// Must config answer parameters in answerConfig
+    .command('answer-question', 'Answer question', {
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const questionKey: PublicKey = answerConfig.question;
+                 const content: string = answerConfig.content;
+
+                 if (!argv.dryRun) {
+                     const answerInstance = await forumClient.answerQuestion(
+                         questionKey,
+                         wallet.payer,
+                         content,
+                     );
+                     console.log(stringifyPKsAndBNs(answerInstance));
+                 } else {
+                     console.log('Answering question with account address', stringifyPKsAndBNs(questionKey));
+                 }
+             })
+
+
+
+// Add content to answer
+// Must config answer parameters in answerConfig
+    .command('add-to-answer', 'Add content to answer', {
+        answerPubkey: {
+            alias: 'a',
+            type: 'string',
+            demandOption: true,
+            description: 'answer account pubkey'
+        },
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const answerKey = new PublicKey(argv.answerPubkey);
+                 const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
+                 const forumKey: PublicKey = answerAcct.forum;
+                 const answerSeed = answerAcct.answerSeed;
+
+                 const newContent: string[] = additionalAnswerContent;
+
+                 if (!argv.dryRun) {
+                     for (let i=0; i < newContent.length; i++) {
+                         const addContentToQuestionInstance = await forumClient.addContentToQuestion(
+                             forumKey,
+                             wallet.payer,
+                             answerSeed,
+                             newContent[i],
+                         );
+                         console.log(stringifyPKsAndBNs(addContentToQuestionInstance));
+                     }
+                 } else {
+                     console.log('Adding content to answer with account address', answerKey.toBase58());
+                 }
+             })
+
+
+
+// Edit answer
+// Must config answer parameters in answerConfig
+    .command('edit-answer', 'Edit answer', {
+        answerPubkey: {
+            alias: 'a',
+            type: 'string',
+            demandOption: true,
+            description: 'answer account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const answerKey: PublicKey = new PublicKey(argv.answerPubkey);
+                 const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
+                 const forumKey = answerAcct.forum;
+                 const answerSeed = answerAcct.answerSeed;
+
+                 const newContent: string = answerConfig.content;
+
+                 if (!argv.dryRun) {
+                     const editAnswerInstance = await forumClient.editAnswer(
+                         forumKey,
+                         wallet.payer,
+                         answerSeed,
+                         newContent,
+                     );
+                     console.log(stringifyPKsAndBNs(editAnswerInstance));
+                 } else {
+                     console.log('Editing answer with account address', stringifyPKsAndBNs(answerKey));
+                 }
+             })
+
+
+
+// Delete answer (signer required: moderator)
+    .command('delete-answer', 'Delete answer', {
+        answerPubkey: {
+            alias: 'a',
+            type: 'string',
+            demandOption: true,
+            description: 'answer account pubkey'
+        },
+        receiverPubkey: {
+            alias: 'r',
+            type: 'string',
+            demandOption: false,
+            description: 'receiver account pubkey for reclaimed rent lamports'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const receiverKey: PublicKey = argv.receiverPubkey ? new PublicKey(argv.receiverPubkey) : wallet.publicKey;
+
+                 const answerKey = new PublicKey(argv.answerPubkey);
+                 const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
+                 const forumKey = answerAcct.forum;
+                 const answerSeed = answerAcct.answerSeed;
+                 const userProfileKey = answerAcct.userProfile;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 if (!argv.dryRun) {
+                     const deleteAnswerInstance = await forumClient.deleteAnswer(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey,
+                         answerSeed,
+                         receiverKey
+                     );
+                     console.log(stringifyPKsAndBNs(deleteAnswerInstance));
+                 } else {
+                     console.log('Deleting answer with account address', answerKey.toBase58());
+                 }
+             })
+
+
+
+// Leave Comment
+// Must config comment parameters in commentConfig
+    .command('leave-comment', 'Leave comment', {
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const commentedOnKey: PublicKey = commentConfig.commentedOn;
+                 const forumKey: PublicKey = commentConfig.forum;
+                 const content: string = commentConfig.content;
+
+                 if (!argv.dryRun) {
+                     const commentInstance = await forumClient.leaveComment(
+                         forumKey,
+                         wallet.payer,
+                         commentedOnKey,
+                         content,
+                     );
+                     console.log(stringifyPKsAndBNs(commentInstance));
+                 } else {
+                     console.log('Leaving comment on account with address', stringifyPKsAndBNs(commentedOnKey));
+                 }
+             })
+
+
+
+// Edit comment
+// Must config comment parameters in commentConfig
+    .command('edit-comment', 'Edit comment', {
+        commentPubkey: {
+            alias: 'c',
+            type: 'string',
+            demandOption: true,
+            description: 'comment account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const commentKey: PublicKey = new PublicKey(argv.commentPubkey);
+                 const commentAcct = await forumClient.fetchCommentAccount(commentKey);
+                 const forumKey = commentAcct.forum;
+                 const commentSeed = commentAcct.commentSeed;
+
+                 const newContent: string = commentConfig.content;
+
+                 if (!argv.dryRun) {
+                     const editCommentInstance = await forumClient.editComment(
+                         forumKey,
+                         wallet.payer,
+                         commentSeed,
+                         newContent,
+                     );
+                     console.log(stringifyPKsAndBNs(editCommentInstance));
+                 } else {
+                     console.log('Editing comment with account address', stringifyPKsAndBNs(commentKey));
+                 }
+             })
+
+
+
+// Delete comment (signer required: moderator)
+    .command('delete-comment', 'Delete comment', {
+        commentPubkey: {
+            alias: 'c',
+            type: 'string',
+            demandOption: true,
+            description: 'comment account pubkey'
+        },
+        receiverPubkey: {
+            alias: 'r',
+            type: 'string',
+            demandOption: false,
+            description: 'receiver account pubkey for reclaimed rent lamports'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const receiverKey: PublicKey = argv.receiverPubkey ? new PublicKey(argv.receiverPubkey) : wallet.publicKey;
+
+                 const commentKey = new PublicKey(argv.commentPubkey);
+                 const commentAcct = await forumClient.fetchCommentAccount(commentKey);
+                 const forumKey = commentAcct.forum;
+                 const commentSeed = commentAcct.commentSeed;
+                 const userProfileKey = commentAcct.userProfile;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 if (!argv.dryRun) {
+                     const deleteCommentInstance = await forumClient.deleteComment(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey,
+                         commentSeed,
+                         receiverKey
+                     );
+                     console.log(stringifyPKsAndBNs(deleteCommentInstance));
+                 } else {
+                     console.log('Deleting comment with account address', commentKey.toBase58());
+                 }
+             })
+
+
+
+// Create Big Note
+// Must config big note parameters in bigNoteConfig
+    .command('create-bignote', 'Create a big note', {
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey: PublicKey = bigNoteConfig.forum;
+                 const title: string = bigNoteConfig.title;
+                 const content: string = bigNoteConfig.content;
+                 const tags = bigNoteConfig.tags;
+
+                 if (!argv.dryRun) {
+                     const bigNoteInstance = await forumClient.createBigNote(
+                         forumKey,
+                         wallet.payer,
+                         title,
+                         content,
+                         tags,
+                     );
+                     console.log(stringifyPKsAndBNs(bigNoteInstance));
+                 } else {
+                     console.log('Creating big note for user profile with wallet pubkey', stringifyPKsAndBNs(wallet.publicKey));
+                 }
+             })
+
+
+
+// Add content to big note
+// Must config big note parameters in bigNoteConfig
+    .command('add-to-bignote', 'Add content to big note', {
+        bigNotePubkey: {
+            alias: 'b',
+            type: 'string',
+            demandOption: true,
+            description: 'big note account pubkey'
+        },
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey: PublicKey = bigNoteConfig.forum;
+                 const newContent: string[] = additionalBigNoteContent;
+
+                 const bigNoteKey = new PublicKey(argv.bigNotePubkey);
+                 const bigNoteAcct = await forumClient.fetchBigNoteAccount(bigNoteKey);
+                 const bigNoteSeed = bigNoteAcct.bigNoteSeed;
+
+                 if (!argv.dryRun) {
+                     for (let i=0; i < newContent.length; i++) {
+                         const addContentToBigNoteInstance = await forumClient.addContentToBigNote(
+                             forumKey,
+                             wallet.payer,
+                             bigNoteSeed,
+                             newContent[i],
+                         );
+                         console.log(stringifyPKsAndBNs(addContentToBigNoteInstance));
+                     }
+                 } else {
+                     console.log('Adding content to big note with account address', bigNoteKey.toBase58());
+                 }
+             })
+
+
+
+// Edit big note
+// Must config big note parameters in bigNoteConfig
+    .command('edit-big-note', 'Edit big note', {
+        bigNotePubkey: {
+            alias: 'b',
+            type: 'string',
+            demandOption: true,
+            description: 'big note account pubkey'
+        },
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey: PublicKey = bigNoteConfig.forum;
+                 const title: string = bigNoteConfig.title;
+                 const content: string = bigNoteConfig.content;
+                 const tags = bigNoteConfig.tags;
+
+                 const bigNoteKey = new PublicKey(argv.bigNotePubkey);
+                 const bigNoteAcct = await forumClient.fetchBigNoteAccount(bigNoteKey);
+                 const bigNoteSeed = bigNoteAcct.bigNoteSeed;
+
+                 if (!argv.dryRun) {
+                     const editBigNoteInstance = await forumClient.editBigNote(
+                         forumKey,
+                         wallet.payer,
+                         bigNoteSeed,
+                         title,
+                         content,
+                         tags,
+                     );
+                     console.log(stringifyPKsAndBNs(editBigNoteInstance));
+                 } else {
+                     console.log('Editing big note with account address', bigNoteKey.toBase58());
+                 }
+             })
+
+
+
+// Delete big note (signer required: moderator)
+    .command('delete-bignote', 'Delete big note', {
+        bigNotePubkey: {
+            alias: 'b',
+            type: 'string',
+            demandOption: true,
+            description: 'big note account pubkey'
+        },
+        receiverPubkey: {
+            alias: 'r',
+            type: 'string',
+            demandOption: false,
+            description: 'receiver account pubkey for reclaimed rent lamports'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey: PublicKey = bigNoteConfig.forum;
+                 const receiverKey: PublicKey = argv.receiverPubkey ? new PublicKey(argv.receiverPubkey) : wallet.publicKey;
+
+                 const bigNoteKey = new PublicKey(argv.bigNotePubkey);
+                 const bigNoteAcct = await forumClient.fetchBigNoteAccount(bigNoteKey);
+                 const bigNoteSeed = bigNoteAcct.bigNoteSeed;
+                 const userProfileKey = bigNoteAcct.userProfile;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 if (!argv.dryRun) {
+                     const deleteQuestionInstance = await forumClient.deleteBigNote(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey,
+                         bigNoteSeed,
+                         receiverKey
+                     );
+                     console.log(stringifyPKsAndBNs(deleteQuestionInstance));
+                 } else {
+                     console.log('Deleting big note with account address', bigNoteKey.toBase58());
+                 }
+             })
+
+
+
+// Verify big note (signer required: moderator)
+    .command('verify-bignote', 'Verify big note', {
+        bigNotePubkey: {
+            alias: 'b',
+            type: 'string',
+            demandOption: true,
+            description: 'big note account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const bigNoteKey = new PublicKey(argv.bigNotePubkey);
+                 const bigNoteAcct = await forumClient.fetchBigNoteAccount(bigNoteKey);
+                 const bigNoteSeed = bigNoteAcct.bigNoteSeed;
+                 const forumKey = bigNoteAcct.forum;
+                 const userProfileKey = bigNoteAcct.userProfile;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 if (!argv.dryRun) {
+                     const deleteQuestionInstance = await forumClient.verifyBigNote(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey,
+                         bigNoteSeed
+                     );
+                     console.log(stringifyPKsAndBNs(deleteQuestionInstance));
+                 } else {
+                     console.log('Verifying big note with account address', bigNoteKey.toBase58());
+                 }
+             })
+
 
 
 
@@ -874,42 +1514,6 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
-// Fetch user about me PDA by Pubkey
-// User about me account pubkey required in command
-    .command('fetch-about-me-by-key', 'Fetch user about me PDA account info by pubkey', {
-        aboutMePubkey: {
-            alias: 'k',
-            type: 'string',
-            demandOption: true,
-            description: 'user about me account pubkey'
-        }
-    },
-             async (argv) => {
-                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
-                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
-                 const forumClient: ForumClient = new ForumClient(
-                     rpcConn,
-                     wallet,
-                     ForumIDL,
-                     FORUM_PROG_ID,
-                 );
-
-                 const aboutMeKey: PublicKey = new PublicKey(argv.aboutMePubkey);
-
-                 if (!argv.dryRun) {
-
-                     const aboutMePDA = await forumClient.fetchAboutMeAccount(aboutMeKey);
-
-                     console.log('Displaying account info for user about me with pubkey: ', aboutMeKey.toBase58());
-                     console.dir(stringifyPKsAndBNs(aboutMePDA), {depth: null});
-
-                 } else {
-                     console.log('Found user about me PDA for pubkey:', aboutMeKey.toBase58());
-                 }
-             })
-
-
-
 // Fetch user about me PDA by user profile
 // User profile account pubkey required in command
     .command('fetch-about-me-by-profile', 'Fetch user about me PDA account info by pubkey', {
@@ -944,6 +1548,42 @@ const parser = yargs(process.argv.slice(2)).options({
                      }
                  } else {
                      console.log('Found user about me PDA for user profile with pubkey:', userProfileKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch user about me PDA by Pubkey
+// User about me account pubkey required in command
+    .command('fetch-about-me-by-key', 'Fetch user about me PDA account info by pubkey', {
+        aboutMePubkey: {
+            alias: 'k',
+            type: 'string',
+            demandOption: true,
+            description: 'user about me account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const aboutMeKey: PublicKey = new PublicKey(argv.aboutMePubkey);
+
+                 if (!argv.dryRun) {
+
+                     const aboutMePDA = await forumClient.fetchAboutMeAccount(aboutMeKey);
+
+                     console.log('Displaying account info for user about me with pubkey: ', aboutMeKey.toBase58());
+                     console.dir(stringifyPKsAndBNs(aboutMePDA), {depth: null});
+
+                 } else {
+                     console.log('Found user about me PDA for pubkey:', aboutMeKey.toBase58());
                  }
              })
 
@@ -1024,6 +1664,372 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// Fetch all answer PDAs for a specific question account
+    .command('fetch-all-answers-by-question', 'Fetch all answer PDA accounts info for a specific question', {
+        questionPubkey: {
+            alias: 'q',
+            type: 'string',
+            demandOption: true,
+            description: 'user profile account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const questionKey: PublicKey = new PublicKey(argv.questionPubkey);
+
+                 if (!argv.dryRun) {
+
+                     console.log('Fetching all answer PDAs for question account with pubkey: ', questionKey.toBase58());
+                     const answerPDAs = await forumClient.fetchAllAnswerPDAsByQuestion(questionKey);
+
+                     // Loop over all PDAs and display account info
+                     for (let num = 1; num <= answerPDAs.length; num++) {
+                         console.log('Answer account', num, ':');
+                         console.dir(stringifyPKsAndBNs(answerPDAs[num - 1]), {depth: null});
+                     }
+
+                 } else {
+                     console.log('Found n answer PDA accounts for question account with pubkey: ', questionKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch all answer PDAs for a specific user profile account
+    .command('fetch-all-answers-by-profile', 'Fetch all answer PDA accounts info for a specific user profile', {
+        userProfilePubkey: {
+            alias: 'p',
+            type: 'string',
+            demandOption: true,
+            description: 'user profile account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const userProfileKey: PublicKey = new PublicKey(argv.userProfilePubkey);
+
+                 if (!argv.dryRun) {
+
+                     console.log('Fetching all answer PDAs for user profile with pubkey: ', userProfileKey.toBase58());
+                     const answerPDAs = await forumClient.fetchAllAnswerPDAsByUserProfile(userProfileKey);
+
+                     // Loop over all PDAs and display account info
+                     for (let num = 1; num <= answerPDAs.length; num++) {
+                         console.log('Answer account', num, ':');
+                         console.dir(stringifyPKsAndBNs(answerPDAs[num - 1]), {depth: null});
+                     }
+
+                 } else {
+                     console.log('Found n answer PDA accounts for user profile with pubkey: ', userProfileKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch answer PDA by Pubkey
+// Answer account pubkey required in command
+    .command('fetch-answer-by-key', 'Fetch answer PDA account info by pubkey', {
+        answerPubkey: {
+            alias: 'k',
+            type: 'string',
+            demandOption: true,
+            description: 'answer account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const answerKey: PublicKey = new PublicKey(argv.answerPubkey);
+
+                 if (!argv.dryRun) {
+
+                     const answerPDA = await forumClient.fetchAnswerAccount(answerKey);
+
+                     console.log('Displaying account info for answer with pubkey: ', answerKey.toBase58());
+                     console.dir(stringifyPKsAndBNs(answerPDA), {depth: null});
+
+                 } else {
+                     console.log('Found answer PDA for pubkey:', answerKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch all comment PDAs for a specific account commented on
+    .command('fetch-all-comments-by-account', 'Fetch all comment PDA accounts info for a specific account commented on', {
+        accountPubkey: {
+            alias: 'k',
+            type: 'string',
+            demandOption: true,
+            description: 'account commented on pubkey (must be question or answer account)'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const accountKey: PublicKey = new PublicKey(argv.accountPubkey);
+
+                 if (!argv.dryRun) {
+
+                     console.log('Fetching all comment PDAs for account commented on with pubkey: ', accountKey.toBase58());
+                     const commentPDAs = await forumClient.fetchAllCommentPDAsByAccountCommentedOn(accountKey);
+
+                     // Loop over all PDAs and display account info
+                     for (let num = 1; num <= commentPDAs.length; num++) {
+                         console.log('Comment account', num, ':');
+                         console.dir(stringifyPKsAndBNs(commentPDAs[num - 1]), {depth: null});
+                     }
+
+                 } else {
+                     console.log('Found n comment PDA accounts for account commented on with pubkey: ', accountKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch all comment PDAs by user profile
+    .command('fetch-all-comments-by-profile', 'Fetch all comment PDA accounts info for a specific user profile', {
+        userProfilePubkey: {
+            alias: 'p',
+            type: 'string',
+            demandOption: true,
+            description: 'user profile account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const userProfileKey: PublicKey = new PublicKey(argv.userProfilePubkey);
+
+                 if (!argv.dryRun) {
+
+                     console.log('Fetching all comment PDAs for user profile with pubkey: ', userProfileKey.toBase58());
+                     const commentPDAs = await forumClient.fetchAllCommentPDAsByUserProfile(userProfileKey);
+
+                     // Loop over all PDAs and display account info
+                     for (let num = 1; num <= commentPDAs.length; num++) {
+                         console.log('Comment account', num, ':');
+                         console.dir(stringifyPKsAndBNs(commentPDAs[num - 1]), {depth: null});
+                     }
+
+                 } else {
+                     console.log('Found n comment PDA accounts for user profile with pubkey: ', userProfileKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch comment PDA by Pubkey
+// Comment account pubkey required in command
+    .command('fetch-comment-by-key', 'Fetch comment PDA account info by pubkey', {
+        commentPubkey: {
+            alias: 'k',
+            type: 'string',
+            demandOption: true,
+            description: 'comment account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const commentKey: PublicKey = new PublicKey(argv.commentPubkey);
+
+                 if (!argv.dryRun) {
+
+                     const commentPDA = await forumClient.fetchCommentAccount(commentKey);
+
+                     console.log('Displaying account info for comment with pubkey: ', commentKey.toBase58());
+                     console.dir(stringifyPKsAndBNs(commentPDA), {depth: null});
+
+                 } else {
+                     console.log('Found comment PDA for pubkey:', commentKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch question stack by question account pubkey
+// Question account pubkey required in command
+    .command('fetch-question-stack', 'Fetch question stack by pubkey', {
+        questionPubkey: {
+            alias: 'q',
+            type: 'string',
+            demandOption: true,
+            description: 'question account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const questionKey: PublicKey = new PublicKey(argv.questionPubkey);
+
+                 if (!argv.dryRun) {
+
+                     // Fetch and display the question PDA
+                     const questionPDA = await forumClient.fetchQuestionAccount(questionKey);
+
+                     console.log('Displaying stack for question with pubkey: ', questionKey.toBase58());
+                     console.dir(stringifyPKsAndBNs(questionPDA), {depth: null});
+
+                     // Fetch all comment PDAs on the question
+                     const commentOnQuestionPDAs = await forumClient.fetchAllCommentPDAsByAccountCommentedOn(questionKey);
+
+                     // Loop over all comment PDAs and display account info
+                     for (let num = 1; num <= commentOnQuestionPDAs.length; num++) {
+                         console.dir(stringifyPKsAndBNs(commentOnQuestionPDAs[num - 1]), {depth: null});
+                     }
+
+                     // Fetch all answer PDAs
+                     const answerPDAs = await forumClient.fetchAllAnswerPDAsByQuestion(questionKey);
+
+                     // Loop over all answer PDAs and display account info
+                     for (let num = 1; num <= answerPDAs.length; num++) {
+
+                         // Fetch all comment PDAs on the answer
+                         const commentsOnAnswerPDAs = await forumClient.fetchAllCommentPDAsByAccountCommentedOn(answerPDAs[num - 1].publicKey);
+
+                         // Display answer PDA account info
+                         console.dir(stringifyPKsAndBNs(answerPDAs[num - 1]), {depth: null});
+
+                         // Display all comment PDAs on the answer
+                         for (let int = 1; int <= commentsOnAnswerPDAs.length; int++) {
+                             console.dir(stringifyPKsAndBNs(commentsOnAnswerPDAs[int - 1]), {depth: null});
+                         }
+                     }
+
+                 } else {
+                     console.log('Found question stack for question PDA with pubkey:', questionKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch all big note PDAs for a specific user profile account
+    .command('fetch-all-bignotes', 'Fetch all big note PDA accounts info', {
+        userProfilePubkey: {
+            alias: 'p',
+            type: 'string',
+            demandOption: true,
+            description: 'user profile account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const userProfileKey: PublicKey = new PublicKey(argv.userProfilePubkey);
+
+                 if (!argv.dryRun) {
+
+                     console.log('Fetching all big note PDAs for user profile with pubkey: ', userProfileKey.toBase58());
+                     const bigNotePDAs = await forumClient.fetchAllBigNotePDAs(userProfileKey);
+
+                     // Loop over all PDAs and display account info
+                     for (let num = 1; num <= bigNotePDAs.length; num++) {
+                         console.log('Big note account', num, ':');
+                         console.dir(stringifyPKsAndBNs(bigNotePDAs[num - 1]), {depth: null});
+                     }
+
+                 } else {
+                     console.log('Found n big note PDA accounts for user profile with pubkey: ', userProfileKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch big note PDA by Pubkey
+// Big note account pubkey required in command
+    .command('fetch-bignote-by-key', 'Fetch big note PDA account info by pubkey', {
+        bigNotePubkey: {
+            alias: 'k',
+            type: 'string',
+            demandOption: true,
+            description: 'big note account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const bigNoteKey: PublicKey = new PublicKey(argv.bigNotePubkey);
+
+                 if (!argv.dryRun) {
+
+                     const bigNotePDA = await forumClient.fetchBigNoteAccount(bigNoteKey);
+
+                     console.log('Displaying account info for big note with pubkey: ', bigNoteKey.toBase58());
+                     console.dir(stringifyPKsAndBNs(bigNotePDA), {depth: null});
+
+                 } else {
+                     console.log('Found big note PDA for pubkey:', bigNoteKey.toBase58());
+                 }
+             })
+
+
+
 
 
 
@@ -1085,7 +2091,7 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  if (!argv.dryRun) {
 
-                     const treasuryBalance = await forumClient.fetchTreasuryBalance(forumKey)
+                     const treasuryBalance = await forumClient.fetchTreasuryBalance(forumKey);
 
                      console.log('Displaying treasury balance for forum account with pubkey: ', forumKey.toBase58());
                      console.log(stringifyPKsAndBNs(treasuryBalance));
@@ -1097,6 +2103,39 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// Fetch bounty pda account
+// Question account pubkey required in command
+    .command('fetch-bounty-pda-balance', 'Fetch bounty PDA account balance', {
+        questionPubkey: {
+            alias: 'q',
+            type: 'string',
+            demandOption: true,
+            description: 'question account pubkey'
+        },
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const questionKey: PublicKey = new PublicKey(argv.questionPubkey);
+
+                 if (!argv.dryRun) {
+
+                     const bountyPdaBalance = await forumClient.fetchBountyPDABalance(questionKey);
+
+                     console.log('Displaying bounty pda balance for question account with pubkey: ', questionKey.toBase58());
+                     console.log(stringifyPKsAndBNs(bountyPdaBalance));
+
+                 } else {
+                     console.log('Found bounty pda balance for question account with pubkey:', questionKey.toBase58());
+                 }
+             })
 
 
 

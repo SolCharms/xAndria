@@ -712,6 +712,835 @@ export type Forum = {
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "supplementQuestionBounty",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "supplementor",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "supplementorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "question",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "questionSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bountyPda",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpSupplementorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBountyPda",
+          "type": "u8"
+        },
+        {
+          "name": "supplementalBountyAmount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "acceptAnswer",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "question",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "questionSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bountyPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerProfileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerUserProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBountyPda",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAnswerUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAnswer",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "answerQuestion",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "question",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "addContentToAnswer",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAnswer",
+          "type": "u8"
+        },
+        {
+          "name": "newContent",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "editAnswer",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        },
+        {
+          "name": "newContent",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteAnswer",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAnswer",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "leaveComment",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentedOn",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "comment",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "editComment",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "comment",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpComment",
+          "type": "u8"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteComment",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "comment",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpComment",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "createBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "forumTreasury",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpTreasury",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "type": {
+            "defined": "Tags"
+          }
+        }
+      ]
+    },
+    {
+      "name": "addContentToBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        },
+        {
+          "name": "newContent",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "editBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        },
+        {
+          "name": "newTitle",
+          "type": "string"
+        },
+        {
+          "name": "newContent",
+          "type": "string"
+        },
+        {
+          "name": "newTags",
+          "type": {
+            "defined": "Tags"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "verifyBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -735,6 +1564,42 @@ export type Forum = {
           {
             "name": "content",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "answer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "question",
+            "type": "publicKey"
+          },
+          {
+            "name": "userProfile",
+            "type": "publicKey"
+          },
+          {
+            "name": "answerSeed",
+            "type": "publicKey"
+          },
+          {
+            "name": "answerPostedTs",
+            "type": "u64"
+          },
+          {
+            "name": "mostRecentEngagementTs",
+            "type": "u64"
+          },
+          {
+            "name": "content",
+            "type": "string"
+          },
+          {
+            "name": "acceptedAnswer",
+            "type": "bool"
           }
         ]
       }
@@ -773,6 +1638,14 @@ export type Forum = {
             "type": "bool"
           },
           {
+            "name": "bountyAwarded",
+            "type": "bool"
+          },
+          {
+            "name": "isVerified",
+            "type": "bool"
+          },
+          {
             "name": "tag",
             "type": {
               "defined": "Tags"
@@ -785,10 +1658,38 @@ export type Forum = {
           {
             "name": "content",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "comment",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "commentedOn",
+            "type": "publicKey"
           },
           {
-            "name": "bountyAwarded",
-            "type": "bool"
+            "name": "userProfile",
+            "type": "publicKey"
+          },
+          {
+            "name": "commentSeed",
+            "type": "publicKey"
+          },
+          {
+            "name": "commentPostedTs",
+            "type": "u64"
+          },
+          {
+            "name": "mostRecentEngagementTs",
+            "type": "u64"
+          },
+          {
+            "name": "content",
+            "type": "string"
           }
         ]
       }
@@ -1851,6 +2752,835 @@ export const IDL: Forum = {
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "supplementQuestionBounty",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "supplementor",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "supplementorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "question",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "questionSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bountyPda",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpSupplementorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBountyPda",
+          "type": "u8"
+        },
+        {
+          "name": "supplementalBountyAmount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "acceptAnswer",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "question",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "questionSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bountyPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerProfileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerUserProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBountyPda",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAnswerUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAnswer",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "answerQuestion",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "question",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "addContentToAnswer",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAnswer",
+          "type": "u8"
+        },
+        {
+          "name": "newContent",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "editAnswer",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        },
+        {
+          "name": "newContent",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteAnswer",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAnswer",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "leaveComment",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentedOn",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "comment",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "editComment",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "comment",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpComment",
+          "type": "u8"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteComment",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "comment",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpComment",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "createBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "forumTreasury",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpTreasury",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "type": {
+            "defined": "Tags"
+          }
+        }
+      ]
+    },
+    {
+      "name": "addContentToBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        },
+        {
+          "name": "newContent",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "editBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        },
+        {
+          "name": "newTitle",
+          "type": "string"
+        },
+        {
+          "name": "newContent",
+          "type": "string"
+        },
+        {
+          "name": "newTags",
+          "type": {
+            "defined": "Tags"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "verifyBigNote",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -1874,6 +3604,42 @@ export const IDL: Forum = {
           {
             "name": "content",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "answer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "question",
+            "type": "publicKey"
+          },
+          {
+            "name": "userProfile",
+            "type": "publicKey"
+          },
+          {
+            "name": "answerSeed",
+            "type": "publicKey"
+          },
+          {
+            "name": "answerPostedTs",
+            "type": "u64"
+          },
+          {
+            "name": "mostRecentEngagementTs",
+            "type": "u64"
+          },
+          {
+            "name": "content",
+            "type": "string"
+          },
+          {
+            "name": "acceptedAnswer",
+            "type": "bool"
           }
         ]
       }
@@ -1912,6 +3678,14 @@ export const IDL: Forum = {
             "type": "bool"
           },
           {
+            "name": "bountyAwarded",
+            "type": "bool"
+          },
+          {
+            "name": "isVerified",
+            "type": "bool"
+          },
+          {
             "name": "tag",
             "type": {
               "defined": "Tags"
@@ -1924,10 +3698,38 @@ export const IDL: Forum = {
           {
             "name": "content",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "comment",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "commentedOn",
+            "type": "publicKey"
           },
           {
-            "name": "bountyAwarded",
-            "type": "bool"
+            "name": "userProfile",
+            "type": "publicKey"
+          },
+          {
+            "name": "commentSeed",
+            "type": "publicKey"
+          },
+          {
+            "name": "commentPostedTs",
+            "type": "u64"
+          },
+          {
+            "name": "mostRecentEngagementTs",
+            "type": "u64"
+          },
+          {
+            "name": "content",
+            "type": "string"
           }
         ]
       }

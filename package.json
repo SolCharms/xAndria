@@ -27,7 +27,7 @@
         "build": "anchor build && ./scripts/cp_idl.sh",
         "test": "yarn build && anchor test --skip-build",
         "pub": "rm -rf ./dist && tsc",
-        "update:anchor": "yarn upgrade @project-serum/anchor --latest --check-files"
+        "update:anchor": "yarn upgrade @coral-xyz/anchor --latest --check-files"
     },
     "dependencies": {
         "@metaplex-foundation/mpl-token-metadata": "^0.0.2",

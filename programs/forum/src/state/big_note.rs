@@ -26,6 +26,12 @@ pub struct BigNote {
 
     pub soliciting_contibutors: bool,
 
+    // Is Bounty Awarded
+    pub bounty_awarded: bool,
+
+    // Is Big note verified
+    pub is_verified: bool,
+
     // ------------- Big note Info
 
     pub tag: Tags,
@@ -33,7 +39,4 @@ pub struct BigNote {
     pub title: String, // Max 256 characters
 
     pub content: String, // Max 65536 characters
-
-    // Is Bounty Awarded
-    pub bounty_awarded: bool,
 }

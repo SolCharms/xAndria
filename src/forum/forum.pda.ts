@@ -29,9 +29,30 @@ export const findAboutMePDA = async (userProfile: PublicKey) => {
     );
 };
 
+export const findBigNotePDA = async (forum: PublicKey, userProfile: PublicKey, bigNoteSeed: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from('big_note'), forum.toBytes(), userProfile.toBytes(), bigNoteSeed.toBytes()],
+        FORUM_PROG_ID
+    );
+};
+
 export const findQuestionPDA = async (forum: PublicKey, userProfile: PublicKey, questionSeed: PublicKey) => {
     return PublicKey.findProgramAddressSync(
         [Buffer.from('question'), forum.toBytes(), userProfile.toBytes(), questionSeed.toBytes()],
+        FORUM_PROG_ID
+    );
+};
+
+export const findAnswerPDA = async (forum: PublicKey, userProfile: PublicKey, answerSeed: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from('answer'), forum.toBytes(), userProfile.toBytes(), answerSeed.toBytes()],
+        FORUM_PROG_ID
+    );
+};
+
+export const findCommentPDA = async (forum: PublicKey, userProfile: PublicKey, commentSeed: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from('comment'), forum.toBytes(), userProfile.toBytes(), commentSeed.toBytes()],
         FORUM_PROG_ID
     );
 };
