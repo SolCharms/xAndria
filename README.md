@@ -1,8 +1,8 @@
-# DeEdIT SDK
+# xAndria SDK
 
 ### A Decentralized Educational Information and Tooling (hence the name DeEdIT) Protocol codenamed and marketed as "xAndria".
 
-This README is intended to cater to experienced developers with a focus on protocol level program interactions. To simply use the protocol as an end-user, visit ------ where you will be greeted with nice graphical interfaces and buttons which do things. 
+This README is intended to cater to experienced developers with a focus on protocol level program interactions. To simply use the protocol as an end-user, visit https://xandriaonchain.vercel.app/forum where you will be greeted with nice graphical interfaces and buttons which do things. 
 
 ## Disclaimer 
 
