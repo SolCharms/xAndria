@@ -17,7 +17,7 @@ pub struct AddContentToQuestion<'info> {
     pub profile_owner: Signer<'info>,
 
     // The user profile
-    #[account(seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()], bump = bump_user_profile, has_one = profile_owner)]
+    #[account(mut, seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()], bump = bump_user_profile, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     // Question PDA account and seed
@@ -81,6 +81,10 @@ pub fn handler(ctx: Context<AddContentToQuestion>, new_content: String) -> Resul
     // Update question PDA's most recent engagement
     let question = &mut ctx.accounts.question;
     question.most_recent_engagement_ts = now_ts;
+
+    // Update user profile's most recent engagement
+    let user_profile = &mut ctx.accounts.user_profile;
+    user_profile.most_recent_engagement_ts = now_ts;
 
     let content_string: &mut String = &mut ctx.accounts.question.content;
     content_string.push_str(&new_content);

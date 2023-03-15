@@ -7,7 +7,7 @@ import * as anchor from '@coral-xyz/anchor';
 import { IDL as ForumIDL } from '../types/forum';
 import { FORUM_PROG_ID } from '../index';
 import { stringifyPKsAndBNs } from '../prog-common';
-import { findForumAuthorityPDA } from '../forum/forum.pda';
+import { findBountyPDA, findForumAuthorityPDA } from '../forum/forum.pda';
 import { ForumFees, ReputationMatrix } from '../forum/forum.client';
 
 import { networkConfig } from "../cli/config_devnet/networkConfig-devnet";
@@ -783,6 +783,8 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
+                 const receiverKey: PublicKey = argv.receiverPubkey ? new PublicKey(argv.receiverPubkey) : wallet.publicKey;
+
                  const questionKey = new PublicKey(argv.questionPubkey);
                  const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
                  const questionSeed = questionAcct.questionSeed;
@@ -791,9 +793,13 @@ const parser = yargs(process.argv.slice(2)).options({
                  const answerKey = new PublicKey(argv.answerPubkey);
                  const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
                  const answerSeed = answerAcct.answerSeed;
-                 const answerProfileOwnerKey = answerAcct.profileOwner;
+                 const answerUserProfile = answerAcct.userProfile;
 
-                 const receiverKey = new PublicKey(argv.receiverPubkey);
+                 const answerUserProfileAcct = await forumClient.fetchUserProfileAccount(answerUserProfile);
+                 const answerProfileOwnerKey = answerUserProfileAcct.profileOwner;
+
+                 // const rentBytes: number = 8;
+                 // const minimumBalanceForRentExemption: anchor.BN = new anchor.BN(await rpcConn.getMinimumBalanceForRentExemption(rentBytes));
 
                  if (!argv.dryRun) {
                      const acceptAnswerInstance = await forumClient.acceptAnswer(
@@ -865,20 +871,23 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const answerKey = new PublicKey(argv.answerPubkey);
                  const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
-                 const forumKey: PublicKey = answerAcct.forum;
                  const answerSeed = answerAcct.answerSeed;
+
+                 const questionKey: PublicKey = answerAcct.question;
+                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
+                 const forumKey = questionAcct.forum;
 
                  const newContent: string[] = additionalAnswerContent;
 
                  if (!argv.dryRun) {
                      for (let i=0; i < newContent.length; i++) {
-                         const addContentToQuestionInstance = await forumClient.addContentToQuestion(
+                         const addContentToAnswerInstance = await forumClient.addContentToAnswer(
                              forumKey,
                              wallet.payer,
                              answerSeed,
                              newContent[i],
                          );
-                         console.log(stringifyPKsAndBNs(addContentToQuestionInstance));
+                         console.log(stringifyPKsAndBNs(addContentToAnswerInstance));
                      }
                  } else {
                      console.log('Adding content to answer with account address', answerKey.toBase58());
@@ -909,8 +918,11 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const answerKey: PublicKey = new PublicKey(argv.answerPubkey);
                  const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
-                 const forumKey = answerAcct.forum;
                  const answerSeed = answerAcct.answerSeed;
+
+                 const questionKey: PublicKey = answerAcct.question;
+                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
+                 const forumKey = questionAcct.forum;
 
                  const newContent: string = answerConfig.content;
 
@@ -958,9 +970,12 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const answerKey = new PublicKey(argv.answerPubkey);
                  const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
-                 const forumKey = answerAcct.forum;
                  const answerSeed = answerAcct.answerSeed;
                  const userProfileKey = answerAcct.userProfile;
+
+                 const questionKey: PublicKey = answerAcct.question;
+                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
+                 const forumKey = questionAcct.forum;
 
                  const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
                  const profileOwnerKey = userProfileAcct.profileOwner;
@@ -1927,24 +1942,29 @@ const parser = yargs(process.argv.slice(2)).options({
 
                      // Loop over all comment PDAs and display account info
                      for (let num = 1; num <= commentOnQuestionPDAs.length; num++) {
+                         console.log('Comment account', num, ':');
                          console.dir(stringifyPKsAndBNs(commentOnQuestionPDAs[num - 1]), {depth: null});
                      }
 
                      // Fetch all answer PDAs
                      const answerPDAs = await forumClient.fetchAllAnswerPDAsByQuestion(questionKey);
+                     const answersLength = answerPDAs.length;
 
                      // Loop over all answer PDAs and display account info
-                     for (let num = 1; num <= answerPDAs.length; num++) {
-
-                         // Fetch all comment PDAs on the answer
-                         const commentsOnAnswerPDAs = await forumClient.fetchAllCommentPDAsByAccountCommentedOn(answerPDAs[num - 1].publicKey);
+                     for (let num = 1; num <= answersLength; num++) {
 
                          // Display answer PDA account info
-                         console.dir(stringifyPKsAndBNs(answerPDAs[num - 1]), {depth: null});
+                         console.log('Answer account', num, ':');
+                         console.dir(stringifyPKsAndBNs(answerPDAs[answersLength - num]), {depth: null});
+
+                         // Fetch all comment PDAs on the answer
+                         const commentsOnAnswerPDAs = await forumClient.fetchAllCommentPDAsByAccountCommentedOn(answerPDAs[answersLength - num].publicKey);
+                         const commentsLength = commentsOnAnswerPDAs.length;
 
                          // Display all comment PDAs on the answer
-                         for (let int = 1; int <= commentsOnAnswerPDAs.length; int++) {
-                             console.dir(stringifyPKsAndBNs(commentsOnAnswerPDAs[int - 1]), {depth: null});
+                         for (let int = 1; int <= commentsLength; int++) {
+                             console.log('Comment account', int, ':');
+                             console.dir(stringifyPKsAndBNs(commentsOnAnswerPDAs[commentsLength - int]), {depth: null});
                          }
                      }
 
@@ -2104,6 +2124,33 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 // Fetch bounty pda account
+// Question account pubkey required in command
+    .command('fetch-bounty-pda', 'Fetch bounty PDA account', {
+        questionPubkey: {
+            alias: 'q',
+            type: 'string',
+            demandOption: true,
+            description: 'question account pubkey'
+        },
+    },
+             async (argv) => {
+                 const questionKey: PublicKey = new PublicKey(argv.questionPubkey);
+
+                 if (!argv.dryRun) {
+
+                     const bountyPda = await findBountyPDA(questionKey);
+
+                     console.log('Displaying bounty pda account for question with pubkey: ', questionKey.toBase58());
+                     console.log(stringifyPKsAndBNs(bountyPda));
+
+                 } else {
+                     console.log('Found bounty pda account for question account with pubkey:', questionKey.toBase58());
+                 }
+             })
+
+
+
+// Fetch bounty pda account balance
 // Question account pubkey required in command
     .command('fetch-bounty-pda-balance', 'Fetch bounty PDA account balance', {
         questionPubkey: {

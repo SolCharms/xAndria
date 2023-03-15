@@ -3,7 +3,7 @@ import { AnchorProvider, BN, Idl, Program } from '@coral-xyz/anchor';
 import { Connection, Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 //import * as SPLToken from "@solana/spl-token";
 //import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { AccountUtils, isKp, /*stringifyPKsAndBNs*/ } from '../prog-common';
+import { AccountUtils, isKp, stringifyPKsAndBNs, /*stringifyPKsAndBNs*/ } from '../prog-common';
 import { Forum } from '../types/forum';
 import {
     findForumAuthorityPDA,
@@ -13,6 +13,7 @@ import {
     findBigNotePDA,
     findQuestionPDA,
     findAnswerPDA,
+    findCommentPDA,
     findBountyPDA,
 } from './forum.pda';
 
@@ -573,7 +574,7 @@ export class ForumClient extends AccountUtils {
         const signers = [];
         if (isKp(profileOwner)) signers.push(<Keypair>profileOwner);
 
-        console.log('creating user about me account with pubkey: ', userProfile.toBase58());
+        console.log('creating about me for user profile account with pubkey: ', userProfile.toBase58());
 
         // Transaction
         const txSig = await this.forumProgram.methods
@@ -614,7 +615,7 @@ export class ForumClient extends AccountUtils {
         const signers = [];
         if (isKp(profileOwner)) signers.push(<Keypair>profileOwner);
 
-        console.log('editing user about me account with pubkey: ', userProfile.toBase58());
+        console.log('editing about me for user profile account with pubkey: ', userProfile.toBase58());
 
         // Transaction
         const txSig = await this.forumProgram.methods
@@ -655,7 +656,7 @@ export class ForumClient extends AccountUtils {
         const signers = [];
         if (isKp(profileOwner)) signers.push(<Keypair>profileOwner);
 
-        console.log('deleting user about me account with pubkey: ', userProfile.toBase58());
+        console.log('deleting about me for user profile account with pubkey: ', userProfile.toBase58());
 
         // Transaction
         const txSig = await this.forumProgram.methods
@@ -981,7 +982,7 @@ export class ForumClient extends AccountUtils {
         const signers = [];
         if (isKp(supplementor)) signers.push(<Keypair>supplementor);
 
-        console.log('supplementing bounty for question with pubkey: ', question.toBase58());
+        console.log('supplementing bounty for question with pubkey: ', question.toBase58(), 'with:', stringifyPKsAndBNs(supplementalBountyAmount));
 
         // Transaction
         const txSig = await this.forumProgram.methods
@@ -1289,7 +1290,7 @@ export class ForumClient extends AccountUtils {
 
         // Derive PDAs
         const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
-        const [comment, commentBump] = await findAnswerPDA(forum, userProfile, commentSeed);
+        const [comment, commentBump] = await findCommentPDA(forum, userProfile, commentSeed);
 
         // Create Signers Array
         const signers = [];

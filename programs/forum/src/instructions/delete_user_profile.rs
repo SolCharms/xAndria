@@ -12,7 +12,6 @@ pub struct DeleteUserProfile<'info> {
     #[account(mut)]
     pub forum: Box<Account<'info, Forum>>,
 
-    #[account(mut)]
     pub profile_owner: Signer<'info>,
 
     // The user profile
@@ -21,7 +20,6 @@ pub struct DeleteUserProfile<'info> {
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     /// CHECK:
-    #[account(mut)]
     pub receiver: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,

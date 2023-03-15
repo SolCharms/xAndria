@@ -177,6 +177,9 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, content: String, tag: T
         let user_profile = &mut ctx.accounts.user_profile;
         user_profile.questions_asked.try_add_assign(1)?;
 
+        // Update most recent engagement in profile's state account
+        user_profile.most_recent_engagement_ts = now_ts;
+
         // Calculate question reputation score
         let question_rep_multiplier = ctx.accounts.forum.reputation_matrix.question_rep;
         let bounty_amount_modded_remainder = bounty_amount % forum_bounty_minimum;
@@ -185,7 +188,6 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, content: String, tag: T
         let question_rep = multiples_bounty_minimum.try_mul(question_rep_multiplier)?;
 
         // Update reputation score in user profile
-        let user_profile = &mut ctx.accounts.user_profile;
         user_profile.reputation_score.try_add_assign(question_rep)?;
     }
 

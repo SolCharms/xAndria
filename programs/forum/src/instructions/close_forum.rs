@@ -18,7 +18,6 @@ pub struct CloseForum<'info> {
     pub forum_treasury: AccountInfo<'info>,
 
     /// CHECK:
-    #[account(mut)]
     pub receiver: AccountInfo<'info>,
 
     // misc

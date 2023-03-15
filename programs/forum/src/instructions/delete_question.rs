@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::state::{Forum, Question, UserProfile};
 use prog_common::errors::ErrorCode;
-use prog_common::{close_account, TrySub};
+use prog_common::{close_account, now_ts, TrySub};
 
 #[derive(Accounts)]
 #[instruction(bump_moderator_profile: u8, bump_user_profile: u8, bump_question: u8)]
@@ -20,7 +20,6 @@ pub struct DeleteQuestion<'info> {
     pub moderator_profile: Box<Account<'info, UserProfile>>,
 
     /// CHECK:
-    #[account(mut)]
     pub profile_owner: AccountInfo<'info>,
 
     // The user profile
@@ -36,13 +35,14 @@ pub struct DeleteQuestion<'info> {
     pub question_seed: AccountInfo<'info>,
 
     /// CHECK:
-    #[account(mut)]
     pub receiver: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 }
 
 pub fn handler(ctx: Context<DeleteQuestion>) -> Result<()> {
+
+    let now_ts: u64 = now_ts()?;
 
     let moderator_profile = &ctx.accounts.moderator_profile;
 
@@ -61,9 +61,13 @@ pub fn handler(ctx: Context<DeleteQuestion>) -> Result<()> {
     let forum = &mut ctx.accounts.forum;
     forum.forum_counts.forum_question_count.try_sub_assign(1)?;
 
-    // Decrement questions asked in user profile account's state
+    // Decrement questions asked in user profile's state account
     let user_profile = &mut ctx.accounts.user_profile;
     user_profile.questions_asked.try_sub_assign(1)?;
+
+    // Update moderator profile's most recent engagement
+    let moderator_profile = &mut ctx.accounts.moderator_profile;
+    moderator_profile.most_recent_engagement_ts = now_ts;
 
     msg!("Question PDA account with address {} now closed", ctx.accounts.question.key());
     Ok(())

@@ -31,7 +31,7 @@ pub fn handler(ctx: Context<EditUserProfile>) -> Result<()> {
     // Update user profile account's most recent engagement timestamp
     user_profile.most_recent_engagement_ts = now_ts;
 
-    msg!("NFT PFP of profile {} updated to token mint with account address {}",
+    msg!("NFT PFP of user profile {} updated to token mint with account address {}",
          ctx.accounts.user_profile.key(), ctx.accounts.nft_pfp_token_mint.key());
     Ok(())
 }

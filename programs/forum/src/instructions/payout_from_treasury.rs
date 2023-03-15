@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::Forum;
+use crate::state::{Forum};
 use prog_common::{TrySub, TryAdd};
 
 #[derive(Accounts)]

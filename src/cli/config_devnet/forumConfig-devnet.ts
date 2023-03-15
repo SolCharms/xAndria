@@ -13,7 +13,7 @@ export const forumConfig: ForumConfig =
             forumQuestionFee: new BN(1_000_000), // 0.001 Sol
             forumBigNotesFee: new BN(100_000_000), // 0.1 Sol
             forumQuestionBountyMinimum: new BN(100_000_000), // 0.1 Sol
-            forumBigNotesBountyMinimum: new BN(2_000_000_000), // 2 Sol
+            forumBigNotesBountyMinimum: new BN(2_500_000_000), // 2 Sol
             extraSpace: new Array(64).fill(0),
         },
         reputationMatrix: {
@@ -21,9 +21,11 @@ export const forumConfig: ForumConfig =
             postBigNotesRep: new BN(1000),
             contributeBigNotesRep: new BN(100),
             questionRep: new BN(100),
-            answerRep: new BN(10),
-            commentRep: new BN(2),
+            answerRep: new BN(25),
+            commentRep: new BN(5),
             acceptedAnswerRep: new BN(500),
             extraSpace: new Array(64).fill(0),
         }
     }
+
+

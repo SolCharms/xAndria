@@ -17,7 +17,7 @@ pub struct EditQuestion<'info> {
     pub profile_owner: Signer<'info>,
 
     // The user profile
-    #[account(seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()], bump = bump_user_profile, has_one = profile_owner)]
+    #[account(mut, seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()], bump = bump_user_profile, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     // Question pda account and seed
@@ -98,11 +98,18 @@ pub fn handler(ctx: Context<EditQuestion>, new_title: String, new_content: Strin
         ctx.accounts.question.to_account_info().realloc(new_data_bytes_amount, false)?;
     }
 
+    // Update question PDA's most recent engagement
     let question = &mut ctx.accounts.question;
     question.most_recent_engagement_ts = now_ts;
+
+    // Update question's content data
     question.title = new_title;
     question.content = new_content;
     question.tag = new_tags;
+
+    // Update user profile's most recent engagement
+    let user_profile = &mut ctx.accounts.user_profile;
+    user_profile.most_recent_engagement_ts = now_ts;
 
     msg!("Question PDA account with address {} has been edited", ctx.accounts.question.key());
     Ok(())

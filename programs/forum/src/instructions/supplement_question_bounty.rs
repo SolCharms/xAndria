@@ -37,7 +37,7 @@ pub struct SupplementQuestionBounty<'info> {
     pub question_seed: AccountInfo<'info>,
 
     /// CHECK:
-    #[account(seeds = [b"bounty_pda".as_ref(), question.key().as_ref()], bump = bump_bounty_pda)]
+    #[account(mut, seeds = [b"bounty_pda".as_ref(), question.key().as_ref()], bump = bump_bounty_pda)]
     pub bounty_pda: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
@@ -78,9 +78,10 @@ pub fn handler(ctx: Context<SupplementQuestionBounty>, supplemental_bounty_amoun
     // Transfer the supplemental bounty amount to the question's bounty pda
     ctx.accounts.transfer_bounty_ctx(supplemental_bounty_amount)?;
 
-    // Update question PDA's most recent engagement
+    // Update question PDA's most recent engagement and bounty amount
     let question = &mut ctx.accounts.question;
     question.most_recent_engagement_ts = now_ts;
+    question.bounty_amount.try_add_assign(supplemental_bounty_amount)?;
 
     // Calculate question reputation score
     let question_rep_multiplier = ctx.accounts.forum.reputation_matrix.question_rep;
@@ -92,6 +93,9 @@ pub fn handler(ctx: Context<SupplementQuestionBounty>, supplemental_bounty_amoun
     // Update reputation score in supplementor profile
     let supplementor_profile = &mut ctx.accounts.supplementor_profile;
     supplementor_profile.reputation_score.try_add_assign(question_rep)?;
+
+    // Update supplementor profile's most recent engagement
+    supplementor_profile.most_recent_engagement_ts = now_ts;
 
     msg!("Supplemental bounty amount {} added to question PDA account with address {}", supplemental_bounty_amount, ctx.accounts.question.key());
     Ok(())

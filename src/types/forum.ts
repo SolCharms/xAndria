@@ -149,7 +149,7 @@ export type Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -251,7 +251,7 @@ export type Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -261,7 +261,7 @@ export type Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -361,7 +361,7 @@ export type Forum = {
       "accounts": [
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -376,7 +376,7 @@ export type Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -556,7 +556,7 @@ export type Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -605,7 +605,7 @@ export type Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -669,7 +669,7 @@ export type Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -689,7 +689,7 @@ export type Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -753,7 +753,7 @@ export type Forum = {
         },
         {
           "name": "bountyPda",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -2189,7 +2189,7 @@ export const IDL: Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -2291,7 +2291,7 @@ export const IDL: Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -2301,7 +2301,7 @@ export const IDL: Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -2401,7 +2401,7 @@ export const IDL: Forum = {
       "accounts": [
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -2416,7 +2416,7 @@ export const IDL: Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -2596,7 +2596,7 @@ export const IDL: Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -2645,7 +2645,7 @@ export const IDL: Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -2709,7 +2709,7 @@ export const IDL: Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -2729,7 +2729,7 @@ export const IDL: Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -2793,7 +2793,7 @@ export const IDL: Forum = {
         },
         {
           "name": "bountyPda",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {

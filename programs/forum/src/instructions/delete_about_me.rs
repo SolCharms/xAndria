@@ -7,7 +7,6 @@ use crate::state::{AboutMe, UserProfile};
 #[instruction(bump_user_profile: u8, bump_about_me: u8)]
 pub struct DeleteAboutMe<'info> {
 
-    #[account(mut)]
     pub profile_owner: Signer<'info>,
 
     // The user profile
@@ -20,7 +19,6 @@ pub struct DeleteAboutMe<'info> {
     about_me: Box<Account<'info, AboutMe>>,
 
     /// CHECK:
-    #[account(mut)]
     pub receiver: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
