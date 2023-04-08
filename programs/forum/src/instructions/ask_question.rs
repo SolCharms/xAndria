@@ -4,8 +4,8 @@ use anchor_lang::solana_program::hash::hash;
 use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::solana_program::system_instruction::{self, create_account};
 
-use prog_common::{now_ts, TryAdd, TrySub, TryDiv, TryMul, errors::ErrorCode};
 use crate::state::{Forum, Tags, UserProfile};
+use prog_common::{now_ts, TryAdd, TrySub, TryDiv, TryMul, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_treasury: u8, bump_user_profile: u8)]
@@ -23,7 +23,8 @@ pub struct AskQuestion<'info> {
     pub profile_owner: Signer<'info>,
 
     // The user profile
-    #[account(mut, seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()], bump = bump_user_profile, has_one = profile_owner)]
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
+              bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     /// CHECK:
@@ -32,6 +33,10 @@ pub struct AskQuestion<'info> {
 
     /// CHECK: The seed address used for initialization of the question PDA
     pub question_seed: AccountInfo<'info>,
+
+    /// CHECK:
+    // The content data hash of the question struct
+    pub content_data_hash: AccountInfo<'info>,
 
     /// CHECK:
     #[account(init, seeds = [b"bounty_pda".as_ref(), question.key().as_ref()], bump, payer = profile_owner, space = 8)]
@@ -67,18 +72,17 @@ impl<'info> AskQuestion<'info> {
     }
 }
 
-pub fn handler(ctx: Context<AskQuestion>, title: String, content: String, tag: Tags, bounty_amount: u64) -> Result<()> {
-
-    let forum_bounty_minimum: u64 = ctx.accounts.forum.forum_fees.forum_question_bounty_minimum;
-    let bounty_awarded = false;
-    let title_length = title.len();
-    let content_length = content.len();
+pub fn handler(ctx: Context<AskQuestion>, title: String, tags: Vec<Tags>, bounty_amount: u64) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
+    let bounty_awarded = false;
+
+    let title_length = title.len();
+    let forum_bounty_minimum: u64 = ctx.accounts.forum.forum_fees.forum_question_bounty_minimum;
 
     // Ensure that the length of title and content strings are non-zero
-    if (title_length == 0) || (content_length == 0) {
-        return Err(error!(ErrorCode::InvalidStringInputs));
+    if title_length == 0 {
+        return Err(error!(ErrorCode::InvalidStringInput));
     }
 
     // Ensure that title does not exceed 256 characters
@@ -106,26 +110,19 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, content: String, tag: T
     if ctx.accounts.question.data_is_empty() {
 
         // Calculate data sizes and convert data to slice arrays
+        let mut tag_buffer: Vec<u8> = Vec::new();
+        tags.serialize(&mut tag_buffer).unwrap();
+
+        let tag_buffer_as_slice: &[u8] = tag_buffer.as_slice();
+        let tag_buffer_slice_length: usize = tag_buffer_as_slice.len();
+        let tag_slice_end_byte = 128 + tag_buffer_slice_length;
+
         let mut title_buffer: Vec<u8> = Vec::new();
         title.serialize(&mut title_buffer).unwrap();
 
         let title_buffer_as_slice: &[u8] = title_buffer.as_slice();
         let title_buffer_slice_length: usize = title_buffer_as_slice.len();
-        let title_slice_end_byte = 128 + title_buffer_slice_length;
-
-        let mut content_buffer: Vec<u8> = Vec::new();
-        content.serialize(&mut content_buffer).unwrap();
-
-        let content_buffer_as_slice: &[u8] = content_buffer.as_slice();
-        let content_buffer_slice_length: usize = content_buffer_as_slice.len();
-        let content_slice_end_byte = title_slice_end_byte + content_buffer_slice_length;
-
-        let mut tag_buffer: Vec<u8> = Vec::new();
-        tag.serialize(&mut tag_buffer).unwrap();
-
-        let tag_buffer_as_slice: &[u8] = tag_buffer.as_slice();
-        let tag_buffer_slice_length: usize = tag_buffer_as_slice.len();
-        let tag_slice_end_byte = content_slice_end_byte + tag_buffer_slice_length;
+        let title_slice_end_byte = tag_slice_end_byte + title_buffer_slice_length;
 
         create_pda_with_space(
             &[
@@ -136,7 +133,7 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, content: String, tag: T
                 &[bump],
             ],
             &ctx.accounts.question,
-            8 + 120 + title_buffer_slice_length + content_buffer_slice_length + tag_buffer_slice_length + 1,
+            8 + 120 + tag_buffer_slice_length + title_buffer_slice_length + 32 + 1,
             ctx.program_id,
             &ctx.accounts.profile_owner.to_account_info(),
             &ctx.accounts.system_program.to_account_info(),
@@ -154,16 +151,20 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, content: String, tag: T
         question_account_raw[104..112].clone_from_slice(&now_ts.to_le_bytes());
         question_account_raw[112..120].clone_from_slice(&now_ts.to_le_bytes());
         question_account_raw[120..128].clone_from_slice(&bounty_amount.to_le_bytes());
-        question_account_raw[128..title_slice_end_byte].clone_from_slice(title_buffer_as_slice);
-        question_account_raw[title_slice_end_byte..content_slice_end_byte].clone_from_slice(content_buffer_as_slice);
-        question_account_raw[content_slice_end_byte..tag_slice_end_byte].clone_from_slice(tag_buffer_as_slice);
-        question_account_raw[tag_slice_end_byte..tag_slice_end_byte+1].clone_from_slice(&(bounty_awarded as u8).to_le_bytes());
+        question_account_raw[128..tag_slice_end_byte].clone_from_slice(tag_buffer_as_slice);
+        question_account_raw[tag_slice_end_byte..title_slice_end_byte].clone_from_slice(title_buffer_as_slice);
+        question_account_raw[title_slice_end_byte..title_slice_end_byte+32].clone_from_slice(&ctx.accounts.content_data_hash.key().to_bytes());
+        question_account_raw[title_slice_end_byte+32..title_slice_end_byte+32+1].clone_from_slice(&(bounty_awarded as u8).to_le_bytes());
 
         // Transfer fee for asking question
         let forum_question_fee = ctx.accounts.forum.forum_fees.forum_question_fee;
 
         if forum_question_fee > 0 {
-            ctx.accounts.transfer_payment_ctx(forum_question_fee)?;
+            let remainder = bounty_amount % 10000;
+            let bounty_amount_mod_10000 = bounty_amount.try_sub(remainder)?;
+            let question_fee_due = bounty_amount_mod_10000.try_mul(forum_question_fee)?;
+
+            ctx.accounts.transfer_payment_ctx(question_fee_due)?;
         }
 
         // Transfer bounty into bounty pda account
@@ -177,7 +178,7 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, content: String, tag: T
         let user_profile = &mut ctx.accounts.user_profile;
         user_profile.questions_asked.try_add_assign(1)?;
 
-        // Update most recent engagement in profile's state account
+        // Update most recent engagement in user profile's state account
         user_profile.most_recent_engagement_ts = now_ts;
 
         // Calculate question reputation score

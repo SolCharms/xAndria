@@ -3,8 +3,8 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::{invoke};
 use anchor_lang::solana_program::system_instruction;
 
-use prog_common::{now_ts, TryAdd, TrySub, TryDiv, TryMul, errors::ErrorCode};
 use crate::state::{Forum, Question, UserProfile};
+use prog_common::{now_ts, TryAdd, TrySub, TryDiv, TryMul, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_supplementor_profile: u8, bump_user_profile: u8, bump_question: u8, bump_bounty_pda: u8)]
@@ -17,20 +17,21 @@ pub struct SupplementQuestionBounty<'info> {
     pub supplementor: Signer<'info>,
 
     // The supplementor profile
-    #[account(mut, seeds = [b"user_profile".as_ref(), supplementor.key().as_ref()],
-              bump = bump_supplementor_profile, constraint = supplementor_profile.profile_owner == supplementor.key())]
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), supplementor.key().as_ref()],
+              bump = bump_supplementor_profile, has_one = forum, constraint = supplementor_profile.profile_owner == supplementor.key())]
     pub supplementor_profile: Box<Account<'info, UserProfile>>,
 
-    /// CHECK:
+    /// CHECK: Used for seed verification of user profile pda account
     pub profile_owner: AccountInfo<'info>,
 
     // The user profile
-    #[account(seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()], bump = bump_user_profile, has_one = profile_owner)]
+    #[account(seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
+              bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     // Question PDA account and seed
     #[account(mut, seeds = [b"question".as_ref(), forum.key().as_ref(), user_profile.key().as_ref(), question_seed.key().as_ref()],
-              bump = bump_question, has_one = user_profile, has_one = question_seed)]
+              bump = bump_question, has_one = forum, has_one = user_profile, has_one = question_seed)]
     pub question: Box<Account<'info, Question>>,
 
     /// CHECK: The seed address used for initialization of the question PDA
@@ -97,6 +98,6 @@ pub fn handler(ctx: Context<SupplementQuestionBounty>, supplemental_bounty_amoun
     // Update supplementor profile's most recent engagement
     supplementor_profile.most_recent_engagement_ts = now_ts;
 
-    msg!("Supplemental bounty amount {} added to question PDA account with address {}", supplemental_bounty_amount, ctx.accounts.question.key());
+    msg!("Supplemental bounty amount of {} added to question PDA account with address {}", supplemental_bounty_amount, ctx.accounts.question.key());
     Ok(())
 }

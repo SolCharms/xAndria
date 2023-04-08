@@ -3,8 +3,8 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::{invoke};
 use anchor_lang::solana_program::system_instruction;
 
-use prog_common::{now_ts, TrySub, errors::ErrorCode};
 use crate::state::{BigNote, Forum, Tags, UserProfile};
+use prog_common::{now_ts, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_user_profile: u8, bump_big_note: u8)]
@@ -17,16 +17,21 @@ pub struct EditBigNote<'info> {
     pub profile_owner: Signer<'info>,
 
     // The user profile
-    #[account(seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()], bump = bump_user_profile, has_one = profile_owner)]
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
+              bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
-    // Question pda account and seed
+    // Big Note pda account and seed
     #[account(mut, seeds = [b"big_note".as_ref(), forum.key().as_ref(), user_profile.key().as_ref(), big_note_seed.key().as_ref()],
-              bump = bump_big_note, has_one = user_profile, has_one = big_note_seed)]
+              bump = bump_big_note, has_one = forum, has_one = user_profile, has_one = big_note_seed)]
     pub big_note: Box<Account<'info, BigNote>>,
 
     /// CHECK: The seed address used for initialization of the big note PDA
     pub big_note_seed: AccountInfo<'info>,
+
+    /// CHECK:
+    // The new content data hash of the big note struct
+    pub new_content_data_hash: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 }
@@ -45,17 +50,16 @@ impl<'info> EditBigNote<'info> {
     }
 }
 
-pub fn handler(ctx: Context<EditBigNote>, new_title: String, new_content: String, new_tags: Tags) -> Result<()> {
-
-    // Record character length of new data to be added
-    let new_title_length = new_title.len();
-    let new_content_length = new_content.len();
+pub fn handler(ctx: Context<EditBigNote>, new_title: String, new_tags: Vec<Tags>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
+    // Record character length of new data to be added
+    let new_title_length = new_title.len();
+
     // Ensure that the length of title and content strings are non-zero
-    if (new_title_length == 0) || (new_content_length == 0) {
-        return Err(error!(ErrorCode::InvalidStringInputs));
+    if new_title_length == 0 {
+        return Err(error!(ErrorCode::InvalidStringInput));
     }
 
     // Ensure that title does not exceed 256 characters
@@ -64,26 +68,20 @@ pub fn handler(ctx: Context<EditBigNote>, new_title: String, new_content: String
     }
 
     // Calculate data sizes and convert data to slice arrays
-    let mut title_buffer: Vec<u8> = Vec::new();
-    new_title.serialize(&mut title_buffer).unwrap();
-
-    let title_buffer_as_slice: &[u8] = title_buffer.as_slice();
-    let title_buffer_slice_length: usize = title_buffer_as_slice.len();
-
-    let mut content_buffer: Vec<u8> = Vec::new();
-    new_content.serialize(&mut content_buffer).unwrap();
-
-    let content_buffer_as_slice: &[u8] = content_buffer.as_slice();
-    let content_buffer_slice_length: usize = content_buffer_as_slice.len();
-
     let mut tag_buffer: Vec<u8> = Vec::new();
     new_tags.serialize(&mut tag_buffer).unwrap();
 
     let tag_buffer_as_slice: &[u8] = tag_buffer.as_slice();
     let tag_buffer_slice_length: usize = tag_buffer_as_slice.len();
 
+    let mut title_buffer: Vec<u8> = Vec::new();
+    new_title.serialize(&mut title_buffer).unwrap();
+
+    let title_buffer_as_slice: &[u8] = title_buffer.as_slice();
+    let title_buffer_slice_length: usize = title_buffer_as_slice.len();
+
     // Calculate total space required for the addition of the new data
-    let new_data_bytes_amount: usize = 131 + title_buffer_slice_length + content_buffer_slice_length + tag_buffer_slice_length;
+    let new_data_bytes_amount: usize = 131 + tag_buffer_slice_length + title_buffer_slice_length + 32;
     let old_data_bytes_amount: usize = ctx.accounts.big_note.to_account_info().data_len();
 
     if new_data_bytes_amount > old_data_bytes_amount {
@@ -98,11 +96,16 @@ pub fn handler(ctx: Context<EditBigNote>, new_title: String, new_content: String
         ctx.accounts.big_note.to_account_info().realloc(new_data_bytes_amount, false)?;
     }
 
+    // Update big note account's most recent engagement timestamp and overwrite with the new content and data hash
     let big_note = &mut ctx.accounts.big_note;
     big_note.most_recent_update_ts = now_ts;
-    big_note.tag = new_tags;
+    big_note.tags = new_tags;
     big_note.title = new_title;
-    big_note.content = new_content;
+    big_note.content_data_hash = ctx.accounts.new_content_data_hash.key();
+
+    // Update user profile's most recent engagement
+    let user_profile = &mut ctx.accounts.user_profile;
+    user_profile.most_recent_engagement_ts = now_ts;
 
     msg!("Big note PDA account with address {} has been edited", ctx.accounts.big_note.key());
     Ok(())

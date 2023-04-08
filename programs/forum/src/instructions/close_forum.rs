@@ -29,7 +29,7 @@ pub fn handler(ctx: Context<CloseForum>) -> Result<()> {
 
     let forum_counts = &mut ctx.accounts.forum.forum_counts;
 
-    // Ensure count PDAs associated to forum have already been closed
+    // Ensure all PDAs associated to forum have already been closed
     if (forum_counts.forum_profile_count > 0) || (forum_counts.forum_big_notes_count > 0) || (forum_counts.forum_question_count > 0) || (forum_counts.forum_answer_count > 0) || (forum_counts.forum_comment_count > 0) {
         return Err(error!(ErrorCode::NotAllForumPDAsClosed));
     }

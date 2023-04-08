@@ -1,14 +1,16 @@
 use anchor_lang::prelude::*;
 
-#[proc_macros::assert_size(216)] // +5 to make it divisible by 8
+#[proc_macros::assert_size(184)] // +5 to make it divisible by 8
 #[repr(C)]
 #[account]
 #[derive(Debug)]
-pub struct UserProfile{
+pub struct UserProfile {
 
     // ------------- profile account info
 
     pub profile_owner: Pubkey,
+
+    pub forum: Pubkey,
 
     pub profile_created_ts: u64,
 
@@ -31,8 +33,6 @@ pub struct UserProfile{
     pub total_bounty_received: u64,
 
     pub reputation_score: u64,
-
-    pub extra_reputation_space: [u8; 64],
 
     // ------------- miscellaneous
 

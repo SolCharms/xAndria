@@ -26,11 +26,11 @@ pub struct Question {
 
     // ------------- Question Info
 
+    pub tags: Vec<Tags>,
+
     pub title: String, // Max 256 characters
 
-    pub content: String, // Max 65536 characters
-
-    pub tag: Tags,
+    pub content_data_hash: Pubkey,
 
     // Is Bounty Awarded
     pub bounty_awarded: bool,

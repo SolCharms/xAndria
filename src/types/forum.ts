@@ -214,6 +214,11 @@ export type Forum = {
       "name": "editUserProfile",
       "accounts": [
         {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "profileOwner",
           "isMut": false,
           "isSigner": true
@@ -301,6 +306,11 @@ export type Forum = {
           "isSigner": false
         },
         {
+          "name": "contentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -310,10 +320,6 @@ export type Forum = {
         {
           "name": "bumpUserProfile",
           "type": "u8"
-        },
-        {
-          "name": "content",
-          "type": "string"
         }
       ]
     },
@@ -321,8 +327,13 @@ export type Forum = {
       "name": "editAboutMe",
       "accounts": [
         {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -333,6 +344,11 @@ export type Forum = {
         {
           "name": "aboutMe",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -349,16 +365,17 @@ export type Forum = {
         {
           "name": "bumpAboutMe",
           "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
     {
       "name": "deleteAboutMe",
       "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
         {
           "name": "profileOwner",
           "isMut": false,
@@ -502,6 +519,11 @@ export type Forum = {
           "isSigner": false
         },
         {
+          "name": "contentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "bountyPda",
           "isMut": true,
           "isSigner": false
@@ -526,67 +548,16 @@ export type Forum = {
           "type": "string"
         },
         {
-          "name": "content",
-          "type": "string"
-        },
-        {
           "name": "tags",
           "type": {
-            "defined": "Tags"
+            "vec": {
+              "defined": "Tags"
+            }
           }
         },
         {
           "name": "bountyAmount",
           "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "addContentToQuestion",
-      "accounts": [
-        {
-          "name": "forum",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "profileOwner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "userProfile",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "question",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "questionSeed",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "bumpUserProfile",
-          "type": "u8"
-        },
-        {
-          "name": "bumpQuestion",
-          "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
@@ -619,6 +590,11 @@ export type Forum = {
           "isSigner": false
         },
         {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -638,13 +614,11 @@ export type Forum = {
           "type": "string"
         },
         {
-          "name": "newContent",
-          "type": "string"
-        },
-        {
           "name": "newTags",
           "type": {
-            "defined": "Tags"
+            "vec": {
+              "defined": "Tags"
+            }
           }
         }
       ]
@@ -892,7 +866,7 @@ export type Forum = {
         },
         {
           "name": "question",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -906,47 +880,7 @@ export type Forum = {
           "isSigner": false
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "bumpUserProfile",
-          "type": "u8"
-        },
-        {
-          "name": "content",
-          "type": "string"
-        }
-      ]
-    },
-    {
-      "name": "addContentToAnswer",
-      "accounts": [
-        {
-          "name": "forum",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "profileOwner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "userProfile",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "answer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "answerSeed",
+          "name": "contentDataHash",
           "isMut": false,
           "isSigner": false
         },
@@ -960,14 +894,6 @@ export type Forum = {
         {
           "name": "bumpUserProfile",
           "type": "u8"
-        },
-        {
-          "name": "bumpAnswer",
-          "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
@@ -986,7 +912,7 @@ export type Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -996,6 +922,11 @@ export type Forum = {
         },
         {
           "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
           "isMut": false,
           "isSigner": false
         },
@@ -1013,10 +944,6 @@ export type Forum = {
         {
           "name": "bumpQuestion",
           "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
@@ -1040,7 +967,7 @@ export type Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1060,7 +987,7 @@ export type Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1104,7 +1031,7 @@ export type Forum = {
         },
         {
           "name": "commentedOn",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1118,6 +1045,11 @@ export type Forum = {
           "isSigner": false
         },
         {
+          "name": "contentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -1127,10 +1059,6 @@ export type Forum = {
         {
           "name": "bumpUserProfile",
           "type": "u8"
-        },
-        {
-          "name": "content",
-          "type": "string"
         }
       ]
     },
@@ -1149,7 +1077,7 @@ export type Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1159,6 +1087,11 @@ export type Forum = {
         },
         {
           "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
           "isMut": false,
           "isSigner": false
         },
@@ -1176,10 +1109,6 @@ export type Forum = {
         {
           "name": "bumpComment",
           "type": "u8"
-        },
-        {
-          "name": "content",
-          "type": "string"
         }
       ]
     },
@@ -1203,7 +1132,7 @@ export type Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1223,7 +1152,7 @@ export type Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1281,6 +1210,11 @@ export type Forum = {
           "isSigner": false
         },
         {
+          "name": "contentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -1300,63 +1234,12 @@ export type Forum = {
           "type": "string"
         },
         {
-          "name": "content",
-          "type": "string"
-        },
-        {
           "name": "tags",
           "type": {
-            "defined": "Tags"
+            "vec": {
+              "defined": "Tags"
+            }
           }
-        }
-      ]
-    },
-    {
-      "name": "addContentToBigNote",
-      "accounts": [
-        {
-          "name": "forum",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "profileOwner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "userProfile",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "bigNote",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "bigNoteSeed",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "bumpUserProfile",
-          "type": "u8"
-        },
-        {
-          "name": "bumpBigNote",
-          "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
@@ -1375,7 +1258,7 @@ export type Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1385,6 +1268,11 @@ export type Forum = {
         },
         {
           "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
           "isMut": false,
           "isSigner": false
         },
@@ -1408,13 +1296,11 @@ export type Forum = {
           "type": "string"
         },
         {
-          "name": "newContent",
-          "type": "string"
-        },
-        {
           "name": "newTags",
           "type": {
-            "defined": "Tags"
+            "vec": {
+              "defined": "Tags"
+            }
           }
         }
       ]
@@ -1439,7 +1325,7 @@ export type Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1459,7 +1345,7 @@ export type Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1488,7 +1374,7 @@ export type Forum = {
       "accounts": [
         {
           "name": "forum",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1498,12 +1384,12 @@ export type Forum = {
         },
         {
           "name": "moderatorProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1541,6 +1427,27 @@ export type Forum = {
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "closeAccount",
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "accountToClose",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -1562,8 +1469,8 @@ export type Forum = {
             "type": "u64"
           },
           {
-            "name": "content",
-            "type": "string"
+            "name": "contentDataHash",
+            "type": "publicKey"
           }
         ]
       }
@@ -1594,8 +1501,8 @@ export type Forum = {
             "type": "u64"
           },
           {
-            "name": "content",
-            "type": "string"
+            "name": "contentDataHash",
+            "type": "publicKey"
           },
           {
             "name": "acceptedAnswer",
@@ -1646,9 +1553,11 @@ export type Forum = {
             "type": "bool"
           },
           {
-            "name": "tag",
+            "name": "tags",
             "type": {
-              "defined": "Tags"
+              "vec": {
+                "defined": "Tags"
+              }
             }
           },
           {
@@ -1656,8 +1565,8 @@ export type Forum = {
             "type": "string"
           },
           {
-            "name": "content",
-            "type": "string"
+            "name": "contentDataHash",
+            "type": "publicKey"
           }
         ]
       }
@@ -1688,8 +1597,8 @@ export type Forum = {
             "type": "u64"
           },
           {
-            "name": "content",
-            "type": "string"
+            "name": "contentDataHash",
+            "type": "publicKey"
           }
         ]
       }
@@ -1779,18 +1688,20 @@ export type Forum = {
             "type": "u64"
           },
           {
+            "name": "tags",
+            "type": {
+              "vec": {
+                "defined": "Tags"
+              }
+            }
+          },
+          {
             "name": "title",
             "type": "string"
           },
           {
-            "name": "content",
-            "type": "string"
-          },
-          {
-            "name": "tag",
-            "type": {
-              "defined": "Tags"
-            }
+            "name": "contentDataHash",
+            "type": "publicKey"
           },
           {
             "name": "bountyAwarded",
@@ -1806,6 +1717,10 @@ export type Forum = {
         "fields": [
           {
             "name": "profileOwner",
+            "type": "publicKey"
+          },
+          {
+            "name": "forum",
             "type": "publicKey"
           },
           {
@@ -1847,15 +1762,6 @@ export type Forum = {
           {
             "name": "reputationScore",
             "type": "u64"
-          },
-          {
-            "name": "extraReputationSpace",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
           },
           {
             "name": "nftPfpTokenMint",
@@ -1902,15 +1808,6 @@ export type Forum = {
           {
             "name": "forumCommentCount",
             "type": "u64"
-          },
-          {
-            "name": "extraSpace",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
           }
         ]
       }
@@ -1929,7 +1826,11 @@ export type Forum = {
             "type": "u64"
           },
           {
-            "name": "forumBigNotesFee",
+            "name": "forumBigNotesSubmissionFee",
+            "type": "u64"
+          },
+          {
+            "name": "forumBigNotesSolicitationFee",
             "type": "u64"
           },
           {
@@ -1939,15 +1840,6 @@ export type Forum = {
           {
             "name": "forumBigNotesBountyMinimum",
             "type": "u64"
-          },
-          {
-            "name": "extraSpace",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
           }
         ]
       }
@@ -1984,15 +1876,6 @@ export type Forum = {
           {
             "name": "acceptedAnswerRep",
             "type": "u64"
-          },
-          {
-            "name": "extraSpace",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
           }
         ]
       }
@@ -2254,6 +2137,11 @@ export const IDL: Forum = {
       "name": "editUserProfile",
       "accounts": [
         {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "profileOwner",
           "isMut": false,
           "isSigner": true
@@ -2341,6 +2229,11 @@ export const IDL: Forum = {
           "isSigner": false
         },
         {
+          "name": "contentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -2350,10 +2243,6 @@ export const IDL: Forum = {
         {
           "name": "bumpUserProfile",
           "type": "u8"
-        },
-        {
-          "name": "content",
-          "type": "string"
         }
       ]
     },
@@ -2361,8 +2250,13 @@ export const IDL: Forum = {
       "name": "editAboutMe",
       "accounts": [
         {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -2373,6 +2267,11 @@ export const IDL: Forum = {
         {
           "name": "aboutMe",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -2389,16 +2288,17 @@ export const IDL: Forum = {
         {
           "name": "bumpAboutMe",
           "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
     {
       "name": "deleteAboutMe",
       "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
         {
           "name": "profileOwner",
           "isMut": false,
@@ -2542,6 +2442,11 @@ export const IDL: Forum = {
           "isSigner": false
         },
         {
+          "name": "contentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "bountyPda",
           "isMut": true,
           "isSigner": false
@@ -2566,67 +2471,16 @@ export const IDL: Forum = {
           "type": "string"
         },
         {
-          "name": "content",
-          "type": "string"
-        },
-        {
           "name": "tags",
           "type": {
-            "defined": "Tags"
+            "vec": {
+              "defined": "Tags"
+            }
           }
         },
         {
           "name": "bountyAmount",
           "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "addContentToQuestion",
-      "accounts": [
-        {
-          "name": "forum",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "profileOwner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "userProfile",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "question",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "questionSeed",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "bumpUserProfile",
-          "type": "u8"
-        },
-        {
-          "name": "bumpQuestion",
-          "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
@@ -2659,6 +2513,11 @@ export const IDL: Forum = {
           "isSigner": false
         },
         {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -2678,13 +2537,11 @@ export const IDL: Forum = {
           "type": "string"
         },
         {
-          "name": "newContent",
-          "type": "string"
-        },
-        {
           "name": "newTags",
           "type": {
-            "defined": "Tags"
+            "vec": {
+              "defined": "Tags"
+            }
           }
         }
       ]
@@ -2932,7 +2789,7 @@ export const IDL: Forum = {
         },
         {
           "name": "question",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -2946,47 +2803,7 @@ export const IDL: Forum = {
           "isSigner": false
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "bumpUserProfile",
-          "type": "u8"
-        },
-        {
-          "name": "content",
-          "type": "string"
-        }
-      ]
-    },
-    {
-      "name": "addContentToAnswer",
-      "accounts": [
-        {
-          "name": "forum",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "profileOwner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "userProfile",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "answer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "answerSeed",
+          "name": "contentDataHash",
           "isMut": false,
           "isSigner": false
         },
@@ -3000,14 +2817,6 @@ export const IDL: Forum = {
         {
           "name": "bumpUserProfile",
           "type": "u8"
-        },
-        {
-          "name": "bumpAnswer",
-          "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
@@ -3026,7 +2835,7 @@ export const IDL: Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -3036,6 +2845,11 @@ export const IDL: Forum = {
         },
         {
           "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
           "isMut": false,
           "isSigner": false
         },
@@ -3053,10 +2867,6 @@ export const IDL: Forum = {
         {
           "name": "bumpQuestion",
           "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
@@ -3080,7 +2890,7 @@ export const IDL: Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -3100,7 +2910,7 @@ export const IDL: Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -3144,7 +2954,7 @@ export const IDL: Forum = {
         },
         {
           "name": "commentedOn",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -3158,6 +2968,11 @@ export const IDL: Forum = {
           "isSigner": false
         },
         {
+          "name": "contentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -3167,10 +2982,6 @@ export const IDL: Forum = {
         {
           "name": "bumpUserProfile",
           "type": "u8"
-        },
-        {
-          "name": "content",
-          "type": "string"
         }
       ]
     },
@@ -3189,7 +3000,7 @@ export const IDL: Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -3199,6 +3010,11 @@ export const IDL: Forum = {
         },
         {
           "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
           "isMut": false,
           "isSigner": false
         },
@@ -3216,10 +3032,6 @@ export const IDL: Forum = {
         {
           "name": "bumpComment",
           "type": "u8"
-        },
-        {
-          "name": "content",
-          "type": "string"
         }
       ]
     },
@@ -3243,7 +3055,7 @@ export const IDL: Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -3263,7 +3075,7 @@ export const IDL: Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -3321,6 +3133,11 @@ export const IDL: Forum = {
           "isSigner": false
         },
         {
+          "name": "contentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -3340,63 +3157,12 @@ export const IDL: Forum = {
           "type": "string"
         },
         {
-          "name": "content",
-          "type": "string"
-        },
-        {
           "name": "tags",
           "type": {
-            "defined": "Tags"
+            "vec": {
+              "defined": "Tags"
+            }
           }
-        }
-      ]
-    },
-    {
-      "name": "addContentToBigNote",
-      "accounts": [
-        {
-          "name": "forum",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "profileOwner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "userProfile",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "bigNote",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "bigNoteSeed",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "bumpUserProfile",
-          "type": "u8"
-        },
-        {
-          "name": "bumpBigNote",
-          "type": "u8"
-        },
-        {
-          "name": "newContent",
-          "type": "string"
         }
       ]
     },
@@ -3415,7 +3181,7 @@ export const IDL: Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -3425,6 +3191,11 @@ export const IDL: Forum = {
         },
         {
           "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
           "isMut": false,
           "isSigner": false
         },
@@ -3448,13 +3219,11 @@ export const IDL: Forum = {
           "type": "string"
         },
         {
-          "name": "newContent",
-          "type": "string"
-        },
-        {
           "name": "newTags",
           "type": {
-            "defined": "Tags"
+            "vec": {
+              "defined": "Tags"
+            }
           }
         }
       ]
@@ -3479,7 +3248,7 @@ export const IDL: Forum = {
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -3499,7 +3268,7 @@ export const IDL: Forum = {
         },
         {
           "name": "receiver",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -3528,7 +3297,7 @@ export const IDL: Forum = {
       "accounts": [
         {
           "name": "forum",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -3538,12 +3307,12 @@ export const IDL: Forum = {
         },
         {
           "name": "moderatorProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "profileOwner",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -3581,6 +3350,27 @@ export const IDL: Forum = {
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "closeAccount",
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "accountToClose",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -3602,8 +3392,8 @@ export const IDL: Forum = {
             "type": "u64"
           },
           {
-            "name": "content",
-            "type": "string"
+            "name": "contentDataHash",
+            "type": "publicKey"
           }
         ]
       }
@@ -3634,8 +3424,8 @@ export const IDL: Forum = {
             "type": "u64"
           },
           {
-            "name": "content",
-            "type": "string"
+            "name": "contentDataHash",
+            "type": "publicKey"
           },
           {
             "name": "acceptedAnswer",
@@ -3686,9 +3476,11 @@ export const IDL: Forum = {
             "type": "bool"
           },
           {
-            "name": "tag",
+            "name": "tags",
             "type": {
-              "defined": "Tags"
+              "vec": {
+                "defined": "Tags"
+              }
             }
           },
           {
@@ -3696,8 +3488,8 @@ export const IDL: Forum = {
             "type": "string"
           },
           {
-            "name": "content",
-            "type": "string"
+            "name": "contentDataHash",
+            "type": "publicKey"
           }
         ]
       }
@@ -3728,8 +3520,8 @@ export const IDL: Forum = {
             "type": "u64"
           },
           {
-            "name": "content",
-            "type": "string"
+            "name": "contentDataHash",
+            "type": "publicKey"
           }
         ]
       }
@@ -3819,18 +3611,20 @@ export const IDL: Forum = {
             "type": "u64"
           },
           {
+            "name": "tags",
+            "type": {
+              "vec": {
+                "defined": "Tags"
+              }
+            }
+          },
+          {
             "name": "title",
             "type": "string"
           },
           {
-            "name": "content",
-            "type": "string"
-          },
-          {
-            "name": "tag",
-            "type": {
-              "defined": "Tags"
-            }
+            "name": "contentDataHash",
+            "type": "publicKey"
           },
           {
             "name": "bountyAwarded",
@@ -3846,6 +3640,10 @@ export const IDL: Forum = {
         "fields": [
           {
             "name": "profileOwner",
+            "type": "publicKey"
+          },
+          {
+            "name": "forum",
             "type": "publicKey"
           },
           {
@@ -3887,15 +3685,6 @@ export const IDL: Forum = {
           {
             "name": "reputationScore",
             "type": "u64"
-          },
-          {
-            "name": "extraReputationSpace",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
           },
           {
             "name": "nftPfpTokenMint",
@@ -3942,15 +3731,6 @@ export const IDL: Forum = {
           {
             "name": "forumCommentCount",
             "type": "u64"
-          },
-          {
-            "name": "extraSpace",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
           }
         ]
       }
@@ -3969,7 +3749,11 @@ export const IDL: Forum = {
             "type": "u64"
           },
           {
-            "name": "forumBigNotesFee",
+            "name": "forumBigNotesSubmissionFee",
+            "type": "u64"
+          },
+          {
+            "name": "forumBigNotesSolicitationFee",
             "type": "u64"
           },
           {
@@ -3979,15 +3763,6 @@ export const IDL: Forum = {
           {
             "name": "forumBigNotesBountyMinimum",
             "type": "u64"
-          },
-          {
-            "name": "extraSpace",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
           }
         ]
       }
@@ -4024,15 +3799,6 @@ export const IDL: Forum = {
           {
             "name": "acceptedAnswerRep",
             "type": "u64"
-          },
-          {
-            "name": "extraSpace",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
           }
         ]
       }

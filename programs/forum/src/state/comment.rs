@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 
+#[proc_macros::assert_size(144)] // divisible by 8
 #[repr(C)]
 #[account]
 #[derive(Debug)]
@@ -19,7 +20,7 @@ pub struct Comment {
 
     pub most_recent_engagement_ts: u64,
 
-    // ------------- Answer Info
+    // ------------- Comment Info
 
-    pub content: String, // Max 512 characters
+    pub content_data_hash: Pubkey,
 }

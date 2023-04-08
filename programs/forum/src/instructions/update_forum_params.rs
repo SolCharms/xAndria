@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 
 use crate::state::{Forum, ForumFees, ReputationMatrix};
+use prog_common::errors::ErrorCode;
 
 #[derive(Accounts)]
 pub struct UpdateForumParams<'info> {
@@ -15,6 +16,11 @@ pub struct UpdateForumParams<'info> {
 }
 
 pub fn handler(ctx: Context<UpdateForumParams>, new_forum_fees: ForumFees, new_reputation_matrix: ReputationMatrix) -> Result<()> {
+
+    // Assert new forum question and big notes fees in basis points are between 0 - 10,000
+    if (new_forum_fees.forum_question_fee > 10000) || (new_forum_fees.forum_big_notes_solicitation_fee > 10000) {
+        return Err(error!(ErrorCode::InvalidFeeInputs));
+    }
 
     let forum = &mut ctx.accounts.forum;
     forum.forum_fees = new_forum_fees;

@@ -44,7 +44,8 @@ export interface ForumCounts {
 export interface ForumFees {
     forumProfileFee: BN;
     forumQuestionFee: BN;
-    forumBigNotesFee: BN;
+    forumBigNotesSubmissionFee: BN;
+    forumBigNotesSolicitationFee: BN;
     forumQuestionBountyMinimum: BN;
     forumBigNotesBountyMinimum: BN;
     extraSpace: number[];
@@ -158,11 +159,37 @@ export class ForumClient extends AccountUtils {
             ]
             : [];
         const pdas = await this.forumProgram.account.forum.all(filter);
-        console.log('Found a total of', pdas.length, 'forum PDAs');
+        if (forumManager) {
+            console.log('Found a total of', pdas.length, 'forum PDAs for forum manager with address', forumManager.toBase58());
+        }
+        else {
+            console.log('Found a total of', pdas.length, 'forum PDAs');
+        }
         return pdas;
     }
 
-    async fetchAllUserProfilePDAs(profileOwner?: PublicKey) {
+    async fetchAllUserProfilePDAs(forum?: PublicKey) {
+        const filter = forum
+            ? [
+                {
+                    memcmp: {
+                        offset: 40, // need to prepend 8 bytes for anchor's disc and 32 for profile owner pubkey
+                        bytes: forum.toBase58(),
+                    },
+                },
+            ]
+            : [];
+        const pdas = await this.forumProgram.account.userProfile.all(filter);
+        if (forum) {
+            console.log('Found a total of', pdas.length, 'user profile PDAs for forum with address', forum.toBase58());
+        }
+        else {
+            console.log('Found a total of', pdas.length, 'user profile PDAs');
+        }
+        return pdas;
+    }
+
+    async fetchAllUserProfilePDAsByProfileOwner(profileOwner?: PublicKey) {
         const filter = profileOwner
             ? [
                 {
@@ -174,11 +201,16 @@ export class ForumClient extends AccountUtils {
             ]
             : [];
         const pdas = await this.forumProgram.account.userProfile.all(filter);
-        console.log('Found a total of', pdas.length, 'user profile PDAs');
+        if (profileOwner) {
+            console.log('Found a total of', pdas.length, 'user profile PDAs for profile owner with address', profileOwner.toBase58());
+        }
+        else {
+            console.log('Found a total of', pdas.length, 'user profile PDAs');
+        }
         return pdas;
     }
 
-    async fetchAboutMeForProfile(userProfile: PublicKey) {
+    async fetchAllAboutMePDAs(userProfile?: PublicKey) {
         const filter = userProfile
             ? [
                 {
@@ -190,11 +222,37 @@ export class ForumClient extends AccountUtils {
             ]
             : [];
         const pdas = await this.forumProgram.account.aboutMe.all(filter);
-        console.log('Found a total of', pdas.length, 'about me PDAs');
+        if (userProfile) {
+            console.log('Found a total of', pdas.length, 'about me PDAs for user profile with address', userProfile.toBase58());
+        }
+        else {
+            console.log('Found a total of', pdas.length, 'about me PDAs');
+        }
         return pdas;
     }
 
-    async fetchAllQuestionPDAs(userProfile?: PublicKey) {
+    async fetchAllQuestionPDAs(forum?: PublicKey) {
+        const filter = forum
+            ? [
+                {
+                    memcmp: {
+                        offset: 8, // need to prepend 8 bytes for anchor's disc
+                        bytes: forum.toBase58(),
+                    },
+                },
+            ]
+            : [];
+        const pdas = await this.forumProgram.account.question.all(filter);
+        if (forum) {
+            console.log('Found a total of', pdas.length, 'question PDAs for forum with address', forum.toBase58());
+        }
+        else {
+            console.log('Found a total of', pdas.length, 'question PDAs');
+        }
+        return pdas;
+    }
+
+    async fetchAllQuestionPDAsByUserProfile(userProfile?: PublicKey) {
         const filter = userProfile
             ? [
                 {
@@ -206,11 +264,16 @@ export class ForumClient extends AccountUtils {
             ]
             : [];
         const pdas = await this.forumProgram.account.question.all(filter);
-        console.log('Found a total of', pdas.length, 'question PDAs for user profile with address', userProfile.toBase58());
+        if (userProfile) {
+            console.log('Found a total of', pdas.length, 'question PDAs for user profile with address', userProfile.toBase58());
+        }
+        else {
+            console.log('Found a total of', pdas.length, 'question PDAs');
+        }
         return pdas;
     }
 
-    async fetchAllAnswerPDAsByQuestion(question?: PublicKey) {
+    async fetchAllAnswerPDAs(question?: PublicKey) {
         const filter = question
             ? [
                 {
@@ -222,7 +285,12 @@ export class ForumClient extends AccountUtils {
             ]
             : [];
         const pdas = await this.forumProgram.account.answer.all(filter);
-        console.log('Found a total of', pdas.length, 'answer PDAs for question account with address', question.toBase58());
+        if (question) {
+            console.log('Found a total of', pdas.length, 'answer PDAs for question account with address', question.toBase58());
+        }
+        else {
+            console.log('Found a total of', pdas.length, 'answer PDAs');
+        }
         return pdas;
     }
 
@@ -238,11 +306,16 @@ export class ForumClient extends AccountUtils {
             ]
             : [];
         const pdas = await this.forumProgram.account.answer.all(filter);
-        console.log('Found a total of', pdas.length, 'answer PDAs for user profile with address', userProfile.toBase58());
+        if (userProfile) {
+            console.log('Found a total of', pdas.length, 'answer PDAs for user profile with address', userProfile.toBase58());
+        }
+        else {
+            console.log('Found a total of', pdas.length, 'answer PDAs');
+        }
         return pdas;
     }
 
-    async fetchAllCommentPDAsByAccountCommentedOn(accountCommentedOn: PublicKey) {
+    async fetchAllCommentPDAs(accountCommentedOn?: PublicKey) {
         const filter = accountCommentedOn
             ? [
                 {
@@ -254,7 +327,12 @@ export class ForumClient extends AccountUtils {
             ]
             : [];
         const pdas = await this.forumProgram.account.comment.all(filter);
-        console.log('Found a total of', pdas.length, 'comment PDAs for account with address', accountCommentedOn.toBase58());
+        if (accountCommentedOn) {
+            console.log('Found a total of', pdas.length, 'comment PDAs for account with address', accountCommentedOn.toBase58());
+        }
+        else{
+            console.log('Found a total of', pdas.length, 'comment PDAs');
+        }
         return pdas;
     }
 
@@ -263,18 +341,44 @@ export class ForumClient extends AccountUtils {
             ? [
                 {
                     memcmp: {
-                        offset: 40, // need to prepend 8 bytes for anchor's disc and 32 for forum pubkey
+                        offset: 40, // need to prepend 8 bytes for anchor's disc and 32 for account commented on pubkey
                         bytes: userProfile.toBase58(),
                     },
                 },
             ]
             : [];
         const pdas = await this.forumProgram.account.comment.all(filter);
-        console.log('Found a total of', pdas.length, 'comment PDAs for user profile with address', userProfile.toBase58());
+        if (userProfile) {
+            console.log('Found a total of', pdas.length, 'comment PDAs for user profile with address', userProfile.toBase58());
+        }
+        else {
+            console.log('Found a total of', pdas.length, 'comment PDAs');
+        }
         return pdas;
     }
 
-    async fetchAllBigNotePDAs(userProfile?: PublicKey) {
+    async fetchAllBigNotePDAs(forum?: PublicKey) {
+        const filter = forum
+            ? [
+                {
+                    memcmp: {
+                        offset: 8, // need to prepend 8 bytes for anchor's disc
+                        bytes: forum.toBase58(),
+                    },
+                },
+            ]
+            : [];
+        const pdas = await this.forumProgram.account.bigNote.all(filter);
+        if (forum) {
+            console.log('Found a total of', pdas.length, 'big note PDAs for forum with address', forum.toBase58());
+        }
+        else{
+            console.log('Found a total of', pdas.length, 'big note PDAs');
+        }
+        return pdas;
+    }
+
+    async fetchAllBigNotePDAsByUserProfile(userProfile?: PublicKey) {
         const filter = userProfile
             ? [
                 {
@@ -286,7 +390,12 @@ export class ForumClient extends AccountUtils {
             ]
             : [];
         const pdas = await this.forumProgram.account.bigNote.all(filter);
-        console.log('Found a total of', pdas.length, 'big note PDAs for user profile with address', userProfile.toBase58());
+        if (userProfile) {
+            console.log('Found a total of', pdas.length, 'big note PDAs for user profile with address', userProfile.toBase58());
+        }
+        else{
+            console.log('Found a total of', pdas.length, 'big note PDAs');
+        }
         return pdas;
     }
 
@@ -440,6 +549,8 @@ export class ForumClient extends AccountUtils {
         }
     }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     async createUserProfile(
         forum: PublicKey,
         profileOwner: PublicKey | Keypair
@@ -449,7 +560,7 @@ export class ForumClient extends AccountUtils {
         // Derive PDAs
         const [forumAuthority, forumAuthBump] = await findForumAuthorityPDA(forum);
         const [forumTreasury, forumTreasuryBump] = await findForumTreasuryPDA(forum);
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
 
         // Create Signers Array
         const signers = [];
@@ -486,13 +597,14 @@ export class ForumClient extends AccountUtils {
     }
 
     async editUserProfile(
+        forum: PublicKey,
         profileOwner: PublicKey | Keypair,
         nft_token_mint: PublicKey,
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
 
         // Create Signers Array
         const signers = [];
@@ -506,6 +618,7 @@ export class ForumClient extends AccountUtils {
                 userProfileBump
             )
             .accounts({
+                forum: forum,
                 profileOwner: isKp(profileOwner)? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner,
                 userProfile: userProfile,
                 nftPfpTokenMint: nft_token_mint,
@@ -529,7 +642,7 @@ export class ForumClient extends AccountUtils {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
 
         // Create Signers Array
         const signers = [];
@@ -562,12 +675,12 @@ export class ForumClient extends AccountUtils {
     async createAboutMe(
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
-        content: string
+        contentDataHash: PublicKey,
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [aboutMe, aboutMeBump] = await findAboutMePDA(userProfile);
 
         // Create Signers Array
@@ -579,14 +692,14 @@ export class ForumClient extends AccountUtils {
         // Transaction
         const txSig = await this.forumProgram.methods
             .createAboutMe(
-                userProfileBump,
-                content
+                userProfileBump
             )
             .accounts({
                 forum: forum,
                 profileOwner: isKp(profileOwner)? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner,
                 userProfile: userProfile,
                 aboutMe: aboutMe,
+                contentDataHash: contentDataHash,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)
@@ -602,13 +715,14 @@ export class ForumClient extends AccountUtils {
     }
 
     async editAboutMe(
+        forum: PublicKey,
         profileOwner: PublicKey | Keypair,
-        new_content: string
+        newContentDataHash: PublicKey,
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [aboutMe, aboutMeBump] = await findAboutMePDA(userProfile);
 
         // Create Signers Array
@@ -622,12 +736,13 @@ export class ForumClient extends AccountUtils {
             .editAboutMe(
                 userProfileBump,
                 aboutMeBump,
-                new_content
             )
             .accounts({
+                forum: forum,
                 profileOwner: isKp(profileOwner)? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner,
                 userProfile: userProfile,
                 aboutMe: aboutMe,
+                newContentDataHash: newContentDataHash,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)
@@ -643,13 +758,14 @@ export class ForumClient extends AccountUtils {
     }
 
     async deleteAboutMe(
+        forum: PublicKey,
         profileOwner: PublicKey | Keypair,
         receiver: PublicKey
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [aboutMe, aboutMeBump] = await findAboutMePDA(userProfile);
 
         // Create Signers Array
@@ -665,6 +781,7 @@ export class ForumClient extends AccountUtils {
                 aboutMeBump,
             )
             .accounts({
+                forum: forum,
                 profileOwner: isKp(profileOwner)? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner,
                 userProfile: userProfile,
                 aboutMe: aboutMe,
@@ -689,7 +806,7 @@ export class ForumClient extends AccountUtils {
         profileOwner: PublicKey
     ) {
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwner);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
 
         // Create Signers Array
         const signers = [];
@@ -725,7 +842,7 @@ export class ForumClient extends AccountUtils {
         profileOwner: PublicKey
     ) {
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwner);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
 
         // Create Signers Array
         const signers = [];
@@ -755,12 +872,14 @@ export class ForumClient extends AccountUtils {
         }
     }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     async askQuestion(
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
+        contentDataHash: PublicKey,
         title: string,
-        content: string,
-        tags: any,
+        tags: any[],
         bountyAmount: BN,
     ) {
         const questionSeedKeypair = Keypair.generate();
@@ -770,7 +889,7 @@ export class ForumClient extends AccountUtils {
 
         // Derive PDAs
         const [forumTreasury, forumTreasuryBump] = await findForumTreasuryPDA(forum);
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [question, questionBump] = await findQuestionPDA(forum, userProfile, questionSeed);
         const [bountyPda, bountyPdaBump] = await findBountyPDA(question);
 
@@ -786,7 +905,6 @@ export class ForumClient extends AccountUtils {
                 forumTreasuryBump,
                 userProfileBump,
                 title,
-                content,
                 tags,
                 bountyAmount,
             )
@@ -797,6 +915,7 @@ export class ForumClient extends AccountUtils {
                 userProfile: userProfile,
                 question: question,
                 questionSeed: questionSeed,
+                contentDataHash: contentDataHash,
                 bountyPda: bountyPda,
                 systemProgram: SystemProgram.programId,
             })
@@ -817,63 +936,18 @@ export class ForumClient extends AccountUtils {
         }
     }
 
-    async addContentToQuestion(
-        forum: PublicKey,
-        profileOwner: PublicKey | Keypair,
-        questionSeed: PublicKey,
-        newContent: string,
-    ) {
-        const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
-
-        // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
-        const [question, questionBump] = await findQuestionPDA(forum, userProfile, questionSeed);
-
-        // Create Signers Array
-        const signers = [];
-        if (isKp(profileOwner)) signers.push(<Keypair>profileOwner);
-
-        console.log('adding content to question with pubkey: ', question.toBase58());
-
-        // Transaction
-        const txSig = await this.forumProgram.methods
-            .addContentToQuestion(
-                userProfileBump,
-                questionBump,
-                newContent,
-            )
-            .accounts({
-                forum: forum,
-                profileOwner: isKp(profileOwner)? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner,
-                userProfile: userProfile,
-                question: question,
-                questionSeed: questionSeed,
-                systemProgram: SystemProgram.programId,
-            })
-            .signers(signers)
-            .rpc();
-
-        return {
-            userProfile,
-            userProfileBump,
-            question,
-            questionBump,
-            txSig
-        }
-    }
-
     async editQuestion(
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
         questionSeed: PublicKey,
+        newContentDataHash: PublicKey,
         title: string,
-        content: string,
-        tags: any,
+        tags: any[],
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [question, questionBump] = await findQuestionPDA(forum, userProfile, questionSeed);
 
         // Create Signers Array
@@ -888,7 +962,6 @@ export class ForumClient extends AccountUtils {
                 userProfileBump,
                 questionBump,
                 title,
-                content,
                 tags,
             )
             .accounts({
@@ -897,6 +970,7 @@ export class ForumClient extends AccountUtils {
                 userProfile: userProfile,
                 question: question,
                 questionSeed: questionSeed,
+                newContentDataHash: newContentDataHash,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)
@@ -921,8 +995,8 @@ export class ForumClient extends AccountUtils {
         const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
 
         // Derive PDAs
-        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(moderatorKey);
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwner);
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
         const [question, questionBump] = await findQuestionPDA(forum, userProfile, questionSeed);
 
         // Create Signers Array
@@ -973,8 +1047,8 @@ export class ForumClient extends AccountUtils {
         const supplementorKey = isKp(supplementor) ? (<Keypair>supplementor).publicKey : <PublicKey>supplementor;
 
         // Derive PDAs
-        const [supplementorProfile, supplementorProfileBump] = await findUserProfilePDA(supplementorKey);
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwner);
+        const [supplementorProfile, supplementorProfileBump] = await findUserProfilePDA(forum, supplementorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
         const [question, questionBump] = await findQuestionPDA(forum, userProfile, questionSeed);
         const [bountyPda, bountyPdaBump] = await findBountyPDA(question);
 
@@ -1031,8 +1105,8 @@ export class ForumClient extends AccountUtils {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
-        const [answerUserProfile, answerUserProfileBump] = await findUserProfilePDA(answerProfileOwner);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
+        const [answerUserProfile, answerUserProfileBump] = await findUserProfilePDA(forum, answerProfileOwner);
         const [question, questionBump] = await findQuestionPDA(forum, userProfile, questionSeed);
         const [bountyPda, bountyPdaBump] = await findBountyPDA(question);
         const [answer, answerBump] = await findAnswerPDA(forum, answerUserProfile, answerSeed)
@@ -1084,10 +1158,13 @@ export class ForumClient extends AccountUtils {
         }
     }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     async answerQuestion(
+        forum: PublicKey,
         question: PublicKey,
         profileOwner: PublicKey | Keypair,
-        content: string,
+        contentDataHash: PublicKey,
     ) {
         const answerSeedKeypair = Keypair.generate();
         const answerSeed: PublicKey = answerSeedKeypair.publicKey;
@@ -1098,7 +1175,7 @@ export class ForumClient extends AccountUtils {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [answer, answerBump] = await findAnswerPDA(forumKey, userProfile, answerSeed);
 
         // Create Signers Array
@@ -1111,7 +1188,6 @@ export class ForumClient extends AccountUtils {
         const txSig = await this.forumProgram.methods
             .answerQuestion(
                 userProfileBump,
-                content,
             )
             .accounts({
                 forum: forumKey,
@@ -1120,6 +1196,7 @@ export class ForumClient extends AccountUtils {
                 question: question,
                 answer: answer,
                 answerSeed: answerSeed,
+                contentDataHash: contentDataHash,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)
@@ -1135,61 +1212,16 @@ export class ForumClient extends AccountUtils {
         }
     }
 
-    async addContentToAnswer(
-        forum: PublicKey,
-        profileOwner: PublicKey | Keypair,
-        answerSeed: PublicKey,
-        newContent: string,
-    ) {
-        const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
-
-        // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
-        const [answer, answerBump] = await findAnswerPDA(forum, userProfile, answerSeed);
-
-        // Create Signers Array
-        const signers = [];
-        if (isKp(profileOwner)) signers.push(<Keypair>profileOwner);
-
-        console.log('adding content to answer with pubkey: ', answer.toBase58());
-
-        // Transaction
-        const txSig = await this.forumProgram.methods
-            .addContentToAnswer(
-                userProfileBump,
-                answerBump,
-                newContent,
-            )
-            .accounts({
-                forum: forum,
-                profileOwner: isKp(profileOwner)? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner,
-                userProfile: userProfile,
-                answer: answer,
-                answerSeed: answerSeed,
-                systemProgram: SystemProgram.programId,
-            })
-            .signers(signers)
-            .rpc();
-
-        return {
-            userProfile,
-            userProfileBump,
-            answer,
-            answerBump,
-            txSig
-        }
-    }
-
     async editAnswer(
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
         answerSeed: PublicKey,
-        content: string,
+        newContentDataHash: string,
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [answer, answerBump] = await findAnswerPDA(forum, userProfile, answerSeed);
 
         // Create Signers Array
@@ -1203,7 +1235,6 @@ export class ForumClient extends AccountUtils {
             .editAnswer(
                 userProfileBump,
                 answerBump,
-                content,
             )
             .accounts({
                 forum: forum,
@@ -1211,6 +1242,7 @@ export class ForumClient extends AccountUtils {
                 userProfile: userProfile,
                 answer: answer,
                 answerSeed: answerSeed,
+                newContentDataHash: newContentDataHash,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)
@@ -1235,8 +1267,8 @@ export class ForumClient extends AccountUtils {
         const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
 
         // Derive PDAs
-        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(moderatorKey);
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwner);
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
         const [answer, answerBump] = await findAnswerPDA(forum, userProfile, answerSeed);
 
         // Create Signers Array
@@ -1277,11 +1309,13 @@ export class ForumClient extends AccountUtils {
         }
     }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     async leaveComment(
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
         commentedOn: PublicKey,
-        content: string,
+        contentDataHash: PublicKey,
     ) {
         const commentSeedKeypair = Keypair.generate();
         const commentSeed: PublicKey = commentSeedKeypair.publicKey;
@@ -1289,7 +1323,7 @@ export class ForumClient extends AccountUtils {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [comment, commentBump] = await findCommentPDA(forum, userProfile, commentSeed);
 
         // Create Signers Array
@@ -1302,7 +1336,6 @@ export class ForumClient extends AccountUtils {
         const txSig = await this.forumProgram.methods
             .leaveComment(
                 userProfileBump,
-                content,
             )
             .accounts({
                 forum: forum,
@@ -1311,6 +1344,7 @@ export class ForumClient extends AccountUtils {
                 commentedOn: commentedOn,
                 comment: comment,
                 commentSeed: commentSeed,
+                contentDataHash: contentDataHash,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)
@@ -1330,12 +1364,12 @@ export class ForumClient extends AccountUtils {
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
         commentSeed: PublicKey,
-        content: string,
+        newContentDataHash: PublicKey,
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [comment, commentBump] = await findAnswerPDA(forum, userProfile, commentSeed);
 
         // Create Signers Array
@@ -1349,7 +1383,6 @@ export class ForumClient extends AccountUtils {
             .editComment(
                 userProfileBump,
                 commentBump,
-                content,
             )
             .accounts({
                 forum: forum,
@@ -1357,6 +1390,7 @@ export class ForumClient extends AccountUtils {
                 userProfile: userProfile,
                 comment: comment,
                 commentSeed: commentSeed,
+                newContentDataHash: newContentDataHash,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)
@@ -1381,8 +1415,8 @@ export class ForumClient extends AccountUtils {
         const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
 
         // Derive PDAs
-        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(moderatorKey);
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwner);
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
         const [comment, commentBump] = await findAnswerPDA(forum, userProfile, commentSeed);
 
         // Create Signers Array
@@ -1423,12 +1457,14 @@ export class ForumClient extends AccountUtils {
         }
     }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     async createBigNote(
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
+        contentDataHash: PublicKey,
         title: string,
-        content: string,
-        tags: any
+        tags: any[],
     ) {
         const bigNoteSeedKeypair = Keypair.generate();
         const bigNoteSeed: PublicKey = bigNoteSeedKeypair.publicKey;
@@ -1437,7 +1473,7 @@ export class ForumClient extends AccountUtils {
 
         // Derive PDAs
         const [forumTreasury, forumTreasuryBump] = await findForumTreasuryPDA(forum);
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [bigNote, bigNoteBump] = await findBigNotePDA(forum, userProfile, bigNoteSeed);
 
         // Create Signers Array
@@ -1452,7 +1488,6 @@ export class ForumClient extends AccountUtils {
                 forumTreasuryBump,
                 userProfileBump,
                 title,
-                content,
                 tags,
             )
             .accounts({
@@ -1462,6 +1497,7 @@ export class ForumClient extends AccountUtils {
                 userProfile: userProfile,
                 bigNote: bigNote,
                 bigNoteSeed: bigNoteSeed,
+                contentDataHash: contentDataHash,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)
@@ -1480,63 +1516,18 @@ export class ForumClient extends AccountUtils {
 
     }
 
-    async addContentToBigNote(
-        forum: PublicKey,
-        profileOwner: PublicKey | Keypair,
-        bigNoteSeed: PublicKey,
-        newContent: string,
-    ) {
-        const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
-
-        // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
-        const [bigNote, bigNoteBump] = await findBigNotePDA(forum, userProfile, bigNoteSeed);
-
-        // Create Signers Array
-        const signers = [];
-        if (isKp(profileOwner)) signers.push(<Keypair>profileOwner);
-
-        console.log('adding content to big note with pubkey: ', bigNote.toBase58());
-
-        // Transaction
-        const txSig = await this.forumProgram.methods
-            .addContentToBigNote(
-                userProfileBump,
-                bigNoteBump,
-                newContent,
-            )
-            .accounts({
-                forum: forum,
-                profileOwner: isKp(profileOwner)? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner,
-                userProfile: userProfile,
-                bigNote: bigNote,
-                bigNoteSeed: bigNoteSeed,
-                systemProgram: SystemProgram.programId,
-            })
-            .signers(signers)
-            .rpc();
-
-        return {
-            userProfile,
-            userProfileBump,
-            bigNote,
-            bigNoteBump,
-            txSig
-        }
-    }
-
     async editBigNote(
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
         bigNoteSeed: PublicKey,
+        newContentDataHash: PublicKey,
         title: string,
-        content: string,
-        tags: any,
+        tags: any[],
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
         // Derive PDAs
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwnerKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
         const [bigNote, bigNoteBump] = await findBigNotePDA(forum, userProfile, bigNoteSeed);
 
         // Create Signers Array
@@ -1551,7 +1542,6 @@ export class ForumClient extends AccountUtils {
                 userProfileBump,
                 bigNoteBump,
                 title,
-                content,
                 tags,
             )
             .accounts({
@@ -1560,6 +1550,7 @@ export class ForumClient extends AccountUtils {
                 userProfile: userProfile,
                 bigNote: bigNote,
                 bigNoteSeed: bigNoteSeed,
+                newContentDataHash: newContentDataHash,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)
@@ -1584,8 +1575,8 @@ export class ForumClient extends AccountUtils {
         const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
 
         // Derive PDAs
-        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(moderatorKey);
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwner);
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
         const [bigNote, bigNoteBump] = await findBigNotePDA(forum, userProfile, bigNoteSeed);
 
         // Create Signers Array
@@ -1633,8 +1624,8 @@ export class ForumClient extends AccountUtils {
         const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
 
         // Derive PDAs
-        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(moderatorKey);
-        const [userProfile, userProfileBump] = await findUserProfilePDA(profileOwner);
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
         const [bigNote, bigNoteBump] = await findBigNotePDA(forum, userProfile, bigNoteSeed);
 
         // Create Signers Array
@@ -1671,5 +1662,35 @@ export class ForumClient extends AccountUtils {
             txSig
         }
     }
+
+    // -------------------------------------------------------- devnet testing phase ixs
+
+    async closeAccount(
+        signer: PublicKey | Keypair,
+        accountToClose: PublicKey,
+    ) {
+        // Create Signers Array
+        const signers = [];
+        if (isKp(signer)) signers.push(<Keypair>signer);
+
+        console.log('closing account with pubkey: ', accountToClose.toBase58());
+
+        // Transaction
+        const txSig = await this.forumProgram.methods
+            .closeAccount()
+            .accounts({
+                signer: isKp(signer) ? (<Keypair>signer).publicKey : <PublicKey>signer,
+                accountToClose: accountToClose,
+                systemProgram: SystemProgram.programId
+            })
+            .signers(signers)
+            .rpc();
+
+        return {
+            txSig
+        }
+    }
+
+
 
 }

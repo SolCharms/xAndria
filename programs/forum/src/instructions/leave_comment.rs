@@ -1,14 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_lang::Discriminator;
 
-use anchor_lang::solana_program::hash::hash;
-use anchor_lang::solana_program::program::{invoke_signed};
-use anchor_lang::solana_program::system_instruction::{create_account};
+use crate::state::{Answer, Comment, Forum, Question, UserProfile};
+use prog_common::{now_ts, TryAdd, errors::ErrorCode};
 
 use arrayref::array_ref;
-use prog_common::{now_ts, TryAdd};
-use prog_common::errors::ErrorCode;
-use crate::state::{Answer, Forum, Question, UserProfile};
 
 #[derive(Accounts)]
 #[instruction(bump_user_profile: u8)]
@@ -26,32 +22,28 @@ pub struct LeaveComment<'info> {
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     /// CHECK: Account (question or answer) being commented on
+    #[account(mut)]
     pub commented_on: AccountInfo<'info>,
 
     /// CHECK:
-    #[account(mut)]
-    pub comment: AccountInfo<'info>,
+    #[account(init, seeds = [b"comment".as_ref(), forum.key().as_ref(), user_profile.key().as_ref(), comment_seed.key().as_ref()],
+              bump, payer = profile_owner, space = 8 + std::mem::size_of::<Comment>())]
+    pub comment: Box<Account<'info, Comment>>,
 
     /// CHECK: The seed address used for initialization of the comment PDA
     pub comment_seed: AccountInfo<'info>,
 
+    /// CHECK:
+    // The content data hash of the comment struct
+    pub content_data_hash: AccountInfo<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<LeaveComment>, content: String) -> Result<()> {
+pub fn handler(ctx: Context<LeaveComment>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
-    let content_length = content.len();
-
-    // Ensure that the length of the content string is non-zero
-    if content_length == 0 {
-        return Err(error!(ErrorCode::InvalidStringInputs));
-    }
-
-    // Ensure that the content does not exceed 512 characters
-    if content_length > 512 {
-        return Err(error!(ErrorCode::ContentTooLong));
-    }
+    let comment_rep = ctx.accounts.forum.reputation_matrix.comment_rep;
 
     // Ensure that comment is being added to either a question or an answer account
     let commented_on_to_account_info = &ctx.accounts.commented_on.to_account_info();
@@ -62,100 +54,24 @@ pub fn handler(ctx: Context<LeaveComment>, content: String) -> Result<()> {
         return Err(error!(ErrorCode::InvalidAccountDiscriminator));
     }
 
-    // find bump - doing this program-side to reduce amount of info to be passed in (tx size)
-    let (_pk, bump) = Pubkey::find_program_address(
-        &[
-            b"comment".as_ref(),
-            ctx.accounts.forum.key().as_ref(),
-            ctx.accounts.user_profile.key().as_ref(),
-            ctx.accounts.comment_seed.key().as_ref()
-        ],
-        ctx.program_id,
-    );
+    // Increment comment count in forum state's account
+    let forum = &mut ctx.accounts.forum;
+    forum.forum_counts.forum_comment_count.try_add_assign(1)?;
 
-    // Create the answer account PDA if it doesn't exist
-    if ctx.accounts.comment.data_is_empty() {
+    // Increment comments added count in user profile's state account
+    let user_profile = &mut ctx.accounts.user_profile;
+    user_profile.comments_added.try_add_assign(1)?;
 
-        // Calculate data sizes and convert data to slice arrays
-        let mut content_buffer: Vec<u8> = Vec::new();
-        content.serialize(&mut content_buffer).unwrap();
+    // Update user profile's most recent engagement timestamp and reputation score
+    let user_profile = &mut ctx.accounts.user_profile;
+    user_profile.reputation_score.try_add_assign(comment_rep)?;
+    user_profile.most_recent_engagement_ts = now_ts;
 
-        let content_buffer_as_slice: &[u8] = content_buffer.as_slice();
-        let content_buffer_slice_length: usize = content_buffer_as_slice.len();
-        let content_slice_end_byte = 120 + content_buffer_slice_length;
-
-        create_pda_with_space(
-            &[
-                b"comment".as_ref(),
-                ctx.accounts.forum.key().as_ref(),
-                ctx.accounts.user_profile.key().as_ref(),
-                ctx.accounts.comment_seed.key().as_ref(),
-                &[bump],
-            ],
-            &ctx.accounts.comment,
-            8 + 112 + content_buffer_slice_length,
-            ctx.program_id,
-            &ctx.accounts.profile_owner.to_account_info(),
-            &ctx.accounts.system_program.to_account_info(),
-        )?;
-
-        // Perform all necessary conversions to bytes
-        let disc = hash("account:Comment".as_bytes());
-
-        // Pack byte data into Comment account
-        let mut comment_account_raw = ctx.accounts.comment.data.borrow_mut();
-        comment_account_raw[..8].clone_from_slice(&disc.to_bytes()[..8]);
-        comment_account_raw[8..40].clone_from_slice(&ctx.accounts.commented_on.key().to_bytes());
-        comment_account_raw[40..72].clone_from_slice(&ctx.accounts.user_profile.key().to_bytes());
-        comment_account_raw[72..104].clone_from_slice(&ctx.accounts.comment_seed.key().to_bytes());
-        comment_account_raw[104..112].clone_from_slice(&now_ts.to_le_bytes());
-        comment_account_raw[112..120].clone_from_slice(&now_ts.to_le_bytes());
-        comment_account_raw[120..content_slice_end_byte].clone_from_slice(content_buffer_as_slice);
-
-        // Increment comment count in forum state's account
-        let forum = &mut ctx.accounts.forum;
-        forum.forum_counts.forum_comment_count.try_add_assign(1)?;
-
-        // Increment comments added count in user profile's state account
-        let user_profile = &mut ctx.accounts.user_profile;
-        user_profile.comments_added.try_add_assign(1)?;
-
-        // Update reputation score in user profile's state account
-        let comment_rep = ctx.accounts.forum.reputation_matrix.comment_rep;
-        let user_profile = &mut ctx.accounts.user_profile;
-        user_profile.reputation_score.try_add_assign(comment_rep)?;
-    }
+    // Update account commented on's most recent engagement timestamp
+    // Note: Only possible since both question and answer have most_recent_engagement bytes at same start byte in struct
+    let mut commented_on_account_raw = ctx.accounts.commented_on.data.borrow_mut();
+    commented_on_account_raw[112..120].clone_from_slice(&now_ts.to_le_bytes());
 
     msg!("Comment PDA account with address {} now created", ctx.accounts.comment.key());
     Ok(())
-}
-
-// Auxiliary helper functions
-
-fn create_pda_with_space<'info>(
-    pda_seeds: &[&[u8]],
-    pda_info: &AccountInfo<'info>,
-    space: usize,
-    owner: &Pubkey,
-    funder_info: &AccountInfo<'info>,
-    system_program_info: &AccountInfo<'info>,
-) -> Result<()> {
-    //create a PDA and allocate space inside of it at the same time - can only be done from INSIDE the program
-    //based on https://github.com/solana-labs/solana-program-library/blob/7c8e65292a6ebc90de54468c665e30bc590c513a/feature-proposal/program/src/processor.rs#L148-L163
-    invoke_signed(
-        &create_account(
-            &funder_info.key,
-            &pda_info.key,
-            1.max(Rent::get()?.minimum_balance(space)),
-            space as u64,
-            owner,
-        ),
-        &[
-            funder_info.clone(),
-            pda_info.clone(),
-            system_program_info.clone(),
-        ],
-        &[pda_seeds], //this is the part you can't do outside the program
-    )
-        .map_err(Into::into)
 }

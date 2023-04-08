@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 
+#[proc_macros::assert_size(80)] // divisible by 8
 #[repr(C)]
 #[account]
 #[derive(Debug)]
@@ -15,5 +16,5 @@ pub struct AboutMe {
 
     // ------------- About Me Info
 
-    pub content: String, // Max 512 characters
+    pub content_data_hash: Pubkey,
 }

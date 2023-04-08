@@ -34,9 +34,9 @@ pub struct BigNote {
 
     // ------------- Big note Info
 
-    pub tag: Tags,
+    pub tags: Vec<Tags>,
 
     pub title: String, // Max 256 characters
 
-    pub content: String, // Max 65536 characters
+    pub content_data_hash: Pubkey,
 }

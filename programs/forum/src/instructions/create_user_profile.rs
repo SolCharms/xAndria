@@ -24,7 +24,7 @@ pub struct CreateUserProfile<'info> {
     pub profile_owner: Signer<'info>,
 
     // The user profile
-    #[account(init, seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()],
+    #[account(init, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
               bump, payer = profile_owner, space = 8 + std::mem::size_of::<UserProfile>())]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
@@ -59,6 +59,7 @@ pub fn handler(ctx: Context<CreateUserProfile>) -> Result<()> {
 
     // Record User Profile's State
     user_profile.profile_owner = ctx.accounts.profile_owner.key();
+    user_profile.forum = ctx.accounts.forum.key();
     user_profile.profile_created_ts = now_ts;
     user_profile.most_recent_engagement_ts = now_ts;
 
@@ -70,7 +71,6 @@ pub fn handler(ctx: Context<CreateUserProfile>) -> Result<()> {
     user_profile.answers_accepted = 0;
     user_profile.total_bounty_received = 0;
     user_profile.reputation_score = 0;
-    user_profile.extra_reputation_space = [0; 64];
 
     // user_profile.nft_pfp_token_mint = ;
     user_profile.has_about_me = false;

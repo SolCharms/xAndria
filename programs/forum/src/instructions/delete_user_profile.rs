@@ -15,8 +15,8 @@ pub struct DeleteUserProfile<'info> {
     pub profile_owner: Signer<'info>,
 
     // The user profile
-    #[account(mut, seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()],
-              bump = bump_user_profile, has_one = profile_owner)]
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
+              bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     /// CHECK:

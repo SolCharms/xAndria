@@ -35,36 +35,34 @@ pub enum ErrorCode {
     Reserved8, //0x1778
     Reserved9, //0x1779
 
-    #[msg("all associated forum PDAs must be closed prior to closing forum state account")]
-    NotAllForumPDAsClosed, //0x177A
+    #[msg("forum question and big notes fees must be between 0 and 10,000 (i.e. in basis points)")]
+    InvalidFeeInputs, //0x177A
 
-    #[msg("both title and content are required to be non-empty strings")]
-    InvalidStringInputs, //0x177B
+    #[msg("all associated forum PDAs must be closed prior to closing forum state account")]
+    NotAllForumPDAsClosed, //0x177B
+
+    #[msg("title is required to be a non-empty string")]
+    InvalidStringInput, //0x177C
 
     #[msg("title cannot be more than 256 characters long")]
-    TitleTooLong, //0x177C
-
-    #[msg("content cannot be more than 65536 characters long")]
-    ContentTooLong, //0x177D
+    TitleTooLong, //0x177D
 
     #[msg("every question asked must be accompanied by a minimum reward bounty of amount stated in forum's state account")]
     InvalidBountyAmount, //0x177E
 
-    #[msg("the content in the about me cannot exceed 512 characters")]
-    AboutMeContentTooLong, //0x177F
-
     #[msg("about me PDA must be closed prior to deleting user profile account")]
-    AboutMePDANotClosed, //0x1780
+    AboutMePDANotClosed, //0x177F
 
     #[msg("the provided profile must have moderator privileges")]
-    ProfileIsNotModerator, //0x1781
+    ProfileIsNotModerator, //0x1780
 
     #[msg("comments can only be added to either a question or an answer account")]
-    InvalidAccountDiscriminator, //0x1782
+    InvalidAccountDiscriminator, //0x1781
 
     #[msg("the bounty has already been awarded")]
-    BountyAlreadyAwarded, //0x1783
+    BountyAlreadyAwarded, //0x1782
 
+    Reserved19, //0x1783
     Reserved20, //0x1784
 
     Reserved21, //0x1785

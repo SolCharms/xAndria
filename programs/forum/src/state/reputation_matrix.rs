@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-#[proc_macros::assert_size(120)] // divisible by 8
+#[proc_macros::assert_size(56)] // divisible by 8
 #[repr(C)]
 #[derive(Debug, Copy, Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct ReputationMatrix {
@@ -18,7 +18,5 @@ pub struct ReputationMatrix {
     pub comment_rep: u64,
 
     pub accepted_answer_rep: u64,
-
-    pub extra_space: [u8; 64]
 
 }

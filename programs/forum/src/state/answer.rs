@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 
+#[proc_macros::assert_size(152)] // +7 to make it divisible by 8
 #[repr(C)]
 #[account]
 #[derive(Debug)]
@@ -20,8 +21,7 @@ pub struct Answer {
     pub most_recent_engagement_ts: u64,
 
     // ------------- Answer Info
-
-    pub content: String, // Max 65536 characters
+    pub content_data_hash: Pubkey,
 
     // Is Accepted Answer
     pub accepted_answer: bool,

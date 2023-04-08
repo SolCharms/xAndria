@@ -4,8 +4,8 @@ use anchor_lang::solana_program::hash::hash;
 use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::solana_program::system_instruction::{self, create_account};
 
-use prog_common::{now_ts, TryAdd, errors::ErrorCode};
 use crate::state::{Forum, Tags, UserProfile};
+use prog_common::{now_ts, TryAdd, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_treasury: u8, bump_user_profile: u8)]
@@ -23,7 +23,8 @@ pub struct CreateBigNote<'info> {
     pub profile_owner: Signer<'info>,
 
     // The user profile
-    #[account(mut, seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()], bump = bump_user_profile, has_one = profile_owner)]
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
+              bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     /// CHECK:
@@ -32,6 +33,10 @@ pub struct CreateBigNote<'info> {
 
     /// CHECK: The seed address used for initialization of the big note PDA
     pub big_note_seed: AccountInfo<'info>,
+
+    /// CHECK:
+    // The content data hash of the question struct
+    pub content_data_hash: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 }
@@ -51,21 +56,19 @@ impl<'info> CreateBigNote<'info> {
     }
 }
 
-pub fn handler(ctx: Context<CreateBigNote>, title: String, content: String, tag: Tags) -> Result<()> {
+pub fn handler(ctx: Context<CreateBigNote>, title: String, tags: Vec<Tags>) -> Result<()> {
 
+    let now_ts: u64 = now_ts()?;
     let bounty_amount: u64 = 0;
     let bounty_awarded = false;
     let solicit_contributors = false;
     let is_verified = false;
 
     let title_length = title.len();
-    let content_length = content.len();
 
-    let now_ts: u64 = now_ts()?;
-
-    // Ensure that the length of title and content strings are non-zero
-    if (title_length == 0) || (content_length == 0) {
-        return Err(error!(ErrorCode::InvalidStringInputs));
+    // Ensure that the length of title string is non-zero
+    if title_length == 0 {
+        return Err(error!(ErrorCode::InvalidStringInput));
     }
 
     // Ensure that title does not exceed 256 characters
@@ -89,7 +92,7 @@ pub fn handler(ctx: Context<CreateBigNote>, title: String, content: String, tag:
 
         // Calculate data sizes and convert data to slice arrays
         let mut tag_buffer: Vec<u8> = Vec::new();
-        tag.serialize(&mut tag_buffer).unwrap();
+        tags.serialize(&mut tag_buffer).unwrap();
 
         let tag_buffer_as_slice: &[u8] = tag_buffer.as_slice();
         let tag_buffer_slice_length: usize = tag_buffer_as_slice.len();
@@ -102,13 +105,6 @@ pub fn handler(ctx: Context<CreateBigNote>, title: String, content: String, tag:
         let title_buffer_slice_length: usize = title_buffer_as_slice.len();
         let title_slice_end_byte = tag_slice_end_byte + title_buffer_slice_length;
 
-        let mut content_buffer: Vec<u8> = Vec::new();
-        content.serialize(&mut content_buffer).unwrap();
-
-        let content_buffer_as_slice: &[u8] = content_buffer.as_slice();
-        let content_buffer_slice_length: usize = content_buffer_as_slice.len();
-        let content_slice_end_byte = title_slice_end_byte + content_buffer_slice_length;
-
         create_pda_with_space(
             &[
                 b"big_note".as_ref(),
@@ -118,7 +114,7 @@ pub fn handler(ctx: Context<CreateBigNote>, title: String, content: String, tag:
                 &[bump],
             ],
             &ctx.accounts.big_note,
-            8 + 120 + 3 + tag_buffer_slice_length + title_buffer_slice_length + content_buffer_slice_length,
+            8 + 120 + 3 + tag_buffer_slice_length + title_buffer_slice_length + 32,
             ctx.program_id,
             &ctx.accounts.profile_owner.to_account_info(),
             &ctx.accounts.system_program.to_account_info(),
@@ -141,13 +137,13 @@ pub fn handler(ctx: Context<CreateBigNote>, title: String, content: String, tag:
         big_note_account_raw[130..131].clone_from_slice(&(is_verified as u8).to_le_bytes());
         big_note_account_raw[131..tag_slice_end_byte].clone_from_slice(tag_buffer_as_slice);
         big_note_account_raw[tag_slice_end_byte..title_slice_end_byte].clone_from_slice(title_buffer_as_slice);
-        big_note_account_raw[title_slice_end_byte..content_slice_end_byte].clone_from_slice(content_buffer_as_slice);
+        big_note_account_raw[title_slice_end_byte..title_slice_end_byte+32].clone_from_slice(&ctx.accounts.content_data_hash.key().to_bytes());
 
         // Transfer fee for posting big_note
-        let forum_big_notes_fee = ctx.accounts.forum.forum_fees.forum_big_notes_fee;
+        let forum_big_notes_submission_fee = ctx.accounts.forum.forum_fees.forum_big_notes_submission_fee;
 
-        if forum_big_notes_fee > 0 {
-            ctx.accounts.transfer_payment_ctx(forum_big_notes_fee)?;
+        if forum_big_notes_submission_fee > 0 {
+            ctx.accounts.transfer_payment_ctx(forum_big_notes_submission_fee)?;
         }
 
         // Increment big_notes count in forum state's account
@@ -158,9 +154,10 @@ pub fn handler(ctx: Context<CreateBigNote>, title: String, content: String, tag:
         let user_profile = &mut ctx.accounts.user_profile;
         user_profile.big_notes_posted.try_add_assign(1)?;
 
-        // Update reputation score in user profile
+        // Update user profile's most recent engagement timestamp and reputation score
         let big_notes_rep = ctx.accounts.forum.reputation_matrix.post_big_notes_rep;
         let user_profile = &mut ctx.accounts.user_profile;
+        user_profile.most_recent_engagement_ts = now_ts;
         user_profile.reputation_score.try_add_assign(big_notes_rep)?;
     }
 

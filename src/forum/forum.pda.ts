@@ -15,9 +15,9 @@ export const findForumTreasuryPDA = async (forum: PublicKey) => {
     );
 };
 
-export const findUserProfilePDA = async (profileOwner: PublicKey) => {
+export const findUserProfilePDA = async (forum: PublicKey, profileOwner: PublicKey) => {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from('user_profile'), profileOwner.toBytes()],
+        [Buffer.from('user_profile'), forum.toBytes(), profileOwner.toBytes()],
         FORUM_PROG_ID
     );
 };

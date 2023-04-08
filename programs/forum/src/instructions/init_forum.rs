@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 
 use crate::state::{Forum, ForumFees, ReputationMatrix, LATEST_FORUM_VERSION};
+use prog_common::errors::ErrorCode;
 
 #[derive(Accounts)]
 #[instruction(bump_forum_auth: u8)]
@@ -40,6 +41,11 @@ pub fn handler(ctx: Context<InitForum>, forum_fees: ForumFees, reputation_matrix
     // Check that the derived treasury PDA pubkey matches the one provided
     assert_eq!(ctx.accounts.forum_treasury.key(), forum_treasury_key);
 
+    // Assert forum question fee and forum big notes fees in basis points are between 0 - 10,000
+    if (forum_fees.forum_question_fee > 10000) || (forum_fees.forum_big_notes_solicitation_fee > 10000) {
+        return Err(error!(ErrorCode::InvalidFeeInputs));
+    }
+
     // Record Forum's State
     forum.version = LATEST_FORUM_VERSION;
     forum.forum_manager = ctx.accounts.forum_manager.key();
@@ -56,7 +62,6 @@ pub fn handler(ctx: Context<InitForum>, forum_fees: ForumFees, reputation_matrix
     forum.forum_counts.forum_question_count = 0;
     forum.forum_counts.forum_answer_count = 0;
     forum.forum_counts.forum_comment_count = 0;
-    forum.forum_counts.extra_space = [0; 64];
 
     forum.reputation_matrix = reputation_matrix;
 

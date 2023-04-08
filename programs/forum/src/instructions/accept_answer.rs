@@ -1,11 +1,7 @@
 use anchor_lang::prelude::*;
 
-// use anchor_lang::solana_program::program::{invoke_signed};
-// use anchor_lang::solana_program::system_instruction;
-
-use prog_common::{close_account, now_ts, TryAdd, TrySub};
-use prog_common::{errors::ErrorCode};
 use crate::state::{Answer, Forum, Question, UserProfile};
+use prog_common::{close_account, now_ts, TryAdd, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_user_profile: u8, bump_question: u8, bump_bounty_pda: u8, bump_answer_user_profile: u8, bump_answer: u8)]
@@ -18,12 +14,13 @@ pub struct AcceptAnswer<'info> {
     pub profile_owner: Signer<'info>,
 
     // The user profile
-    #[account(mut, seeds = [b"user_profile".as_ref(), profile_owner.key().as_ref()], bump = bump_user_profile, has_one = profile_owner)]
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
+              bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     // Question PDA account and seed
     #[account(mut, seeds = [b"question".as_ref(), forum.key().as_ref(), user_profile.key().as_ref(), question_seed.key().as_ref()],
-              bump = bump_question, has_one = user_profile, has_one = question_seed)]
+              bump = bump_question, has_one = forum, has_one = user_profile, has_one = question_seed)]
     pub question: Box<Account<'info, Question>>,
 
     /// CHECK: The seed address used for initialization of the question PDA
@@ -33,13 +30,13 @@ pub struct AcceptAnswer<'info> {
     #[account(mut, seeds = [b"bounty_pda".as_ref(), question.key().as_ref()], bump = bump_bounty_pda)]
     pub bounty_pda: AccountInfo<'info>,
 
-    /// CHECK:
+    /// CHECK: Used for seed verification of user profile pda account
     #[account(mut)]
     pub answer_profile_owner: AccountInfo<'info>,
 
     // The user profile
-    #[account(mut, seeds = [b"user_profile".as_ref(), answer_profile_owner.key().as_ref()],
-              bump = bump_answer_user_profile, constraint = answer_user_profile.profile_owner == answer_profile_owner.key())]
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), answer_profile_owner.key().as_ref()],
+              bump = bump_answer_user_profile, has_one = forum, constraint = answer_user_profile.profile_owner == answer_profile_owner.key())]
     pub answer_user_profile: Box<Account<'info, UserProfile>>,
 
     // Answer PDA account and seed
@@ -57,23 +54,6 @@ pub struct AcceptAnswer<'info> {
     pub system_program: Program<'info, System>,
 }
 
-// impl<'info> AcceptAnswer<'info> {
-
-//     fn transfer_bounty_ctx(&self, bump_bounty_pda:u8, lamports: u64) -> Result<()> {
-//         invoke_signed(
-//             &system_instruction::transfer(self.bounty_pda.key, self.answer_profile_owner.key, lamports),
-//             &[
-//                 self.bounty_pda.to_account_info(),
-//                 self.answer_profile_owner.to_account_info(),
-//                 self.system_program.to_account_info(),
-//             ],
-//             &[ &[b"bounty_pda".as_ref(), self.question.key().as_ref(), &[bump_bounty_pda]]],
-//         )
-//             .map_err(Into::into)
-//     }
-
-// }
-
 pub fn handler(ctx:Context<AcceptAnswer>) -> Result<()> {
 
     let now_ts = now_ts()?;
@@ -86,12 +66,6 @@ pub fn handler(ctx:Context<AcceptAnswer>) -> Result<()> {
 
     let bounty_amount = ctx.accounts.question.bounty_amount;
     let accepted_answer_rep = ctx.accounts.forum.reputation_matrix.accepted_answer_rep;
-
-    //  Manually derive the pubkey of the Bounty PDA
-    // let (_bounty_pda_account, bump_bounty_pda_account) = Pubkey::find_program_address(&[b"bounty_pda".as_ref(), question.key().as_ref()], ctx.program_id);
-
-    // Award bounty to user profile of answer account
-    // ctx.accounts.transfer_bounty_ctx(bump_bounty_pda_account, bounty_amount)?;
 
     // Manually transfer the lamports from bounty PDA to answer profile owner
     let bounty_pda_account_info: &mut AccountInfo = &mut ctx.accounts.bounty_pda.to_account_info();

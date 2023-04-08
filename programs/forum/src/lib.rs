@@ -93,26 +93,18 @@ pub mod forum {
     pub fn create_about_me(
         ctx: Context<CreateAboutMe>,
         _bump_user_profile: u8,
-        content: String,
     ) -> Result<()> {
         msg!("creating user about me");
-        instructions::create_about_me::handler(
-            ctx,
-            content
-        )
+        instructions::create_about_me::handler(ctx)
     }
 
     pub fn edit_about_me(
         ctx: Context<EditAboutMe>,
         _bump_user_profile: u8,
         _bump_about_me: u8,
-        new_content: String,
     ) -> Result<()> {
         msg!("editing user about me");
-        instructions::edit_about_me::handler(
-            ctx,
-            new_content
-        )
+        instructions::edit_about_me::handler(ctx)
     }
 
     pub fn delete_about_me(
@@ -149,30 +141,15 @@ pub mod forum {
         _bump_treasury: u8,
         _bump_user_profile: u8,
         title: String,
-        content: String,
-        tags: Tags,
+        tags: Vec<Tags>,
         bounty_amount: u64
     ) -> Result<()> {
         msg!("asking question");
         instructions::ask_question::handler(
             ctx,
             title,
-            content,
             tags,
             bounty_amount
-        )
-    }
-
-    pub fn add_content_to_question(
-        ctx: Context<AddContentToQuestion>,
-        _bump_user_profile: u8,
-        _bump_question: u8,
-        new_content: String,
-    ) -> Result<()> {
-        msg!("adding content to question");
-        instructions::add_content_to_question::handler(
-            ctx,
-            new_content
         )
     }
 
@@ -181,14 +158,12 @@ pub mod forum {
         _bump_user_profile: u8,
         _bump_question: u8,
         new_title: String,
-        new_content: String,
-        new_tags: Tags,
+        new_tags: Vec<Tags>,
     ) -> Result<()> {
         msg!("editing question");
         instructions::edit_question::handler(
             ctx,
             new_title,
-            new_content,
             new_tags
         )
     }
@@ -235,25 +210,10 @@ pub mod forum {
     pub fn answer_question(
         ctx: Context<AnswerQuestion>,
         _bump_user_profile: u8,
-        content: String,
     ) -> Result<()> {
         msg!("answering question");
         instructions::answer_question::handler(
             ctx,
-            content
-        )
-    }
-
-    pub fn add_content_to_answer(
-        ctx: Context<AddContentToAnswer>,
-        _bump_user_profile: u8,
-        _bump_answer: u8,
-        new_content: String,
-    ) -> Result<()> {
-        msg!("adding content to answer");
-        instructions::add_content_to_answer::handler(
-            ctx,
-            new_content
         )
     }
 
@@ -261,13 +221,9 @@ pub mod forum {
         ctx: Context<EditAnswer>,
         _bump_user_profile: u8,
         _bump_question: u8,
-        new_content: String,
     ) -> Result<()> {
         msg!("editing answer");
-        instructions::edit_answer::handler(
-            ctx,
-            new_content
-        )
+        instructions::edit_answer::handler(ctx)
     }
 
     pub fn delete_answer(
@@ -285,26 +241,18 @@ pub mod forum {
     pub fn leave_comment(
         ctx: Context<LeaveComment>,
         _bump_user_profile: u8,
-        content: String,
     ) -> Result<()> {
         msg!("leaving comment");
-        instructions::leave_comment::handler(
-            ctx,
-            content
-        )
+        instructions::leave_comment::handler(ctx)
     }
 
     pub fn edit_comment(
         ctx: Context<EditComment>,
         _bump_user_profile: u8,
         _bump_comment: u8,
-        content: String,
     ) -> Result<()> {
         msg!("editing comment");
-        instructions::edit_comment::handler(
-            ctx,
-            content
-        )
+        instructions::edit_comment::handler(ctx)
     }
 
     pub fn delete_comment(
@@ -324,28 +272,13 @@ pub mod forum {
         _bump_treasury: u8,
         _bump_user_profile: u8,
         title: String,
-        content: String,
-        tags: Tags,
+        tags: Vec<Tags>,
     ) -> Result<()> {
         msg!("creating big note");
         instructions::create_big_note::handler(
             ctx,
             title,
-            content,
             tags
-        )
-    }
-
-    pub fn add_content_to_big_note(
-        ctx: Context<AddContentToBigNote>,
-        _bump_user_profile: u8,
-        _bump_big_note: u8,
-        new_content: String,
-    ) -> Result<()> {
-        msg!("adding content to big note");
-        instructions::add_content_to_big_note::handler(
-            ctx,
-            new_content
         )
     }
 
@@ -354,14 +287,12 @@ pub mod forum {
         _bump_user_profile: u8,
         _bump_big_note: u8,
         new_title: String,
-        new_content: String,
-        new_tags: Tags,
+        new_tags: Vec<Tags>,
     ) -> Result<()> {
         msg!("editing big note");
         instructions::edit_big_note::handler(
             ctx,
             new_title,
-            new_content,
             new_tags
         )
     }
@@ -386,7 +317,12 @@ pub mod forum {
         instructions::verify_big_note::handler(ctx)
     }
 
-
+    pub fn close_account(
+        ctx: Context<CloseAccount>,
+    ) -> Result<()> {
+        msg!("closing account");
+        instructions::close_account::handler(ctx)
+    }
 
 
 }

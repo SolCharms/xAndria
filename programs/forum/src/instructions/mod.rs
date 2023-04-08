@@ -1,10 +1,8 @@
 pub mod accept_answer;
-pub mod add_content_to_answer;
-pub mod add_content_to_big_note;
-pub mod add_content_to_question;
 pub mod add_moderator;
 pub mod answer_question;
 pub mod ask_question;
+pub mod close_account;
 pub mod close_forum;
 pub mod create_about_me;
 pub mod create_big_note;
@@ -30,12 +28,10 @@ pub mod update_forum_params;
 pub mod verify_big_note;
 
 pub use accept_answer::*;
-pub use add_content_to_answer::*;
-pub use add_content_to_big_note::*;
-pub use add_content_to_question::*;
 pub use add_moderator::*;
 pub use answer_question::*;
 pub use ask_question::*;
+pub use close_account::*;
 pub use close_forum::*;
 pub use create_about_me::*;
 pub use create_big_note::*;
