@@ -941,8 +941,8 @@ export class ForumClient extends AccountUtils {
         profileOwner: PublicKey | Keypair,
         questionSeed: PublicKey,
         newContentDataHash: PublicKey,
-        title: string,
-        tags: any[],
+        newTitle: string,
+        newTags: any[],
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
@@ -961,8 +961,8 @@ export class ForumClient extends AccountUtils {
             .editQuestion(
                 userProfileBump,
                 questionBump,
-                title,
-                tags,
+                newTitle,
+                newTags,
             )
             .accounts({
                 forum: forum,
@@ -1216,7 +1216,7 @@ export class ForumClient extends AccountUtils {
         forum: PublicKey,
         profileOwner: PublicKey | Keypair,
         answerSeed: PublicKey,
-        newContentDataHash: string,
+        newContentDataHash: PublicKey,
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
@@ -1521,8 +1521,8 @@ export class ForumClient extends AccountUtils {
         profileOwner: PublicKey | Keypair,
         bigNoteSeed: PublicKey,
         newContentDataHash: PublicKey,
-        title: string,
-        tags: any[],
+        newTitle: string,
+        newTags: any[],
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
@@ -1541,8 +1541,8 @@ export class ForumClient extends AccountUtils {
             .editBigNote(
                 userProfileBump,
                 bigNoteBump,
-                title,
-                tags,
+                newTitle,
+                newTags,
             )
             .accounts({
                 forum: forum,

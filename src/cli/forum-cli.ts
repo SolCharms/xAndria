@@ -9,14 +9,15 @@ import { FORUM_PROG_ID } from '../index';
 import { stringifyPKsAndBNs } from '../prog-common';
 import { findBountyPDA, findForumAuthorityPDA } from '../forum/forum.pda';
 import { ForumFees, ReputationMatrix } from '../forum/forum.client';
+import { hash } from 'blake3';
 
 import { networkConfig } from "../cli/config_devnet/networkConfig-devnet";
 import { forumConfig } from "../cli/config_devnet/forumConfig-devnet";
 import { aboutMeConfig } from "../cli/config_devnet/aboutMeConfig-devnet";
-import { additionalQuestionContent, questionConfig } from "../cli/config_devnet/questionConfig-devnet";
-import { additionalAnswerContent, answerConfig } from "../cli/config_devnet/answerConfig-devnet";
+import { questionConfig } from "../cli/config_devnet/questionConfig-devnet";
+import { answerConfig } from "../cli/config_devnet/answerConfig-devnet";
 import { commentConfig } from "../cli/config_devnet/commentConfig-devnet";
-import { additionalBigNoteContent, bigNoteConfig } from "../cli/config_devnet/bigNoteConfig-devnet";
+import { bigNoteConfig } from "../cli/config_devnet/bigNoteConfig-devnet";
 
 // ----------------------------------------------- Legend ---------------------------------------------------------
 
@@ -26,6 +27,7 @@ import { additionalBigNoteContent, bigNoteConfig } from "../cli/config_devnet/bi
 // -d destination (token) account address (destination)
 // -f forum account address (forum)
 // -k pubkey of account being fetched (key)
+// -l account comment was left on (left)
 // -m forum manager account address (manager)
 // -o user profile owner address (owner)
 // -p user profile account address (profile)
@@ -240,11 +242,11 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
-                 const forum = new PublicKey(argv.forumPubkey);
+                 const forumKey = new PublicKey(argv.forumPubkey);
 
                  if (!argv.dryRun) {
                      const profileInstance = await forumClient.createUserProfile(
-                         forum,
+                         forumKey,
                          wallet.payer
                      );
                      console.log(stringifyPKsAndBNs(profileInstance));
@@ -257,6 +259,12 @@ const parser = yargs(process.argv.slice(2)).options({
 
 // Edit user profile account
     .command('edit-profile', 'Edit a user profile account', {
+        forumPubkey: {
+            alias: 'f',
+            type: 'string',
+            demandOption: true,
+            description: 'forum account pubkey'
+        },
         tokenMint: {
             alias: 't',
             type: 'string',
@@ -274,10 +282,12 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
+                 const forumKey = new PublicKey(argv.forumPubkey);
                  const tokenMintKey = new PublicKey(argv.tokenMint);
 
                  if (!argv.dryRun) {
                      const editInstance = await forumClient.editUserProfile(
+                         forumKey,
                          wallet.payer,
                          tokenMintKey
                      );
@@ -345,14 +355,18 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
-                 const forum = aboutMeConfig.forum;
-                 const content = aboutMeConfig.content;
+                 const forumKey = aboutMeConfig.forum;
+
+                 const contentString = aboutMeConfig.content;
+                 const hashResult = hash(contentString);
+                 const contentDataHash: PublicKey = new PublicKey(hashResult);
+
 
                  if (!argv.dryRun) {
                      const aboutMeInstance = await forumClient.createAboutMe(
-                         forum,
+                         forumKey,
                          wallet.payer,
-                         content
+                         contentDataHash,
                      );
                      console.log(stringifyPKsAndBNs(aboutMeInstance));
                  } else {
@@ -376,12 +390,17 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
-                 const new_content = aboutMeConfig.content;
+                 const forumKey = aboutMeConfig.forum;
+
+                 const newContentString: string = aboutMeConfig.content;
+                 const hashResult = hash(newContentString);
+                 const newContentDataHash: PublicKey = new PublicKey(hashResult);
 
                  if (!argv.dryRun) {
                      const editAboutMeInstance = await forumClient.editAboutMe(
+                         forumKey,
                          wallet.payer,
-                         new_content
+                         newContentDataHash
                      );
                      console.log(stringifyPKsAndBNs(editAboutMeInstance));
                  } else {
@@ -410,10 +429,12 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
+                 const forumKey = aboutMeConfig.forum;
                  const receiverKey: PublicKey = argv.receiverPubkey ? new PublicKey(argv.receiverPubkey) : wallet.publicKey;
 
                  if (!argv.dryRun) {
                      const deleteAboutMeInstance = await forumClient.deleteAboutMe(
+                         forumKey,
                          wallet.payer,
                          receiverKey
                      );
@@ -537,66 +558,25 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const forumKey: PublicKey = questionConfig.forum;
                  const title: string = questionConfig.title;
-                 const content: string = questionConfig.content;
                  const tags = questionConfig.tags;
                  const bountyAmount: anchor.BN = questionConfig.bountyAmount;
+
+                 const contentString: string = questionConfig.content;
+                 const hashResult = hash(contentString);
+                 const contentDataHash: PublicKey = new PublicKey(hashResult);
 
                  if (!argv.dryRun) {
                      const questionInstance = await forumClient.askQuestion(
                          forumKey,
                          wallet.payer,
+                         contentDataHash,
                          title,
-                         content,
                          tags,
                          bountyAmount
                      );
                      console.log(stringifyPKsAndBNs(questionInstance));
                  } else {
                      console.log('Asking question for user profile with wallet pubkey', stringifyPKsAndBNs(wallet.publicKey));
-                 }
-             })
-
-
-
-// Add content to question
-// Must config question parameters in questionConfig
-    .command('add-to-question', 'Add content to question', {
-        questionPubkey: {
-            alias: 'q',
-            type: 'string',
-            demandOption: true,
-            description: 'question account pubkey'
-        },
-    },
-             async (argv) => {
-                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
-                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
-                 const forumClient: ForumClient = new ForumClient(
-                     rpcConn,
-                     wallet,
-                     ForumIDL,
-                     FORUM_PROG_ID,
-                 );
-
-                 const forumKey: PublicKey = questionConfig.forum;
-                 const newContent: string[] = additionalQuestionContent;
-
-                 const questionKey = new PublicKey(argv.questionPubkey);
-                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
-                 const questionSeed = questionAcct.questionSeed;
-
-                 if (!argv.dryRun) {
-                     for (let i=0; i < newContent.length; i++) {
-                         const addContentToQuestionInstance = await forumClient.addContentToQuestion(
-                             forumKey,
-                             wallet.payer,
-                             questionSeed,
-                             newContent[i],
-                         );
-                         console.log(stringifyPKsAndBNs(addContentToQuestionInstance));
-                     }
-                 } else {
-                     console.log('Adding content to question with account address', questionKey.toBase58());
                  }
              })
 
@@ -623,9 +603,12 @@ const parser = yargs(process.argv.slice(2)).options({
                  );
 
                  const forumKey: PublicKey = questionConfig.forum;
-                 const title: string = questionConfig.title;
-                 const content: string = questionConfig.content;
-                 const tags = questionConfig.tags;
+                 const newTitle: string = questionConfig.title;
+                 const newTags = questionConfig.tags;
+
+                 const newContentString: string = questionConfig.content;
+                 const hashResult = hash(newContentString);
+                 const newContentDataHash: PublicKey = new PublicKey(hashResult);
 
                  const questionKey = new PublicKey(argv.questionPubkey);
                  const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
@@ -636,9 +619,9 @@ const parser = yargs(process.argv.slice(2)).options({
                          forumKey,
                          wallet.payer,
                          questionSeed,
-                         title,
-                         content,
-                         tags,
+                         newContentDataHash,
+                         newTitle,
+                         newTags,
                      );
                      console.log(stringifyPKsAndBNs(editQuestionInstance));
                  } else {
@@ -832,65 +815,23 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
+                 const forumKey: PublicKey = answerConfig.forum;
                  const questionKey: PublicKey = answerConfig.question;
-                 const content: string = answerConfig.content;
+
+                 const contentString: string = answerConfig.content;
+                 const hashResult = hash(contentString);
+                 const contentDataHash: PublicKey = new PublicKey(hashResult);
 
                  if (!argv.dryRun) {
                      const answerInstance = await forumClient.answerQuestion(
+                         forumKey,
                          questionKey,
                          wallet.payer,
-                         content,
+                         contentDataHash,
                      );
                      console.log(stringifyPKsAndBNs(answerInstance));
                  } else {
                      console.log('Answering question with account address', stringifyPKsAndBNs(questionKey));
-                 }
-             })
-
-
-
-// Add content to answer
-// Must config answer parameters in answerConfig
-    .command('add-to-answer', 'Add content to answer', {
-        answerPubkey: {
-            alias: 'a',
-            type: 'string',
-            demandOption: true,
-            description: 'answer account pubkey'
-        },
-    },
-             async (argv) => {
-                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
-                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
-                 const forumClient: ForumClient = new ForumClient(
-                     rpcConn,
-                     wallet,
-                     ForumIDL,
-                     FORUM_PROG_ID,
-                 );
-
-                 const answerKey = new PublicKey(argv.answerPubkey);
-                 const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
-                 const answerSeed = answerAcct.answerSeed;
-
-                 const questionKey: PublicKey = answerAcct.question;
-                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
-                 const forumKey = questionAcct.forum;
-
-                 const newContent: string[] = additionalAnswerContent;
-
-                 if (!argv.dryRun) {
-                     for (let i=0; i < newContent.length; i++) {
-                         const addContentToAnswerInstance = await forumClient.addContentToAnswer(
-                             forumKey,
-                             wallet.payer,
-                             answerSeed,
-                             newContent[i],
-                         );
-                         console.log(stringifyPKsAndBNs(addContentToAnswerInstance));
-                     }
-                 } else {
-                     console.log('Adding content to answer with account address', answerKey.toBase58());
                  }
              })
 
@@ -924,14 +865,16 @@ const parser = yargs(process.argv.slice(2)).options({
                  const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
                  const forumKey = questionAcct.forum;
 
-                 const newContent: string = answerConfig.content;
+                 const newContentString: string = answerConfig.content;
+                 const hashResult = hash(newContentString);
+                 const newContentDataHash: PublicKey = new PublicKey(hashResult);
 
                  if (!argv.dryRun) {
                      const editAnswerInstance = await forumClient.editAnswer(
                          forumKey,
                          wallet.payer,
                          answerSeed,
-                         newContent,
+                         newContentDataHash
                      );
                      console.log(stringifyPKsAndBNs(editAnswerInstance));
                  } else {
@@ -1012,14 +955,17 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const commentedOnKey: PublicKey = commentConfig.commentedOn;
                  const forumKey: PublicKey = commentConfig.forum;
-                 const content: string = commentConfig.content;
+
+                 const contentString: string = commentConfig.content;
+                 const hashResult = hash(contentString);
+                 const contentDataHash: PublicKey = new PublicKey(hashResult);
 
                  if (!argv.dryRun) {
                      const commentInstance = await forumClient.leaveComment(
                          forumKey,
                          wallet.payer,
                          commentedOnKey,
-                         content,
+                         contentDataHash,
                      );
                      console.log(stringifyPKsAndBNs(commentInstance));
                  } else {
@@ -1054,14 +1000,16 @@ const parser = yargs(process.argv.slice(2)).options({
                  const forumKey = commentAcct.forum;
                  const commentSeed = commentAcct.commentSeed;
 
-                 const newContent: string = commentConfig.content;
+                 const newContentString: string = commentConfig.content;
+                 const hashResult = hash(newContentString);
+                 const newContentDataHash: PublicKey = new PublicKey(hashResult);
 
                  if (!argv.dryRun) {
                      const editCommentInstance = await forumClient.editComment(
                          forumKey,
                          wallet.payer,
                          commentSeed,
-                         newContent,
+                         newContentDataHash,
                      );
                      console.log(stringifyPKsAndBNs(editCommentInstance));
                  } else {
@@ -1139,64 +1087,23 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const forumKey: PublicKey = bigNoteConfig.forum;
                  const title: string = bigNoteConfig.title;
-                 const content: string = bigNoteConfig.content;
                  const tags = bigNoteConfig.tags;
+
+                 const contentString: string = bigNoteConfig.content;
+                 const hashResult = hash(contentString);
+                 const contentDataHash: PublicKey = new PublicKey(hashResult);
 
                  if (!argv.dryRun) {
                      const bigNoteInstance = await forumClient.createBigNote(
                          forumKey,
                          wallet.payer,
+                         contentDataHash,
                          title,
-                         content,
                          tags,
                      );
                      console.log(stringifyPKsAndBNs(bigNoteInstance));
                  } else {
                      console.log('Creating big note for user profile with wallet pubkey', stringifyPKsAndBNs(wallet.publicKey));
-                 }
-             })
-
-
-
-// Add content to big note
-// Must config big note parameters in bigNoteConfig
-    .command('add-to-bignote', 'Add content to big note', {
-        bigNotePubkey: {
-            alias: 'b',
-            type: 'string',
-            demandOption: true,
-            description: 'big note account pubkey'
-        },
-    },
-             async (argv) => {
-                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
-                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
-                 const forumClient: ForumClient = new ForumClient(
-                     rpcConn,
-                     wallet,
-                     ForumIDL,
-                     FORUM_PROG_ID,
-                 );
-
-                 const forumKey: PublicKey = bigNoteConfig.forum;
-                 const newContent: string[] = additionalBigNoteContent;
-
-                 const bigNoteKey = new PublicKey(argv.bigNotePubkey);
-                 const bigNoteAcct = await forumClient.fetchBigNoteAccount(bigNoteKey);
-                 const bigNoteSeed = bigNoteAcct.bigNoteSeed;
-
-                 if (!argv.dryRun) {
-                     for (let i=0; i < newContent.length; i++) {
-                         const addContentToBigNoteInstance = await forumClient.addContentToBigNote(
-                             forumKey,
-                             wallet.payer,
-                             bigNoteSeed,
-                             newContent[i],
-                         );
-                         console.log(stringifyPKsAndBNs(addContentToBigNoteInstance));
-                     }
-                 } else {
-                     console.log('Adding content to big note with account address', bigNoteKey.toBase58());
                  }
              })
 
@@ -1223,9 +1130,12 @@ const parser = yargs(process.argv.slice(2)).options({
                  );
 
                  const forumKey: PublicKey = bigNoteConfig.forum;
-                 const title: string = bigNoteConfig.title;
-                 const content: string = bigNoteConfig.content;
-                 const tags = bigNoteConfig.tags;
+                 const newTitle: string = bigNoteConfig.title;
+                 const newTags = bigNoteConfig.tags;
+
+                 const newContentString: string = bigNoteConfig.content;
+                 const hashResult = hash(newContentString);
+                 const newContentDataHash: PublicKey = new PublicKey(hashResult);
 
                  const bigNoteKey = new PublicKey(argv.bigNotePubkey);
                  const bigNoteAcct = await forumClient.fetchBigNoteAccount(bigNoteKey);
@@ -1236,9 +1146,9 @@ const parser = yargs(process.argv.slice(2)).options({
                          forumKey,
                          wallet.payer,
                          bigNoteSeed,
-                         title,
-                         content,
-                         tags,
+                         newContentDataHash,
+                         newTitle,
+                         newTags,
                      );
                      console.log(stringifyPKsAndBNs(editBigNoteInstance));
                  } else {
@@ -1343,6 +1253,44 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// -------------------------------------------------- Close Account IX -----------------------------------------------------------
+
+
+
+    .command('close-account', 'Close PDA account', {
+        accountPubkey: {
+            alias: 'k',
+            type: 'string',
+            demandOption: true,
+            description: 'account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const accountKey: PublicKey = new PublicKey(argv.accountPubkey);
+
+                 if (!argv.dryRun) {
+
+                     const closeAccountInstance = await forumClient.closeAccount(
+                         wallet.payer,
+                         accountKey
+                     );
+                     console.log(stringifyPKsAndBNs(closeAccountInstance));
+                 } else {
+                     console.log('Closing account with pubkey:', accountKey.toBase58());
+                 }
+             })
+
+
+
 
 // -------------------------------------------------- PDA account fetching instructions ------------------------------------------
 
@@ -1368,20 +1316,37 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
-                 const managerKey: PublicKey = argv.managerPubkey ? new PublicKey(argv.managerPubkey) : wallet.publicKey;
+                 if (argv.managerPubkey) {
 
-                 if (!argv.dryRun) {
-                     console.log('Fetching all forum PDAs for manager with pubkey:', managerKey.toBase58());
-                     const forumPDAs = await forumClient.fetchAllForumPDAs(managerKey);
+                     const managerKey: PublicKey = new PublicKey(argv.managerPubkey);
 
-                     // Loop over all PDAs and display account info
-                     for (let num = 1; num <= forumPDAs.length; num++) {
-                         console.log('Forum account', num, ':');
-                         console.dir(stringifyPKsAndBNs(forumPDAs[num - 1]), {depth: null});
+                     if (!argv.dryRun) {
+                         console.log('Fetching all forum PDAs for manager with pubkey:', managerKey.toBase58());
+                         const forumPDAs = await forumClient.fetchAllForumPDAs(managerKey);
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= forumPDAs.length; num++) {
+                             console.log('Forum account', num, ':');
+                             console.dir(stringifyPKsAndBNs(forumPDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found a total of n forum PDAs for manager pubkey:', managerKey.toBase58());
                      }
-
                  } else {
-                     console.log('Found a total of n forum PDAs for manager pubkey:', managerKey.toBase58());
+                     if (!argv.dryRun) {
+                         console.log('Fetching all forum PDAs');
+                         const forumPDAs = await forumClient.fetchAllForumPDAs();
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= forumPDAs.length; num++) {
+                             console.log('Forum account', num, ':');
+                             console.dir(stringifyPKsAndBNs(forumPDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found a total of n forum PDAs');
+                     }
                  }
              })
 
@@ -1425,6 +1390,12 @@ const parser = yargs(process.argv.slice(2)).options({
 
 // Fetch all user profile PDAs
     .command('fetch-all-profiles', 'Fetch all user profile PDA accounts info', {
+        forumPubkey: {
+            alias: 'f',
+            type: 'string',
+            demandOption: false,
+            description: 'forum account pubkey'
+        }
     },
              async (argv) => {
                  const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
@@ -1436,19 +1407,80 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
+                 if (argv.forumPubkey) {
+
+                     const forumKey: PublicKey = new PublicKey(argv.forumPubkey);
+
+                     if (!argv.dryRun) {
+
+                         console.log('Fetching all profile PDAs for forum pubkey:', forumKey.toBase58());
+                         const profilePDAs = await forumClient.fetchAllUserProfilePDAs(forumKey);
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= profilePDAs.length; num++) {
+                             console.log('User profile account', num, ':');
+                             console.dir(stringifyPKsAndBNs(profilePDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found n user profile PDA accounts for forum pubkey:', forumKey.toBase58());
+                     }
+
+                 } else {
+
+                     if (!argv.dryRun) {
+
+                         console.log('Fetching all profile PDAs');
+                         const profilePDAs = await forumClient.fetchAllUserProfilePDAs();
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= profilePDAs.length; num++) {
+                             console.log('User profile account', num, ':');
+                             console.dir(stringifyPKsAndBNs(profilePDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found n user profile PDA accounts');
+                     }
+                 }
+             })
+
+
+
+// Fetch user profile PDA by Owner Pubkey
+// User profile account owner pubkey required in command
+    .command('fetch-all-profiles-by-owner', 'Fetch user profile PDA account info by owner pubkey', {
+        userProfileOwnerPubkey: {
+            alias: 'o',
+            type: 'string',
+            demandOption: true,
+            description: 'user profile account owner pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const profileOwnerKey: PublicKey = new PublicKey(argv.userProfileOwnerPubkey);
+
                  if (!argv.dryRun) {
 
-                     console.log('Fetching all profile PDAs');
-                     const profilePDAs = await forumClient.fetchAllUserProfilePDAs();
+                     const profilePDAs = await forumClient.fetchAllUserProfilePDAsByProfileOwner(profileOwnerKey);
 
                      // Loop over all PDAs and display account info
                      for (let num = 1; num <= profilePDAs.length; num++) {
-                         console.log('User profile account', num, ':');
+                         console.log('Displaying account info for user profile with owner pubkey: ', profileOwnerKey.toBase58());
                          console.dir(stringifyPKsAndBNs(profilePDAs[num - 1]), {depth: null});
                      }
 
                  } else {
-                     console.log('Found n user profile PDA accounts');
+                     console.log('Found user profile PDA for owner pubkey:', profileOwnerKey.toBase58());
                  }
              })
 
@@ -1490,14 +1522,13 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
-// Fetch user profile PDA by Owner Pubkey
-// User profile account owner pubkey required in command
-    .command('fetch-profile-by-owner', 'Fetch user profile PDA account info by owner pubkey', {
-        userProfileOwnerPubkey: {
-            alias: 'o',
+// Fetch all user about me PDAs
+    .command('fetch-all-about-mes', 'Fetch all user about me PDA accounts program-wide', {
+        userProfilePubkey: {
+            alias: 'p',
             type: 'string',
-            demandOption: true,
-            description: 'user profile account owner pubkey'
+            demandOption: false,
+            description: 'user profile account pubkey'
         }
     },
              async (argv) => {
@@ -1510,20 +1541,38 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
-                 const profileOwnerKey: PublicKey = new PublicKey(argv.userProfileOwnerPubkey);
+                 if (argv.userProfilePubkey) {
 
-                 if (!argv.dryRun) {
+                     const userProfileKey: PublicKey = new PublicKey(argv.userProfilePubkey);
 
-                     const profilePDAs = await forumClient.fetchAllUserProfilePDAs(profileOwnerKey);
+                     if (!argv.dryRun) {
 
-                     // Loop over all PDAs and display account info
-                     for (let num = 1; num <= profilePDAs.length; num++) {
-                         console.log('Displaying account info for user profile with owner pubkey: ', profileOwnerKey.toBase58());
-                         console.dir(stringifyPKsAndBNs(profilePDAs[num - 1]), {depth: null});
+                         console.log('Fetching about me PDA for user profile with pubkey: ', userProfileKey.toBase58());
+                         const aboutMePDAs = await forumClient.fetchAllAboutMePDAs(userProfileKey);
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= aboutMePDAs.length; num++) {
+                             console.log('About me account', num, ':');
+                             console.dir(stringifyPKsAndBNs(aboutMePDAs[num - 1]), {depth: null});
+                         }
+                     } else {
+                         console.log('Found user about me PDA for user profile with pubkey:', userProfileKey.toBase58());
                      }
-
                  } else {
-                     console.log('Found user profile PDA for owner pubkey:', profileOwnerKey.toBase58());
+
+                     if (!argv.dryRun) {
+
+                         console.log('Fetching all about me PDAs');
+                         const aboutMePDAs = await forumClient.fetchAllAboutMePDAs();
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= aboutMePDAs.length; num++) {
+                             console.log('About me account', num, ':');
+                             console.dir(stringifyPKsAndBNs(aboutMePDAs[num - 1]), {depth: null});
+                         }
+                     } else {
+                         console.log('Found n user about me PDAs');
+                     }
                  }
              })
 
@@ -1554,7 +1603,7 @@ const parser = yargs(process.argv.slice(2)).options({
                  if (!argv.dryRun) {
 
                      console.log('Fetching about me PDA for user profile with pubkey: ', userProfileKey.toBase58());
-                     const aboutMePDAs = await forumClient.fetchAboutMeForProfile(userProfileKey);
+                     const aboutMePDAs = await forumClient.fetchAllAboutMePDAs(userProfileKey);
 
                      // Loop over all PDAs and display account info
                      for (let num = 1; num <= aboutMePDAs.length; num++) {
@@ -1604,8 +1653,63 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// Fetch all question PDAs
+    .command('fetch-all-questions', 'Fetch all question PDA accounts program-wide', {
+        forumPubkey: {
+            alias: 'f',
+            type: 'string',
+            demandOption: false,
+            description: 'forum account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 if (argv.forumPubkey) {
+
+                     const forumKey: PublicKey = new PublicKey(argv.forumPubkey);
+
+                     if (!argv.dryRun) {
+
+                         console.log('Fetching all question PDAs for forum pubkey:', forumKey.toBase58());
+                         const questionPDAs = await forumClient.fetchAllQuestionPDAs(forumKey);
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= questionPDAs.length; num++) {
+                             console.log('Question account', num, ':');
+                             console.dir(stringifyPKsAndBNs(questionPDAs[num - 1]), {depth: null});
+                         }
+                     } else {
+                         console.log('Found n question PDA accounts for forum pubkey:', forumKey.toBase58());
+                     }
+                 } else {
+                     if (!argv.dryRun) {
+
+                         console.log('Fetching all question PDAs');
+                         const questionPDAs = await forumClient.fetchAllQuestionPDAs();
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= questionPDAs.length; num++) {
+                             console.log('Question account', num, ':');
+                             console.dir(stringifyPKsAndBNs(questionPDAs[num - 1]), {depth: null});
+                         }
+                     } else {
+                         console.log('Found n question PDA accounts');
+                     }
+                 }
+             })
+
+
+
 // Fetch all question PDAs for a specific user profile account
-    .command('fetch-all-questions', 'Fetch all question PDA accounts info', {
+    .command('fetch-all-questions-by-profile', 'Fetch all question PDA accounts info for a specific user profile account', {
         userProfilePubkey: {
             alias: 'p',
             type: 'string',
@@ -1627,15 +1731,14 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  if (!argv.dryRun) {
 
-                     console.log('Fetching all question PDAs for user profile with pubkey: ', userProfileKey.toBase58());
-                     const questionPDAs = await forumClient.fetchAllQuestionPDAs(userProfileKey);
+                     console.log('Fetching all question PDAs for user profile with pubkey: ', userProfileKey?.toBase58());
+                     const questionPDAs = await forumClient.fetchAllQuestionPDAsByUserProfile(userProfileKey);
 
                      // Loop over all PDAs and display account info
                      for (let num = 1; num <= questionPDAs.length; num++) {
                          console.log('Question account', num, ':');
                          console.dir(stringifyPKsAndBNs(questionPDAs[num - 1]), {depth: null});
                      }
-
                  } else {
                      console.log('Found n question PDA accounts for user profile with pubkey: ', userProfileKey.toBase58());
                  }
@@ -1679,13 +1782,13 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
-// Fetch all answer PDAs for a specific question account
-    .command('fetch-all-answers-by-question', 'Fetch all answer PDA accounts info for a specific question', {
+// Fetch all answer PDAs
+    .command('fetch-all-answers', 'Fetch all answer PDA accounts program-wide', {
         questionPubkey: {
             alias: 'q',
             type: 'string',
-            demandOption: true,
-            description: 'user profile account pubkey'
+            demandOption: false,
+            description: 'question account pubkey'
         }
     },
              async (argv) => {
@@ -1698,21 +1801,40 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
-                 const questionKey: PublicKey = new PublicKey(argv.questionPubkey);
+                 if (argv.questionPubkey) {
 
-                 if (!argv.dryRun) {
+                     const questionKey: PublicKey = new PublicKey(argv.questionPubkey);
 
-                     console.log('Fetching all answer PDAs for question account with pubkey: ', questionKey.toBase58());
-                     const answerPDAs = await forumClient.fetchAllAnswerPDAsByQuestion(questionKey);
+                     if (!argv.dryRun) {
 
-                     // Loop over all PDAs and display account info
-                     for (let num = 1; num <= answerPDAs.length; num++) {
-                         console.log('Answer account', num, ':');
-                         console.dir(stringifyPKsAndBNs(answerPDAs[num - 1]), {depth: null});
+                         console.log('Fetching all answer PDAs for question with pubkey:', questionKey.toBase58());
+                         const answerPDAs = await forumClient.fetchAllAnswerPDAs(questionKey);
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= answerPDAs.length; num++) {
+                             console.log('Answer account', num, ':');
+                             console.dir(stringifyPKsAndBNs(answerPDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found n answer PDA accounts for question with pubkey:', questionKey.toBase58());
                      }
-
                  } else {
-                     console.log('Found n answer PDA accounts for question account with pubkey: ', questionKey.toBase58());
+
+                     if (!argv.dryRun) {
+
+                         console.log('Fetching all answer PDAs');
+                         const answerPDAs = await forumClient.fetchAllAnswerPDAs();
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= answerPDAs.length; num++) {
+                             console.log('Answer account', num, ':');
+                             console.dir(stringifyPKsAndBNs(answerPDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found n answer PDA accounts ');
+                     }
                  }
              })
 
@@ -1793,12 +1915,12 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
-// Fetch all comment PDAs for a specific account commented on
-    .command('fetch-all-comments-by-account', 'Fetch all comment PDA accounts info for a specific account commented on', {
+// Fetch all comment PDAs
+    .command('fetch-all-comments', 'Fetch all comment PDA accounts program-wide', {
         accountPubkey: {
-            alias: 'k',
+            alias: 'l',
             type: 'string',
-            demandOption: true,
+            demandOption: false,
             description: 'account commented on pubkey (must be question or answer account)'
         }
     },
@@ -1812,21 +1934,40 @@ const parser = yargs(process.argv.slice(2)).options({
                      FORUM_PROG_ID,
                  );
 
-                 const accountKey: PublicKey = new PublicKey(argv.accountPubkey);
+                 if (argv.accountPubkey) {
 
-                 if (!argv.dryRun) {
+                     const accountKey: PublicKey = new PublicKey(argv.accountPubkey);
 
-                     console.log('Fetching all comment PDAs for account commented on with pubkey: ', accountKey.toBase58());
-                     const commentPDAs = await forumClient.fetchAllCommentPDAsByAccountCommentedOn(accountKey);
+                     if (!argv.dryRun) {
 
-                     // Loop over all PDAs and display account info
-                     for (let num = 1; num <= commentPDAs.length; num++) {
-                         console.log('Comment account', num, ':');
-                         console.dir(stringifyPKsAndBNs(commentPDAs[num - 1]), {depth: null});
+                         console.log('Fetching all comment PDAs for account commented on with pubkey: ', accountKey.toBase58());
+                         const commentPDAs = await forumClient.fetchAllCommentPDAs(accountKey);
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= commentPDAs.length; num++) {
+                             console.log('Comment account', num, ':');
+                             console.dir(stringifyPKsAndBNs(commentPDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found n comment PDA accounts for account commented on with pubkey: ', accountKey.toBase58());
                      }
-
                  } else {
-                     console.log('Found n comment PDA accounts for account commented on with pubkey: ', accountKey.toBase58());
+
+                     if (!argv.dryRun) {
+
+                         console.log('Fetching all comment PDAs');
+                         const commentPDAs = await forumClient.fetchAllCommentPDAs();
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= commentPDAs.length; num++) {
+                             console.log('Comment account', num, ':');
+                             console.dir(stringifyPKsAndBNs(commentPDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found n comment PDA accounts');
+                     }
                  }
              })
 
@@ -1938,7 +2079,7 @@ const parser = yargs(process.argv.slice(2)).options({
                      console.dir(stringifyPKsAndBNs(questionPDA), {depth: null});
 
                      // Fetch all comment PDAs on the question
-                     const commentOnQuestionPDAs = await forumClient.fetchAllCommentPDAsByAccountCommentedOn(questionKey);
+                     const commentOnQuestionPDAs = await forumClient.fetchAllCommentPDAs(questionKey);
 
                      // Loop over all comment PDAs and display account info
                      for (let num = 1; num <= commentOnQuestionPDAs.length; num++) {
@@ -1947,7 +2088,7 @@ const parser = yargs(process.argv.slice(2)).options({
                      }
 
                      // Fetch all answer PDAs
-                     const answerPDAs = await forumClient.fetchAllAnswerPDAsByQuestion(questionKey);
+                     const answerPDAs = await forumClient.fetchAllAnswerPDAs(questionKey);
                      const answersLength = answerPDAs.length;
 
                      // Loop over all answer PDAs and display account info
@@ -1958,7 +2099,7 @@ const parser = yargs(process.argv.slice(2)).options({
                          console.dir(stringifyPKsAndBNs(answerPDAs[answersLength - num]), {depth: null});
 
                          // Fetch all comment PDAs on the answer
-                         const commentsOnAnswerPDAs = await forumClient.fetchAllCommentPDAsByAccountCommentedOn(answerPDAs[answersLength - num].publicKey);
+                         const commentsOnAnswerPDAs = await forumClient.fetchAllCommentPDAs(answerPDAs[answersLength - num].publicKey);
                          const commentsLength = commentsOnAnswerPDAs.length;
 
                          // Display all comment PDAs on the answer
@@ -1975,8 +2116,65 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// Fetch all big note PDAs
+    .command('fetch-all-bignotes', 'Fetch all big note PDA accounts info program-wide', {
+        forumPubkey: {
+            alias: 'f',
+            type: 'string',
+            demandOption: false,
+            description: 'forum account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 if (argv.forumPubkey) {
+
+                     const forumKey: PublicKey = new PublicKey(argv.forumPubkey);
+
+                     if (!argv.dryRun) {
+
+                         console.log('Fetching all big note PDAs for forum pubkey:', forumKey.toBase58());
+                         const bigNotePDAs = await forumClient.fetchAllBigNotePDAs(forumKey);
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= bigNotePDAs.length; num++) {
+                             console.log('Big note account', num, ':');
+                             console.dir(stringifyPKsAndBNs(bigNotePDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found n big note PDA accounts for forum pubkey:', forumKey.toBase58());
+                     }
+                 } else {
+                     if (!argv.dryRun) {
+
+                         console.log('Fetching all big note PDAs');
+                         const bigNotePDAs = await forumClient.fetchAllBigNotePDAs();
+
+                         // Loop over all PDAs and display account info
+                         for (let num = 1; num <= bigNotePDAs.length; num++) {
+                             console.log('Big note account', num, ':');
+                             console.dir(stringifyPKsAndBNs(bigNotePDAs[num - 1]), {depth: null});
+                         }
+
+                     } else {
+                         console.log('Found n big note PDA accounts');
+                     }
+                 }
+             })
+
+
+
 // Fetch all big note PDAs for a specific user profile account
-    .command('fetch-all-bignotes', 'Fetch all big note PDA accounts info', {
+    .command('fetch-all-bignotes-by-profile', 'Fetch all big note PDA accounts info', {
         userProfilePubkey: {
             alias: 'p',
             type: 'string',
@@ -2047,16 +2245,6 @@ const parser = yargs(process.argv.slice(2)).options({
                      console.log('Found big note PDA for pubkey:', bigNoteKey.toBase58());
                  }
              })
-
-
-
-
-
-
-
-
-
-
 
 
 
