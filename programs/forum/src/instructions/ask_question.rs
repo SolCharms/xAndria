@@ -161,7 +161,8 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, tags: Vec<Tags>, bounty
 
         if forum_question_fee > 0 {
             let remainder = bounty_amount % 10000;
-            let bounty_amount_mod_10000 = bounty_amount.try_sub(remainder)?;
+            let bounty_amount_minus_remainder = bounty_amount.try_sub(remainder)?;
+            let bounty_amount_mod_10000 = bounty_amount_minus_remainder.try_div(10000)?;
             let question_fee_due = bounty_amount_mod_10000.try_mul(forum_question_fee)?;
 
             ctx.accounts.transfer_payment_ctx(question_fee_due)?;

@@ -1886,7 +1886,7 @@ export type Forum = {
         "kind": "enum",
         "variants": [
           {
-            "name": "DAOsAndGovernance"
+            "name": "DaosAndGovernance"
           },
           {
             "name": "DataAndAnalytics"
@@ -1904,7 +1904,7 @@ export type Forum = {
             "name": "Mobile"
           },
           {
-            "name": "NFTs"
+            "name": "Nfts"
           },
           {
             "name": "Payments"
@@ -3809,7 +3809,7 @@ export const IDL: Forum = {
         "kind": "enum",
         "variants": [
           {
-            "name": "DAOsAndGovernance"
+            "name": "DaosAndGovernance"
           },
           {
             "name": "DataAndAnalytics"
@@ -3827,7 +3827,7 @@ export const IDL: Forum = {
             "name": "Mobile"
           },
           {
-            "name": "NFTs"
+            "name": "Nfts"
           },
           {
             "name": "Payments"

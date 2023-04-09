@@ -1,4 +1,4 @@
-import { ForumClient } from '../forum';
+import { ForumClient, Tags } from '../forum';
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 // import * as SPLToken from "@solana/spl-token";
 import { default as fs } from 'fs/promises';
@@ -558,12 +558,14 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const forumKey: PublicKey = questionConfig.forum;
                  const title: string = questionConfig.title;
-                 const tags = questionConfig.tags;
+                 const tags: Tags[] = questionConfig.tags;
                  const bountyAmount: anchor.BN = questionConfig.bountyAmount;
 
                  const contentString: string = questionConfig.content;
                  const hashResult = hash(contentString);
                  const contentDataHash: PublicKey = new PublicKey(hashResult);
+
+                 console.log(stringifyPKsAndBNs(contentDataHash));
 
                  if (!argv.dryRun) {
                      const questionInstance = await forumClient.askQuestion(
@@ -604,7 +606,7 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const forumKey: PublicKey = questionConfig.forum;
                  const newTitle: string = questionConfig.title;
-                 const newTags = questionConfig.tags;
+                 const newTags: Tags[] = questionConfig.tags;
 
                  const newContentString: string = questionConfig.content;
                  const hashResult = hash(newContentString);
@@ -737,12 +739,6 @@ const parser = yargs(process.argv.slice(2)).options({
 
 // Accept answer
     .command('accept-answer', 'Accept answer', {
-        questionPubkey: {
-            alias: 'q',
-            type: 'string',
-            demandOption: true,
-            description: 'question account pubkey'
-        },
         answerPubkey: {
             alias: 'a',
             type: 'string',
@@ -768,15 +764,15 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const receiverKey: PublicKey = argv.receiverPubkey ? new PublicKey(argv.receiverPubkey) : wallet.publicKey;
 
-                 const questionKey = new PublicKey(argv.questionPubkey);
-                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
-                 const questionSeed = questionAcct.questionSeed;
-                 const forumKey = questionAcct.forum;
-
                  const answerKey = new PublicKey(argv.answerPubkey);
                  const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
                  const answerSeed = answerAcct.answerSeed;
                  const answerUserProfile = answerAcct.userProfile;
+
+                 const questionKey: PublicKey = answerAcct.question;
+                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
+                 const questionSeed = questionAcct.questionSeed;
+                 const forumKey = questionAcct.forum;
 
                  const answerUserProfileAcct = await forumClient.fetchUserProfileAccount(answerUserProfile);
                  const answerProfileOwnerKey = answerUserProfileAcct.profileOwner;
@@ -997,8 +993,11 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const commentKey: PublicKey = new PublicKey(argv.commentPubkey);
                  const commentAcct = await forumClient.fetchCommentAccount(commentKey);
-                 const forumKey = commentAcct.forum;
                  const commentSeed = commentAcct.commentSeed;
+                 const userProfileKey = commentAcct.userProfile;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const forumKey = userProfileAcct.forum;
 
                  const newContentString: string = commentConfig.content;
                  const hashResult = hash(newContentString);
@@ -1048,11 +1047,11 @@ const parser = yargs(process.argv.slice(2)).options({
 
                  const commentKey = new PublicKey(argv.commentPubkey);
                  const commentAcct = await forumClient.fetchCommentAccount(commentKey);
-                 const forumKey = commentAcct.forum;
                  const commentSeed = commentAcct.commentSeed;
                  const userProfileKey = commentAcct.userProfile;
 
                  const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const forumKey = userProfileAcct.forum;
                  const profileOwnerKey = userProfileAcct.profileOwner;
 
                  if (!argv.dryRun) {
@@ -1111,7 +1110,7 @@ const parser = yargs(process.argv.slice(2)).options({
 
 // Edit big note
 // Must config big note parameters in bigNoteConfig
-    .command('edit-big-note', 'Edit big note', {
+    .command('edit-bignote', 'Edit big note', {
         bigNotePubkey: {
             alias: 'b',
             type: 'string',
@@ -2197,7 +2196,7 @@ const parser = yargs(process.argv.slice(2)).options({
                  if (!argv.dryRun) {
 
                      console.log('Fetching all big note PDAs for user profile with pubkey: ', userProfileKey.toBase58());
-                     const bigNotePDAs = await forumClient.fetchAllBigNotePDAs(userProfileKey);
+                     const bigNotePDAs = await forumClient.fetchAllBigNotePDAsByUserProfile(userProfileKey);
 
                      // Loop over all PDAs and display account info
                      for (let num = 1; num <= bigNotePDAs.length; num++) {

@@ -17,19 +17,32 @@ import {
     findBountyPDA,
 } from './forum.pda';
 
+// // Enum: Tags
+// export const Tags = {
+//     DAOsAndGovernance: { dAOsAndGovernance: {}},
+//     DataAndAnalytics: { dataAndAnalytics: {}},
+//     DeFi: { deFi: {}},
+//     Development: { development: {}},
+//     Gaming: { gaming: {}},
+//     Mobile: { mobile: {}},
+//     NFTs: { nFTs: {}},
+//     Payments: { payments: {}},
+//     ToolsAndInfrastructure: { toolsAndInfrastructure: {}},
+//     Trading: { trading:{}}
+// }
+
 // Enum: Tags
-export const Tags = {
-    DAOsAndGovernance: { daosAndGovernance: {}},
-    DataAndAnalytics: { dataAndAnalytics: {}},
-    DeFi: { defi: {}},
-    Development: { development: {}},
-    Gaming: { gaming: {}},
-    Mobile: { mobile: {}},
-    NFTs: { nfts: {}},
-    Payments: { payments: {}},
-    Research: { research:{}},
-    ToolsAndInfrastructure: { toolsAndInfrastructure: {}},
-    Trading: { trading:{}}
+export enum Tags {
+    DAOsAndGovernance,
+    DataAndAnalytics,
+    DeFi,
+    Development,
+    Gaming,
+    Mobile,
+    NFTs,
+    Payments,
+    ToolsAndInfrastructure,
+    Trading,
 }
 
 export interface ForumCounts {
@@ -38,7 +51,6 @@ export interface ForumCounts {
     forumQuestionCount: BN;
     forumAnswerCount: BN;
     forumCommentCount: BN;
-    extraSpace: number[];
 }
 
 export interface ForumFees {
@@ -48,7 +60,6 @@ export interface ForumFees {
     forumBigNotesSolicitationFee: BN;
     forumQuestionBountyMinimum: BN;
     forumBigNotesBountyMinimum: BN;
-    extraSpace: number[];
 }
 
 export interface ReputationMatrix {
@@ -59,7 +70,6 @@ export interface ReputationMatrix {
     answerRep: BN;
     commentRep: BN;
     acceptedAnswerRep: BN;
-    extraSpace: number[];
 }
 
 
@@ -128,7 +138,7 @@ export class ForumClient extends AccountUtils {
     }
 
     async fetchCommentAccount(comment: PublicKey) {
-        return this.forumProgram.account.answer.fetch(comment);
+        return this.forumProgram.account.comment.fetch(comment);
     }
 
     async fetchBigNoteAccount(bigNote: PublicKey) {
@@ -879,7 +889,7 @@ export class ForumClient extends AccountUtils {
         profileOwner: PublicKey | Keypair,
         contentDataHash: PublicKey,
         title: string,
-        tags: any[],
+        tags: Tags[],
         bountyAmount: BN,
     ) {
         const questionSeedKeypair = Keypair.generate();
@@ -1370,7 +1380,7 @@ export class ForumClient extends AccountUtils {
 
         // Derive PDAs
         const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
-        const [comment, commentBump] = await findAnswerPDA(forum, userProfile, commentSeed);
+        const [comment, commentBump] = await findCommentPDA(forum, userProfile, commentSeed);
 
         // Create Signers Array
         const signers = [];
@@ -1417,7 +1427,7 @@ export class ForumClient extends AccountUtils {
         // Derive PDAs
         const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
         const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
-        const [comment, commentBump] = await findAnswerPDA(forum, userProfile, commentSeed);
+        const [comment, commentBump] = await findCommentPDA(forum, userProfile, commentSeed);
 
         // Create Signers Array
         const signers = [];
