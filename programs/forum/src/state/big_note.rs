@@ -24,7 +24,7 @@ pub struct BigNote {
     // ------------- Bounty Amount
     pub bounty_amount: u64,
 
-    pub soliciting_contibutors: bool,
+    pub soliciting_contributors: bool,
 
     // Is Bounty Awarded
     pub bounty_awarded: bool,

@@ -78,7 +78,7 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, tags: Vec<Tags>, bounty
     let bounty_awarded = false;
 
     let title_length = title.len();
-    let forum_bounty_minimum: u64 = ctx.accounts.forum.forum_fees.forum_question_bounty_minimum;
+    let forum_question_bounty_minimum: u64 = ctx.accounts.forum.forum_fees.forum_question_bounty_minimum;
 
     // Ensure that the length of title and content strings are non-zero
     if title_length == 0 {
@@ -91,7 +91,7 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, tags: Vec<Tags>, bounty
     }
 
     // Ensure minimum bounty amount is contributed
-    if bounty_amount < forum_bounty_minimum {
+    if bounty_amount < forum_question_bounty_minimum {
         return Err(error!(ErrorCode::InvalidBountyAmount));
     }
 
@@ -184,9 +184,9 @@ pub fn handler(ctx: Context<AskQuestion>, title: String, tags: Vec<Tags>, bounty
 
         // Calculate question reputation score
         let question_rep_multiplier = ctx.accounts.forum.reputation_matrix.question_rep;
-        let bounty_amount_modded_remainder = bounty_amount % forum_bounty_minimum;
+        let bounty_amount_modded_remainder = bounty_amount % forum_question_bounty_minimum;
         let bounty_amount_divisible_minimum = bounty_amount.try_sub(bounty_amount_modded_remainder)?;
-        let multiples_bounty_minimum = bounty_amount_divisible_minimum.try_div(forum_bounty_minimum)?;
+        let multiples_bounty_minimum = bounty_amount_divisible_minimum.try_div(forum_question_bounty_minimum)?;
         let question_rep = multiples_bounty_minimum.try_mul(question_rep_multiplier)?;
 
         // Update reputation score in user profile

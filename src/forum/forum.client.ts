@@ -810,6 +810,49 @@ export class ForumClient extends AccountUtils {
         }
     }
 
+    async deleteUserProfileAndAboutMe(
+        forum: PublicKey,
+        profileOwner: PublicKey | Keypair,
+        receiver: PublicKey
+    ) {
+        const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
+
+        // Derive PDAs
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwnerKey);
+        const [aboutMe, aboutMeBump] = await findAboutMePDA(userProfile);
+
+        // Create Signers Array
+        const signers = [];
+        if (isKp(profileOwner)) signers.push(<Keypair>profileOwner);
+
+        console.log('deleting user profile and about me for user profile account with pubkey: ', userProfile.toBase58());
+
+        // Transaction
+        const txSig = await this.forumProgram.methods
+            .deleteUserProfileAndAboutMe(
+                userProfileBump,
+                aboutMeBump,
+            )
+            .accounts({
+                forum: forum,
+                profileOwner: isKp(profileOwner)? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner,
+                userProfile: userProfile,
+                aboutMe: aboutMe,
+                receiver: receiver,
+                systemProgram: SystemProgram.programId,
+            })
+            .signers(signers)
+            .rpc();
+
+        return {
+            userProfile,
+            userProfileBump,
+            aboutMe,
+            aboutMeBump,
+            txSig
+        }
+    }
+
     async addModerator(
         forum: PublicKey,
         forumManager: PublicKey | Keypair,
@@ -952,7 +995,7 @@ export class ForumClient extends AccountUtils {
         questionSeed: PublicKey,
         newContentDataHash: PublicKey,
         newTitle: string,
-        newTags: any[],
+        newTags: Tags[],
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
@@ -987,6 +1030,62 @@ export class ForumClient extends AccountUtils {
             .rpc();
 
         return {
+            userProfile,
+            userProfileBump,
+            question,
+            questionBump,
+            txSig
+        }
+    }
+
+    async editQuestionModerator(
+        forum: PublicKey,
+        moderator: PublicKey | Keypair,
+        profileOwner: PublicKey,
+        questionSeed: PublicKey,
+        newContentDataHash: PublicKey,
+        newTitle: string,
+        newTags: Tags[],
+    ) {
+        const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
+
+        // Derive PDAs
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
+        const [question, questionBump] = await findQuestionPDA(forum, userProfile, questionSeed);
+
+        // Create Signers Array
+        const signers = [];
+        if (isKp(moderator)) signers.push(<Keypair>moderator);
+
+        console.log('moderator editing question with pubkey: ', question.toBase58());
+
+        // Transaction
+        const txSig = await this.forumProgram.methods
+            .editQuestionModerator(
+                moderatorProfileBump,
+                userProfileBump,
+                questionBump,
+                newTitle,
+                newTags,
+            )
+            .accounts({
+                forum: forum,
+                moderator: isKp(moderator)? (<Keypair>moderator).publicKey : <PublicKey>moderator,
+                moderatorProfile: moderatorProfile,
+                profileOwner: profileOwner,
+                userProfile: userProfile,
+                question: question,
+                questionSeed: questionSeed,
+                newContentDataHash: newContentDataHash,
+                systemProgram: SystemProgram.programId,
+            })
+            .signers(signers)
+            .rpc();
+
+        return {
+            moderatorProfile,
+            moderatorProfileBump,
             userProfile,
             userProfileBump,
             question,
@@ -1267,6 +1366,58 @@ export class ForumClient extends AccountUtils {
         }
     }
 
+    async editAnswerModerator(
+        forum: PublicKey,
+        moderator: PublicKey | Keypair,
+        profileOwner: PublicKey,
+        answerSeed: PublicKey,
+        newContentDataHash: PublicKey,
+    ) {
+        const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
+
+        // Derive PDAs
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
+        const [answer, answerBump] = await findAnswerPDA(forum, userProfile, answerSeed);
+
+        // Create Signers Array
+        const signers = [];
+        if (isKp(moderator)) signers.push(<Keypair>moderator);
+
+        console.log('moderator editing answer with pubkey: ', answer.toBase58());
+
+        // Transaction
+        const txSig = await this.forumProgram.methods
+            .editAnswerModerator(
+                moderatorProfileBump,
+                userProfileBump,
+                answerBump,
+            )
+            .accounts({
+                forum: forum,
+                moderator: isKp(moderator)? (<Keypair>moderator).publicKey : <PublicKey>moderator,
+                moderatorProfile: moderatorProfile,
+                profileOwner: profileOwner,
+                userProfile: userProfile,
+                answer: answer,
+                answerSeed: answerSeed,
+                newContentDataHash: newContentDataHash,
+                systemProgram: SystemProgram.programId,
+            })
+            .signers(signers)
+            .rpc();
+
+        return {
+            moderatorProfile,
+            moderatorProfileBump,
+            userProfile,
+            userProfileBump,
+            answer,
+            answerBump,
+            txSig
+        }
+    }
+
     async deleteAnswer(
         forum: PublicKey,
         moderator: PublicKey | Keypair,
@@ -1415,6 +1566,58 @@ export class ForumClient extends AccountUtils {
         }
     }
 
+    async editCommentModerator(
+        forum: PublicKey,
+        moderator: PublicKey | Keypair,
+        profileOwner: PublicKey,
+        commentSeed: PublicKey,
+        newContentDataHash: PublicKey,
+    ) {
+        const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
+
+        // Derive PDAs
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
+        const [comment, commentBump] = await findCommentPDA(forum, userProfile, commentSeed);
+
+        // Create Signers Array
+        const signers = [];
+        if (isKp(moderator)) signers.push(<Keypair>moderator);
+
+        console.log('moderator editing comment with pubkey: ', comment.toBase58());
+
+        // Transaction
+        const txSig = await this.forumProgram.methods
+            .editCommentModerator(
+                moderatorProfileBump,
+                userProfileBump,
+                commentBump,
+            )
+            .accounts({
+                forum: forum,
+                moderator: isKp(moderator)? (<Keypair>moderator).publicKey : <PublicKey>moderator,
+                moderatorProfile: moderatorProfile,
+                profileOwner: profileOwner,
+                userProfile: userProfile,
+                comment: comment,
+                commentSeed: commentSeed,
+                newContentDataHash: newContentDataHash,
+                systemProgram: SystemProgram.programId,
+            })
+            .signers(signers)
+            .rpc();
+
+        return {
+            moderatorProfile,
+            moderatorProfileBump,
+            userProfile,
+            userProfileBump,
+            comment,
+            commentBump,
+            txSig
+        }
+    }
+
     async deleteComment(
         forum: PublicKey,
         moderator: PublicKey | Keypair,
@@ -1474,7 +1677,7 @@ export class ForumClient extends AccountUtils {
         profileOwner: PublicKey | Keypair,
         contentDataHash: PublicKey,
         title: string,
-        tags: any[],
+        tags: Tags[],
     ) {
         const bigNoteSeedKeypair = Keypair.generate();
         const bigNoteSeed: PublicKey = bigNoteSeedKeypair.publicKey;
@@ -1532,7 +1735,7 @@ export class ForumClient extends AccountUtils {
         bigNoteSeed: PublicKey,
         newContentDataHash: PublicKey,
         newTitle: string,
-        newTags: any[],
+        newTags: Tags[],
     ) {
         const profileOwnerKey = isKp(profileOwner) ? (<Keypair>profileOwner).publicKey : <PublicKey>profileOwner;
 
@@ -1567,6 +1770,62 @@ export class ForumClient extends AccountUtils {
             .rpc();
 
         return {
+            userProfile,
+            userProfileBump,
+            bigNote,
+            bigNoteSeed,
+            txSig
+        }
+    }
+
+    async editBigNoteModerator(
+        forum: PublicKey,
+        moderator: PublicKey | Keypair,
+        profileOwner: PublicKey,
+        bigNoteSeed: PublicKey,
+        newContentDataHash: PublicKey,
+        newTitle: string,
+        newTags: Tags[],
+    ) {
+        const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
+
+        // Derive PDAs
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfile, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
+        const [bigNote, bigNoteBump] = await findBigNotePDA(forum, userProfile, bigNoteSeed);
+
+        // Create Signers Array
+        const signers = [];
+        if (isKp(moderator)) signers.push(<Keypair>moderator);
+
+        console.log('moderator editing big note with pubkey: ', bigNote.toBase58());
+
+        // Transaction
+        const txSig = await this.forumProgram.methods
+            .editBigNoteModerator(
+                moderatorProfileBump,
+                userProfileBump,
+                bigNoteBump,
+                newTitle,
+                newTags,
+            )
+            .accounts({
+                forum: forum,
+                moderator: isKp(moderator)? (<Keypair>moderator).publicKey : <PublicKey>moderator,
+                moderatorProfile: moderatorProfile,
+                profileOwner: profileOwner,
+                userProfile: userProfile,
+                bigNote: bigNote,
+                bigNoteSeed: bigNoteSeed,
+                newContentDataHash: newContentDataHash,
+                systemProgram: SystemProgram.programId,
+            })
+            .signers(signers)
+            .rpc();
+
+        return {
+            moderatorProfile,
+            moderatorProfileBump,
             userProfile,
             userProfileBump,
             bigNote,

@@ -34,7 +34,7 @@ pub fn handler(ctx: Context<DeleteAboutMe>) -> Result<()> {
     // Set the receiver of the lamports to be reclaimed from the rent of the accounts to be closed
     let receiver = &mut ctx.accounts.receiver;
 
-    // Close the user profile state account
+    // Close the about me state account
     let about_me_account_info = &mut (*ctx.accounts.about_me).to_account_info();
     close_account(about_me_account_info, receiver)?;
 

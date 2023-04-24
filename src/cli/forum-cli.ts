@@ -446,6 +446,42 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// Delete user profile and about me accounts
+    .command('delete-user-profile-and-about-me', 'Delete user profile and about me accounts simultaneously', {
+        receiverPubkey: {
+            alias: 'r',
+            type: 'string',
+            demandOption: false,
+            description: 'receiver account pubkey for reclaimed rent lamports'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey = aboutMeConfig.forum;
+                 const receiverKey: PublicKey = argv.receiverPubkey ? new PublicKey(argv.receiverPubkey) : wallet.publicKey;
+
+                 if (!argv.dryRun) {
+                     const deleteUserProfileAndAboutMeInstance = await forumClient.deleteUserProfileAndAboutMe(
+                         forumKey,
+                         wallet.payer,
+                         receiverKey
+                     );
+                     console.log(stringifyPKsAndBNs(deleteUserProfileAndAboutMeInstance));
+                 } else {
+                     console.log('Deleting user profile and about me account for user profile account with wallet address', stringifyPKsAndBNs(wallet.publicKey));
+                 }
+             })
+
+
+
 // ---------------------------------------------- adding/removing moderator privilege instructions ------------------------------------------
 
 
@@ -628,6 +664,60 @@ const parser = yargs(process.argv.slice(2)).options({
                      console.log(stringifyPKsAndBNs(editQuestionInstance));
                  } else {
                      console.log('Editing question with account address', questionKey.toBase58());
+                 }
+             })
+
+
+
+// Edit question moderator
+// Must config question parameters in questionConfig
+    .command('edit-question-moderator', 'Edit question moderator', {
+        questionPubkey: {
+            alias: 'q',
+            type: 'string',
+            demandOption: true,
+            description: 'question account pubkey'
+        },
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey: PublicKey = questionConfig.forum;
+                 const newTitle: string = questionConfig.title;
+                 const newTags: Tags[] = questionConfig.tags;
+
+                 const newContentString: string = questionConfig.content;
+                 const hashResult = hash(newContentString);
+                 const newContentDataHash: PublicKey = new PublicKey(hashResult);
+
+                 const questionKey = new PublicKey(argv.questionPubkey);
+                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
+                 const questionSeed = questionAcct.questionSeed;
+                 const userProfileKey = questionAcct.userProfile;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 if (!argv.dryRun) {
+                     const editQuestionModeratorInstance = await forumClient.editQuestionModerator(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey,
+                         questionSeed,
+                         newContentDataHash,
+                         newTitle,
+                         newTags,
+                     );
+                     console.log(stringifyPKsAndBNs(editQuestionModeratorInstance));
+                 } else {
+                     console.log('Moderator editing question with account address', questionKey.toBase58());
                  }
              })
 
@@ -880,6 +970,58 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// Edit answer moderator
+// Must config answer parameters in answerConfig
+    .command('edit-answer-moderator', 'Edit answer moderator', {
+        answerPubkey: {
+            alias: 'a',
+            type: 'string',
+            demandOption: true,
+            description: 'answer account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const answerKey: PublicKey = new PublicKey(argv.answerPubkey);
+                 const answerAcct = await forumClient.fetchAnswerAccount(answerKey);
+                 const answerSeed = answerAcct.answerSeed;
+                 const questionKey = answerAcct.question;
+                 const userProfileKey = answerAcct.userProfile;
+
+                 const questionAcct = await forumClient.fetchQuestionAccount(questionKey);
+                 const forumKey = questionAcct.forum;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 const newContentString: string = answerConfig.content;
+                 const hashResult = hash(newContentString);
+                 const newContentDataHash: PublicKey = new PublicKey(hashResult);
+
+                 if (!argv.dryRun) {
+                     const editAnswerModeratorInstance = await forumClient.editAnswerModerator(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey,
+                         answerSeed,
+                         newContentDataHash
+                     );
+                     console.log(stringifyPKsAndBNs(editAnswerModeratorInstance));
+                 } else {
+                     console.log('Moderator editing answer with account address', stringifyPKsAndBNs(answerKey));
+                 }
+             })
+
+
+
 // Delete answer (signer required: moderator)
     .command('delete-answer', 'Delete answer', {
         answerPubkey: {
@@ -1013,6 +1155,55 @@ const parser = yargs(process.argv.slice(2)).options({
                      console.log(stringifyPKsAndBNs(editCommentInstance));
                  } else {
                      console.log('Editing comment with account address', stringifyPKsAndBNs(commentKey));
+                 }
+             })
+
+
+
+// Edit comment moderator
+// Must config comment parameters in commentConfig
+    .command('edit-comment-moderator', 'Edit comment moderator', {
+        commentPubkey: {
+            alias: 'c',
+            type: 'string',
+            demandOption: true,
+            description: 'comment account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const commentKey: PublicKey = new PublicKey(argv.commentPubkey);
+                 const commentAcct = await forumClient.fetchCommentAccount(commentKey);
+                 const commentSeed = commentAcct.commentSeed;
+                 const userProfileKey = commentAcct.userProfile;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+                 const forumKey = userProfileAcct.forum;
+
+                 const newContentString: string = commentConfig.content;
+                 const hashResult = hash(newContentString);
+                 const newContentDataHash: PublicKey = new PublicKey(hashResult);
+
+                 if (!argv.dryRun) {
+                     const editCommentModeratorInstance = await forumClient.editCommentModerator(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey,
+                         commentSeed,
+                         newContentDataHash,
+                     );
+                     console.log(stringifyPKsAndBNs(editCommentModeratorInstance));
+                 } else {
+                     console.log('Moderator editing comment with account address', stringifyPKsAndBNs(commentKey));
                  }
              })
 
@@ -1152,6 +1343,60 @@ const parser = yargs(process.argv.slice(2)).options({
                      console.log(stringifyPKsAndBNs(editBigNoteInstance));
                  } else {
                      console.log('Editing big note with account address', bigNoteKey.toBase58());
+                 }
+             })
+
+
+
+// Edit big note moderator
+// Must config big note parameters in bigNoteConfig
+    .command('edit-bignote-moderator', 'Edit big note moderator', {
+        bigNotePubkey: {
+            alias: 'b',
+            type: 'string',
+            demandOption: true,
+            description: 'big note account pubkey'
+        },
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const forumKey: PublicKey = bigNoteConfig.forum;
+                 const newTitle: string = bigNoteConfig.title;
+                 const newTags = bigNoteConfig.tags;
+
+                 const newContentString: string = bigNoteConfig.content;
+                 const hashResult = hash(newContentString);
+                 const newContentDataHash: PublicKey = new PublicKey(hashResult);
+
+                 const bigNoteKey = new PublicKey(argv.bigNotePubkey);
+                 const bigNoteAcct = await forumClient.fetchBigNoteAccount(bigNoteKey);
+                 const bigNoteSeed = bigNoteAcct.bigNoteSeed;
+                 const userProfileKey = bigNoteAcct.userProfile;
+
+                 const userProfileAcct = await forumClient.fetchUserProfileAccount(userProfileKey);
+                 const profileOwnerKey = userProfileAcct.profileOwner;
+
+                 if (!argv.dryRun) {
+                     const editBigNoteModeratorInstance = await forumClient.editBigNoteModerator(
+                         forumKey,
+                         wallet.payer,
+                         profileOwnerKey,
+                         bigNoteSeed,
+                         newContentDataHash,
+                         newTitle,
+                         newTags,
+                     );
+                     console.log(stringifyPKsAndBNs(editBigNoteModeratorInstance));
+                 } else {
+                     console.log('Moderator editing big note with account address', bigNoteKey.toBase58());
                  }
              })
 

@@ -7,11 +7,16 @@ use crate::state::{Forum, Question, UserProfile};
 use prog_common::{now_ts, TryAdd, TrySub, TryDiv, TryMul, errors::ErrorCode};
 
 #[derive(Accounts)]
-#[instruction(bump_supplementor_profile: u8, bump_user_profile: u8, bump_question: u8, bump_bounty_pda: u8)]
+#[instruction(bump_treasury: u8, bump_supplementor_profile: u8, bump_user_profile: u8, bump_question: u8, bump_bounty_pda: u8)]
 pub struct SupplementQuestionBounty<'info> {
 
     // Forum
+    #[account(has_one = forum_treasury)]
     pub forum: Box<Account<'info, Forum>>,
+
+    /// CHECK:
+    #[account(mut, seeds = [b"treasury".as_ref(), forum.key().as_ref()], bump = bump_treasury)]
+    pub forum_treasury: AccountInfo<'info>,
 
     #[account(mut)]
     pub supplementor: Signer<'info>,
@@ -45,6 +50,19 @@ pub struct SupplementQuestionBounty<'info> {
 }
 
 impl<'info> SupplementQuestionBounty<'info> {
+
+    fn transfer_payment_ctx(&self, lamports: u64) -> Result<()> {
+        invoke(
+            &system_instruction::transfer(self.supplementor.key, self.forum_treasury.key, lamports),
+            &[
+                self.supplementor.to_account_info(),
+                self.forum_treasury.to_account_info(),
+                self.system_program.to_account_info(),
+            ],
+        )
+            .map_err(Into::into)
+    }
+
     fn transfer_bounty_ctx(&self, lamports: u64) -> Result<()> {
         invoke(
             &system_instruction::transfer(self.supplementor.key, &self.bounty_pda.key(), lamports),
@@ -74,6 +92,18 @@ pub fn handler(ctx: Context<SupplementQuestionBounty>, supplemental_bounty_amoun
 
     if supplemental_bounty_amount < forum_bounty_minimum {
         return Err(error!(ErrorCode::InvalidBountyAmount));
+    }
+
+    // Transfer fee for asking question
+    let forum_question_fee = ctx.accounts.forum.forum_fees.forum_question_fee;
+
+    if forum_question_fee > 0 {
+        let remainder = supplemental_bounty_amount % 10000;
+        let bounty_amount_minus_remainder = supplemental_bounty_amount.try_sub(remainder)?;
+        let bounty_amount_mod_10000 = bounty_amount_minus_remainder.try_div(10000)?;
+        let question_fee_due = bounty_amount_mod_10000.try_mul(forum_question_fee)?;
+
+        ctx.accounts.transfer_payment_ctx(question_fee_due)?;
     }
 
     // Transfer the supplemental bounty amount to the question's bounty pda

@@ -414,6 +414,51 @@ export type Forum = {
       ]
     },
     {
+      "name": "deleteUserProfileAndAboutMe",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aboutMe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAboutMe",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "addModerator",
       "accounts": [
         {
@@ -601,6 +646,82 @@ export type Forum = {
         }
       ],
       "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        },
+        {
+          "name": "newTitle",
+          "type": "string"
+        },
+        {
+          "name": "newTags",
+          "type": {
+            "vec": {
+              "defined": "Tags"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "editQuestionModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "question",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "questionSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
         {
           "name": "bumpUserProfile",
           "type": "u8"
@@ -948,6 +1069,70 @@ export type Forum = {
       ]
     },
     {
+      "name": "editAnswerModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "deleteAnswer",
       "accounts": [
         {
@@ -1102,6 +1287,70 @@ export type Forum = {
         }
       ],
       "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpComment",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "editCommentModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "comment",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
         {
           "name": "bumpUserProfile",
           "type": "u8"
@@ -1283,6 +1532,82 @@ export type Forum = {
         }
       ],
       "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        },
+        {
+          "name": "newTitle",
+          "type": "string"
+        },
+        {
+          "name": "newTags",
+          "type": {
+            "vec": {
+              "defined": "Tags"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "editBigNoteModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
         {
           "name": "bumpUserProfile",
           "type": "u8"
@@ -1541,7 +1866,7 @@ export type Forum = {
             "type": "u64"
           },
           {
-            "name": "solicitingContibutors",
+            "name": "solicitingContributors",
             "type": "bool"
           },
           {
@@ -2337,6 +2662,51 @@ export const IDL: Forum = {
       ]
     },
     {
+      "name": "deleteUserProfileAndAboutMe",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "aboutMe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpAboutMe",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "addModerator",
       "accounts": [
         {
@@ -2524,6 +2894,82 @@ export const IDL: Forum = {
         }
       ],
       "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        },
+        {
+          "name": "newTitle",
+          "type": "string"
+        },
+        {
+          "name": "newTags",
+          "type": {
+            "vec": {
+              "defined": "Tags"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "editQuestionModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "question",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "questionSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
         {
           "name": "bumpUserProfile",
           "type": "u8"
@@ -2871,6 +3317,70 @@ export const IDL: Forum = {
       ]
     },
     {
+      "name": "editAnswerModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "answer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpQuestion",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "deleteAnswer",
       "accounts": [
         {
@@ -3025,6 +3535,70 @@ export const IDL: Forum = {
         }
       ],
       "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpComment",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "editCommentModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "comment",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "commentSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
         {
           "name": "bumpUserProfile",
           "type": "u8"
@@ -3206,6 +3780,82 @@ export const IDL: Forum = {
         }
       ],
       "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        },
+        {
+          "name": "newTitle",
+          "type": "string"
+        },
+        {
+          "name": "newTags",
+          "type": {
+            "vec": {
+              "defined": "Tags"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "editBigNoteModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newContentDataHash",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
         {
           "name": "bumpUserProfile",
           "type": "u8"
@@ -3464,7 +4114,7 @@ export const IDL: Forum = {
             "type": "u64"
           },
           {
-            "name": "solicitingContibutors",
+            "name": "solicitingContributors",
             "type": "bool"
           },
           {

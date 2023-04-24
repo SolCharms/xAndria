@@ -116,6 +116,15 @@ pub mod forum {
         instructions::delete_about_me::handler(ctx)
     }
 
+    pub fn delete_user_profile_and_about_me(
+        ctx: Context<DeleteUserProfileAndAboutMe>,
+        _bump_user_profile: u8,
+        _bump_about_me: u8,
+    ) -> Result<()>{
+        msg!("deleting user profile and about me");
+        instructions::delete_user_profile_and_about_me::handler(ctx)
+    }
+
 ///////////////////////////////////////////////////////////////////////////
 
     pub fn add_moderator(
@@ -162,6 +171,22 @@ pub mod forum {
     ) -> Result<()> {
         msg!("editing question");
         instructions::edit_question::handler(
+            ctx,
+            new_title,
+            new_tags
+        )
+    }
+
+    pub fn edit_question_moderator(
+        ctx: Context<EditQuestionModerator>,
+        _bump_moderator_profile: u8,
+        _bump_user_profile: u8,
+        _bump_question: u8,
+        new_title: String,
+        new_tags: Vec<Tags>,
+    ) -> Result<()> {
+        msg!("moderator editing question");
+        instructions::edit_question_moderator::handler(
             ctx,
             new_title,
             new_tags
@@ -226,6 +251,16 @@ pub mod forum {
         instructions::edit_answer::handler(ctx)
     }
 
+    pub fn edit_answer_moderator(
+        ctx: Context<EditAnswerModerator>,
+        _bump_moderator_profile: u8,
+        _bump_user_profile: u8,
+        _bump_question: u8,
+    ) -> Result<()> {
+        msg!("moderator editing answer");
+        instructions::edit_answer_moderator::handler(ctx)
+    }
+
     pub fn delete_answer(
         ctx: Context<DeleteAnswer>,
         _bump_moderator_profile: u8,
@@ -253,6 +288,16 @@ pub mod forum {
     ) -> Result<()> {
         msg!("editing comment");
         instructions::edit_comment::handler(ctx)
+    }
+
+    pub fn edit_comment_moderator(
+        ctx: Context<EditCommentModerator>,
+        _bump_moderator_profile: u8,
+        _bump_user_profile: u8,
+        _bump_comment: u8,
+    ) -> Result<()> {
+        msg!("moderator editing comment");
+        instructions::edit_comment_moderator::handler(ctx)
     }
 
     pub fn delete_comment(
@@ -291,6 +336,22 @@ pub mod forum {
     ) -> Result<()> {
         msg!("editing big note");
         instructions::edit_big_note::handler(
+            ctx,
+            new_title,
+            new_tags
+        )
+    }
+
+    pub fn edit_big_note_moderator(
+        ctx: Context<EditBigNoteModerator>,
+        _bump_moderator_profile: u8,
+        _bump_user_profile: u8,
+        _bump_big_note: u8,
+        new_title: String,
+        new_tags: Vec<Tags>,
+    ) -> Result<()> {
+        msg!("moderator editing big note");
+        instructions::edit_big_note_moderator::handler(
             ctx,
             new_title,
             new_tags
