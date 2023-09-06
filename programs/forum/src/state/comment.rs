@@ -1,12 +1,12 @@
 use anchor_lang::prelude::*;
 
-#[proc_macros::assert_size(144)] // divisible by 8
+#[proc_macros::assert_size(152)] // divisible by 8
 #[repr(C)]
 #[account]
 #[derive(Debug)]
 pub struct Comment {
 
-    // Account pubkey of Question/Answer for which comment belongs
+    // Account pubkey of Question/Answer/BigNote/ProposedContribution for which comment belongs
     pub commented_on: Pubkey,
 
     // Profile of user providing comment
@@ -21,6 +21,8 @@ pub struct Comment {
     pub most_recent_engagement_ts: u64,
 
     // ------------- Comment Info
-
     pub content_data_hash: Pubkey,
+
+    // ------------- Comment reputation value
+    pub comment_rep: u64,
 }

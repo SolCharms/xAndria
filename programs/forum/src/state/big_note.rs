@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Tags};
+use crate::state::{BigNoteType, BountyContribution, Tags};
 
 #[repr(C)]
 #[account]
@@ -10,7 +10,7 @@ pub struct BigNote {
     // Forum for which big note belongs
     pub forum: Pubkey,
 
-    // Profile of user creating big note
+    // Profile of user which created big note
     pub user_profile: Pubkey,
 
     // Seed used to generate unique big note account PDA address
@@ -19,24 +19,30 @@ pub struct BigNote {
     // ------------- Timestamps
     pub big_note_created_ts: u64,
 
-    pub most_recent_update_ts: u64,
+    pub most_recent_engagement_ts: u64,
 
     // ------------- Bounty Amount
     pub bounty_amount: u64,
 
-    pub soliciting_contributors: bool,
+    pub bounty_contributions: Vec<BountyContribution>,
+
+    // ------------- Big note Info (Maximum number of tags/character strings set in forum_constants.rs)
+    pub big_note_type: BigNoteType,
+
+    pub tags: Vec<Tags>,
+
+    pub title: String,
+
+    pub content_data_url: String,
+
+    pub content_data_hash: Pubkey,
+
+    pub is_verified: bool,
+
+    // ------------- Big Note reputation value
+    pub big_note_rep: u64,
 
     // Is Bounty Awarded
     pub bounty_awarded: bool,
 
-    // Is Big note verified
-    pub is_verified: bool,
-
-    // ------------- Big note Info
-
-    pub tags: Vec<Tags>,
-
-    pub title: String, // Max 256 characters
-
-    pub content_data_hash: Pubkey,
 }

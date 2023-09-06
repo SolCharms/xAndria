@@ -15,6 +15,5 @@ pub struct AboutMe {
     pub most_recent_update_ts: u64,
 
     // ------------- About Me Info
-
     pub content_data_hash: Pubkey,
 }
