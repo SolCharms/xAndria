@@ -25,7 +25,7 @@ pub struct EditQuestionModerator<'info> {
     pub profile_owner: AccountInfo<'info>,
 
     // The user profile
-    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
+    #[account(seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
               bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
@@ -47,7 +47,7 @@ pub struct EditQuestionModerator<'info> {
 impl<'info> EditQuestionModerator<'info> {
     fn pay_lamports_difference(&self, lamports: u64) -> Result<()> {
         invoke(
-            &system_instruction::transfer(self.profile_owner.key, &self.question.key(), lamports),
+            &system_instruction::transfer(&self.moderator.key, &self.question.key(), lamports),
             &[
                 self.moderator.to_account_info(),
                 self.question.to_account_info(),
@@ -58,24 +58,47 @@ impl<'info> EditQuestionModerator<'info> {
     }
 }
 
-pub fn handler(ctx: Context<EditQuestionModerator>, new_title: String, new_tags: Vec<Tags>) -> Result<()> {
+pub fn handler(ctx: Context<EditQuestionModerator>, new_tags: Vec<Tags>, new_title: String, new_content_data_url: String) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
-    // Record character length of new data to be added
-    let new_title_length = new_title.len();
-
-    // Ensure that the length of title and content strings are non-zero
-    if new_title_length == 0 {
-        return Err(error!(ErrorCode::InvalidStringInput));
+    if !ctx.accounts.moderator_profile.is_moderator {
+        return Err(error!(ErrorCode::ProfileIsNotModerator));
     }
 
-    // Ensure that title does not exceed 256 characters
-    if new_title_length > 256 {
-        return Err(error!(ErrorCode::TitleTooLong));
+    // Record vector length of new tags and character length of new title and content_data_url to be added
+    let new_tags_length: u64 = new_tags.len() as u64;
+    let new_title_length: u64 = new_title.len() as u64;
+    let new_url_length: u64 = new_content_data_url.len() as u64;
+
+    let max_tags_length = ctx.accounts.forum.forum_constants.max_tags_length;
+    let max_title_length = ctx.accounts.forum.forum_constants.max_title_length;
+    let max_url_length = ctx.accounts.forum.forum_constants.max_url_length;
+
+    // Ensure that the length of new tags vector is non-zero and not greater than max_tags_length
+    if (new_tags_length == 0) || (new_tags_length > max_tags_length){
+        return Err(error!(ErrorCode::InvalidTagsVectorInput));
+    }
+
+    // Ensure that the length of the new title string is non-zero and not more than max_title_length characters long
+    if (new_title_length == 0) || (new_title_length > max_title_length) {
+        return Err(error!(ErrorCode::InvalidTitleStringInput));
+    }
+
+    // Ensure that the length of the new content_data_url string is non-zero and not more than max_url_length characters long
+    if (new_url_length == 0) || (new_url_length > max_url_length) {
+        return Err(error!(ErrorCode::InvalidUrlStringInput));
     }
 
     // Calculate data sizes and convert data to slice arrays
+    let bounty_contributions = &ctx.accounts.question.bounty_contributions;
+
+    let mut contribution_buffer: Vec<u8> = Vec::new();
+    bounty_contributions.serialize(&mut contribution_buffer).unwrap();
+
+    let contribution_buffer_as_slice: &[u8] = contribution_buffer.as_slice();
+    let contribution_buffer_slice_length: usize = contribution_buffer_as_slice.len();
+
     let mut tag_buffer: Vec<u8> = Vec::new();
     new_tags.serialize(&mut tag_buffer).unwrap();
 
@@ -88,8 +111,14 @@ pub fn handler(ctx: Context<EditQuestionModerator>, new_title: String, new_tags:
     let title_buffer_as_slice: &[u8] = title_buffer.as_slice();
     let title_buffer_slice_length: usize = title_buffer_as_slice.len();
 
+    let mut content_data_url_buffer: Vec<u8> = Vec::new();
+    new_content_data_url.serialize(&mut content_data_url_buffer).unwrap();
+
+    let content_data_url_buffer_as_slice: &[u8] = content_data_url_buffer.as_slice();
+    let content_data_url_buffer_slice_length: usize = content_data_url_buffer_as_slice.len();
+
     // Calculate total space required for the addition of the new data
-    let new_data_bytes_amount: usize = 128 + tag_buffer_slice_length + title_buffer_slice_length + 32 + 1;
+    let new_data_bytes_amount: usize = 128 + contribution_buffer_slice_length + tag_buffer_slice_length + title_buffer_slice_length + content_data_url_buffer_slice_length + 32 + 8 + 1;
     let old_data_bytes_amount: usize = ctx.accounts.question.to_account_info().data_len();
 
     if new_data_bytes_amount > old_data_bytes_amount {
@@ -109,13 +138,14 @@ pub fn handler(ctx: Context<EditQuestionModerator>, new_title: String, new_tags:
     question.most_recent_engagement_ts = now_ts;
     question.tags = new_tags;
     question.title = new_title;
+    question.content_data_url = new_content_data_url;
     question.content_data_hash = ctx.accounts.new_content_data_hash.key();
 
-    // Update moderator profile's most recent engagement
+    // Update moderator profile's most recent engagement ts
     let moderator_profile = &mut ctx.accounts.moderator_profile;
     moderator_profile.most_recent_engagement_ts = now_ts;
 
-    msg!("Question PDA account with address {} has been edited by moderator with pubkey {}",
-         ctx.accounts.question.key(), ctx.accounts.moderator.key());
+    msg!("Question PDA account with address {} has been edited by moderator profile with pubkey {}",
+         ctx.accounts.question.key(), ctx.accounts.moderator_profile.key());
     Ok(())
 }

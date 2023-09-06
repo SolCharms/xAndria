@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Forum, Question, UserProfile};
+use crate::state::{BountyContribution, Forum, Question, UserProfile};
 use prog_common::{close_account, now_ts, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_moderator_profile: u8, bump_user_profile: u8, bump_question: u8)]
-pub struct DeleteQuestion<'info> {
+pub struct DeleteQuestionModerator<'info> {
 
     // Forum
     #[account(mut)]
@@ -35,19 +35,30 @@ pub struct DeleteQuestion<'info> {
     pub question_seed: AccountInfo<'info>,
 
     /// CHECK:
+    #[account(mut)]
     pub receiver: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteQuestion>) -> Result<()> {
+pub fn handler(ctx: Context<DeleteQuestionModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
-    let moderator_profile = &ctx.accounts.moderator_profile;
+    let is_bounty_awarded = &ctx.accounts.question.bounty_awarded;
+    let question_rep = ctx.accounts.question.question_rep;
 
-    if !moderator_profile.is_moderator {
+    if !ctx.accounts.moderator_profile.is_moderator {
         return Err(error!(ErrorCode::ProfileIsNotModerator));
+    }
+
+    // If bounty is not yet awarded and there exist bounty contributions, then throw error
+    if !is_bounty_awarded {
+
+        let bounty_contributions: &Vec<BountyContribution> = &ctx.accounts.question.bounty_contributions;
+        if bounty_contributions.len() > 0 {
+            return Err(error!(ErrorCode::NotAllContributionsRefunded));
+        }
     }
 
     // Set the receiver of the lamports to be reclaimed from the rent of the accounts to be closed
@@ -61,14 +72,16 @@ pub fn handler(ctx: Context<DeleteQuestion>) -> Result<()> {
     let forum = &mut ctx.accounts.forum;
     forum.forum_counts.forum_question_count.try_sub_assign(1)?;
 
-    // Decrement questions asked in user profile's state account
+    // Decrement questions asked and reputation score in user profile's state account
     let user_profile = &mut ctx.accounts.user_profile;
     user_profile.questions_asked.try_sub_assign(1)?;
+    user_profile.reputation_score.try_sub_assign(question_rep)?;
 
     // Update moderator profile's most recent engagement
     let moderator_profile = &mut ctx.accounts.moderator_profile;
     moderator_profile.most_recent_engagement_ts = now_ts;
 
-    msg!("Question PDA account with address {} now closed", ctx.accounts.question.key());
+    msg!("Question PDA account with address {} has been closed by moderator profile with pubkey {}",
+         ctx.accounts.question.key(), ctx.accounts.moderator_profile.key());
     Ok(())
 }
