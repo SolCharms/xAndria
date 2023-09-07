@@ -4,14 +4,22 @@ use crate::state::{Answer, Forum, Question, UserProfile};
 use prog_common::{now_ts, close_account, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
-#[instruction(bump_user_profile: u8, bump_answer: u8)]
-pub struct DeleteAnswer<'info> {
+#[instruction(bump_moderator_profile: u8, bump_user_profile: u8, bump_answer: u8)]
+pub struct DeleteAnswerModerator<'info> {
 
     // Forum
     #[account(mut)]
     pub forum: Box<Account<'info, Forum>>,
 
-    pub profile_owner: Signer<'info>,
+    pub moderator: Signer<'info>,
+
+    // The moderator profile
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), moderator.key().as_ref()],
+              bump = bump_moderator_profile, has_one = forum, constraint = moderator_profile.profile_owner == moderator.key())]
+    pub moderator_profile: Box<Account<'info, UserProfile>>,
+
+    /// CHECK: Used for seed verification of user profile pda account
+    pub profile_owner: AccountInfo<'info>,
 
     // The user profile
     #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
@@ -37,16 +45,15 @@ pub struct DeleteAnswer<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteAnswer>) -> Result<()> {
+pub fn handler(ctx: Context<DeleteAnswerModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
     let answer_rep = ctx.accounts.answer.answer_rep;
     let is_accepted_answer = ctx.accounts.answer.accepted_answer;
 
-    // Ensure answer is not an accepted answer
-    if is_accepted_answer {
-        return Err(error!(ErrorCode::AccountCannotBeEdited));
+    if !ctx.accounts.moderator_profile.is_moderator {
+        return Err(error!(ErrorCode::ProfileIsNotModerator));
     }
 
     // Set the receiver of the lamports to be reclaimed from the rent of the accounts to be closed
@@ -64,12 +71,22 @@ pub fn handler(ctx: Context<DeleteAnswer>) -> Result<()> {
     let user_profile = &mut ctx.accounts.user_profile;
     user_profile.questions_answered.try_sub_assign(1)?;
     user_profile.reputation_score.try_sub_assign(answer_rep)?;
-    user_profile.most_recent_engagement_ts = now_ts;
+
+    if is_accepted_answer {
+        let accepted_answer_rep = ctx.accounts.answer.accepted_answer_rep;
+        user_profile.answers_accepted.try_sub_assign(1)?;
+        user_profile.reputation_score.try_sub_assign(accepted_answer_rep)?;
+    }
+
+    // Update moderator profile's most recent engagement
+    let moderator_profile = &mut ctx.accounts.moderator_profile;
+    moderator_profile.most_recent_engagement_ts = now_ts;
 
     // Update question account's most recent engagement timestamp
     let question = &mut ctx.accounts.question;
     question.most_recent_engagement_ts = now_ts;
 
-    msg!("Answer PDA account with address {} now closed", ctx.accounts.answer.key());
+    msg!("Answer PDA account with address {} has been closed by moderator profile with pubkey {}",
+         ctx.accounts.answer.key(), ctx.accounts.moderator_profile.key());
     Ok(())
 }

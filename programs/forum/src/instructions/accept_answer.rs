@@ -10,7 +10,6 @@ pub struct AcceptAnswer<'info> {
     // Forum
     pub forum: Box<Account<'info, Forum>>,
 
-    #[account(mut)]
     pub profile_owner: Signer<'info>,
 
     // The user profile
@@ -57,10 +56,10 @@ pub struct AcceptAnswer<'info> {
 pub fn handler(ctx:Context<AcceptAnswer>) -> Result<()> {
 
     let now_ts = now_ts()?;
-    let question = &ctx.accounts.question;
 
     // Ensure there is not already an accepted answer for this question
-    if question.bounty_awarded {
+    let is_bounty_awarded = ctx.accounts.question.bounty_awarded;
+    if is_bounty_awarded {
         return Err(error!(ErrorCode::BountyAlreadyAwarded));
     }
 
@@ -82,12 +81,18 @@ pub fn handler(ctx:Context<AcceptAnswer>) -> Result<()> {
     question.bounty_awarded = true;
     question.most_recent_engagement_ts = now_ts;
 
+    // Update bounty contributions in question account's state
+    for index in 0..question.bounty_contributions.len() {
+        question.bounty_contributions[index].bounty_awarded = true;
+    }
+
     // Update answer account's state
     let answer = &mut ctx.accounts.answer;
     answer.accepted_answer = true;
+    answer.accepted_answer_rep = accepted_answer_rep;
     answer.most_recent_engagement_ts = now_ts;
 
-    // Update user profile's state
+    // Update user profile's most recent engagement timestamp
     let user_profile = &mut ctx.accounts.user_profile;
     user_profile.most_recent_engagement_ts = now_ts;
 
@@ -95,7 +100,7 @@ pub fn handler(ctx:Context<AcceptAnswer>) -> Result<()> {
     let answer_user_profile = &mut ctx.accounts.answer_user_profile;
     answer_user_profile.most_recent_engagement_ts = now_ts;
     answer_user_profile.answers_accepted.try_add_assign(1)?;
-    answer_user_profile.total_bounty_received.try_add_assign(bounty_amount)?;
+    answer_user_profile.total_bounty_earned.try_add_assign(bounty_amount)?;
     answer_user_profile.reputation_score.try_add_assign(accepted_answer_rep)?;
 
     // Set the receiver of the lamports to be reclaimed from the rent of the accounts to be closed
