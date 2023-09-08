@@ -3,28 +3,28 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::{invoke};
 use anchor_lang::solana_program::system_instruction;
 
-use crate::state::{BigNote, Forum, Tags, UserProfile};
+use crate::state::{BigNote, BigNoteType, Forum, Tags, UserProfile};
 use prog_common::{now_ts, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
-#[instruction(bump_moderator_profile: u8, bump_user_profile: u8, bump_big_note: u8)]
-pub struct EditBigNoteModerator<'info> {
+#[instruction(bump_editor_profile: u8, bump_user_profile: u8, bump_big_note: u8)]
+pub struct EditBigNoteOpenContribution<'info> {
 
     // Forum
     pub forum: Box<Account<'info, Forum>>,
 
     #[account(mut)]
-    pub moderator: Signer<'info>,
+    pub editor: Signer<'info>,
 
-    // The moderator profile
-    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), moderator.key().as_ref()],
-              bump = bump_moderator_profile, has_one = forum, constraint = moderator_profile.profile_owner == moderator.key())]
-    pub moderator_profile: Box<Account<'info, UserProfile>>,
+    // The editor profile
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), editor.key().as_ref()],
+              bump = bump_editor_profile, has_one = forum, constraint = editor_profile.profile_owner == editor.key())]
+    pub editor_profile: Box<Account<'info, UserProfile>>,
 
     /// CHECK: Used for seed verification of user profile pda account
     pub profile_owner: AccountInfo<'info>,
 
-    // The user profile
+    // The big note creator's user profile
     #[account(seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
               bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
@@ -44,12 +44,12 @@ pub struct EditBigNoteModerator<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> EditBigNoteModerator<'info> {
+impl<'info> EditBigNoteOpenContribution<'info> {
     fn pay_lamports_difference(&self, lamports: u64) -> Result<()> {
         invoke(
-            &system_instruction::transfer(self.profile_owner.key, &self.big_note.key(), lamports),
+            &system_instruction::transfer(self.editor.key, &self.big_note.key(), lamports),
             &[
-                self.moderator.to_account_info(),
+                self.editor.to_account_info(),
                 self.big_note.to_account_info(),
                 self.system_program.to_account_info(),
             ],
@@ -58,12 +58,12 @@ impl<'info> EditBigNoteModerator<'info> {
     }
 }
 
-pub fn handler(ctx: Context<EditBigNoteModerator>, new_tags: Vec<Tags>, new_title: String, new_content_data_url: String) -> Result<()> {
+pub fn handler(ctx: Context<EditBigNoteOpenContribution>, new_tags: Vec<Tags>, new_title: String, new_content_data_url: String) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
-    if !ctx.accounts.moderator_profile.is_moderator {
-        return Err(error!(ErrorCode::ProfileIsNotModerator));
+    if !(ctx.accounts.big_note.big_note_type == BigNoteType::OpenContribution) {
+        return Err(error!(ErrorCode::NotOpenContribution));
     }
 
     // Record vector length of new tags and character length of new title and content_data_url to be added
@@ -148,11 +148,11 @@ pub fn handler(ctx: Context<EditBigNoteModerator>, new_tags: Vec<Tags>, new_titl
     big_note.content_data_url = new_content_data_url;
     big_note.content_data_hash = ctx.accounts.new_content_data_hash.key();
 
-    // Update moderator profile's most recent engagement
-    let moderator_profile = &mut ctx.accounts.moderator_profile;
-    moderator_profile.most_recent_engagement_ts = now_ts;
+    // Update editor profile's most recent engagement
+    let editor_profile = &mut ctx.accounts.editor_profile;
+    editor_profile.most_recent_engagement_ts = now_ts;
 
-    msg!("Big note PDA account with address {} has been edited by moderator with pubkey {}",
-         ctx.accounts.big_note.key(), ctx.accounts.moderator.key());
+    msg!("Big note PDA account with address {} has been edited by user profile with pubkey {}",
+         ctx.accounts.big_note.key(), ctx.accounts.user_profile.key());
     Ok(())
 }

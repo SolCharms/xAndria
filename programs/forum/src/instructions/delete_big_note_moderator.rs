@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{BigNote, Forum, UserProfile};
+use crate::state::{BigNote, BountyContribution, Forum, UserProfile};
 use prog_common::{close_account, now_ts, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_moderator_profile: u8, bump_user_profile: u8, bump_big_note: u8)]
-pub struct DeleteBigNote<'info> {
+pub struct DeleteBigNoteModerator<'info> {
 
     // Forum
     #[account(mut)]
@@ -26,28 +26,38 @@ pub struct DeleteBigNote<'info> {
               bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
-    // Big Note PDA account and seed
+    // Big Note pda account and seed
     #[account(mut, seeds = [b"big_note".as_ref(), forum.key().as_ref(), user_profile.key().as_ref(), big_note_seed.key().as_ref()],
               bump = bump_big_note, has_one = forum, has_one = user_profile, has_one = big_note_seed)]
     pub big_note: Box<Account<'info, BigNote>>,
 
-    /// CHECK: The seed address used for initialization of the big note PDA
+    /// CHECK: The seed address used for initialization of the Big Note PDA
     pub big_note_seed: AccountInfo<'info>,
 
     /// CHECK:
+    #[account(mut)]
     pub receiver: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteBigNote>) -> Result<()> {
+pub fn handler(ctx: Context<DeleteBigNoteModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
-    let moderator_profile = &ctx.accounts.moderator_profile;
+    let is_bounty_awarded = &ctx.accounts.big_note.bounty_awarded;
+    let big_note_rep = ctx.accounts.big_note.big_note_rep;
 
-    if !moderator_profile.is_moderator {
+    if !ctx.accounts.moderator_profile.is_moderator {
         return Err(error!(ErrorCode::ProfileIsNotModerator));
+    }
+
+    if !is_bounty_awarded {
+
+        let bounty_contributions: &Vec<BountyContribution> = &ctx.accounts.big_note.bounty_contributions;
+        if bounty_contributions.len() > 0 {
+            return Err(error!(ErrorCode::NotAllContributionsRefunded));
+        }
     }
 
     // Set the receiver of the lamports to be reclaimed from the rent of the accounts to be closed
@@ -61,14 +71,16 @@ pub fn handler(ctx: Context<DeleteBigNote>) -> Result<()> {
     let forum = &mut ctx.accounts.forum;
     forum.forum_counts.forum_big_notes_count.try_sub_assign(1)?;
 
-    // Decrement big notes posted in user profile's state account
+    // Decrement big notes created and reputation score in user profile's state account
     let user_profile = &mut ctx.accounts.user_profile;
-    user_profile.big_notes_posted.try_sub_assign(1)?;
+    user_profile.big_notes_created.try_sub_assign(1)?;
+    user_profile.reputation_score.try_sub_assign(big_note_rep)?;
 
     // Update moderator profile's most recent engagement
     let moderator_profile = &mut ctx.accounts.moderator_profile;
     moderator_profile.most_recent_engagement_ts = now_ts;
 
-    msg!("Big Note PDA account with address {} now closed", ctx.accounts.big_note.key());
+    msg!("Big note PDA account with address {} has been closed by moderator profile with pubkey {}",
+         ctx.accounts.big_note.key(), ctx.accounts.moderator_profile.key());
     Ok(())
 }

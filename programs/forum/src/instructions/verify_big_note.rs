@@ -48,7 +48,7 @@ pub fn handler(ctx: Context<VerifyBigNote>) -> Result<()> {
 
     // Update big note account's most recent engagement timestamp and flip is verified boolean
     let big_note = &mut ctx.accounts.big_note;
-    big_note.most_recent_update_ts = now_ts;
+    big_note.most_recent_engagement_ts = now_ts;
     big_note.is_verified = true;
 
     // Update moderator profile's most recent engagement
