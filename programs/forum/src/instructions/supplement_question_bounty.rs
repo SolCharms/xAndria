@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::{invoke};
 use anchor_lang::solana_program::system_instruction;
 
-use crate::state::{Forum, Question, UserProfile};
+use crate::state::{BountyContribution, Forum, Question, UserProfile};
 use prog_common::{now_ts, TryAdd, TrySub, TryDiv, TryMul, errors::ErrorCode};
 
 #[derive(Accounts)]
@@ -74,60 +74,94 @@ impl<'info> SupplementQuestionBounty<'info> {
         )
             .map_err(Into::into)
     }
+
+    fn pay_lamports_difference(&self, lamports: u64) -> Result<()> {
+        invoke(
+            &system_instruction::transfer(self.supplementor.key, &self.question.key(), lamports),
+            &[
+                self.supplementor.to_account_info(),
+                self.question.to_account_info(),
+                self.system_program.to_account_info(),
+            ],
+        )
+            .map_err(Into::into)
+    }
 }
 
 pub fn handler(ctx: Context<SupplementQuestionBounty>, supplemental_bounty_amount: u64) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
+    let forum_question_bounty_minimum: u64 = ctx.accounts.forum.forum_fees.forum_question_bounty_minimum;
+    let bounty_contribution_rep: u64 = ctx.accounts.forum.reputation_matrix.bounty_contribution_rep;
+
     // Ensure Bounty has not yet been awarded
     let is_bounty_awarded = ctx.accounts.question.bounty_awarded;
-
     if is_bounty_awarded {
         return Err(error!(ErrorCode::BountyAlreadyAwarded));
     }
 
     // Ensure minimum bounty amount is contributed
-    let forum_bounty_minimum: u64 = ctx.accounts.forum.forum_fees.forum_question_bounty_minimum;
-
-    if supplemental_bounty_amount < forum_bounty_minimum {
+    if supplemental_bounty_amount < forum_question_bounty_minimum {
         return Err(error!(ErrorCode::InvalidBountyAmount));
     }
 
-    // Transfer fee for asking question
+    // Transfer fee for supplementing question
     let forum_question_fee = ctx.accounts.forum.forum_fees.forum_question_fee;
 
     if forum_question_fee > 0 {
-        let remainder = supplemental_bounty_amount % 10000;
-        let bounty_amount_minus_remainder = supplemental_bounty_amount.try_sub(remainder)?;
-        let bounty_amount_mod_10000 = bounty_amount_minus_remainder.try_div(10000)?;
-        let question_fee_due = bounty_amount_mod_10000.try_mul(forum_question_fee)?;
+        let bounty_bps_remainder = supplemental_bounty_amount % 10000;
+        let bounty_amount_minus_remainder = supplemental_bounty_amount.try_sub(bounty_bps_remainder)?;
+        let bounty_amount_minus_remainder_div_10000 = bounty_amount_minus_remainder.try_div(10000)?;
+        let question_fee_due = bounty_amount_minus_remainder_div_10000.try_mul(forum_question_fee)?;
 
         ctx.accounts.transfer_payment_ctx(question_fee_due)?;
     }
 
-    // Transfer the supplemental bounty amount to the question's bounty pda
+    // Transfer the supplemental bounty amount to the question's bounty pda account
     ctx.accounts.transfer_bounty_ctx(supplemental_bounty_amount)?;
+
+    // Calculate bounty contribution entry
+    let bounty_contribution = BountyContribution {
+        bounty_contributor: ctx.accounts.supplementor_profile.key(),
+        bounty_amount: supplemental_bounty_amount,
+        forum_bounty_minimum: forum_question_bounty_minimum,
+        bounty_contribution_rep: bounty_contribution_rep,
+        bounty_awarded: false,
+    };
+
+    // Calculate total space required for the addition of the new data
+    let new_data_bytes_amount: usize = ctx.accounts.question.to_account_info().data_len() + std::mem::size_of::<BountyContribution>();
+    let minimum_balance_for_rent_exemption: u64 = Rent::get()?.minimum_balance(new_data_bytes_amount);
+    let lamports_difference: u64 = minimum_balance_for_rent_exemption.try_sub(ctx.accounts.question.to_account_info().lamports())?;
+
+    // Transfer the required difference in Lamports to accommodate this increase in space
+    ctx.accounts.pay_lamports_difference(lamports_difference)?;
+
+    // Reallocate the question pda account with the proper byte data size
+    ctx.accounts.question.to_account_info().realloc(new_data_bytes_amount, false)?;
 
     // Update question PDA's most recent engagement and bounty amount
     let question = &mut ctx.accounts.question;
     question.most_recent_engagement_ts = now_ts;
     question.bounty_amount.try_add_assign(supplemental_bounty_amount)?;
+    question.bounty_contributions.push(bounty_contribution);
+
+    // Update most recent engagement and increment total bounty contributed in supplementor profile's state account
+    let supplementor_profile = &mut ctx.accounts.supplementor_profile;
+    supplementor_profile.most_recent_engagement_ts = now_ts;
+    supplementor_profile.total_bounty_contributed.try_add_assign(supplemental_bounty_amount)?;
 
     // Calculate question reputation score
-    let question_rep_multiplier = ctx.accounts.forum.reputation_matrix.question_rep;
-    let bounty_amount_modded_remainder = supplemental_bounty_amount % forum_bounty_minimum;
-    let bounty_amount_divisible_minimum = supplemental_bounty_amount.try_sub(bounty_amount_modded_remainder)?;
-    let multiples_bounty_minimum = bounty_amount_divisible_minimum.try_div(forum_bounty_minimum)?;
-    let question_rep = multiples_bounty_minimum.try_mul(question_rep_multiplier)?;
+    let bounty_amount_mod_minimum_remainder = supplemental_bounty_amount % forum_question_bounty_minimum;
+    let bounty_amount_divisible_minimum = supplemental_bounty_amount.try_sub(bounty_amount_mod_minimum_remainder)?;
+    let multiples_bounty_minimum = bounty_amount_divisible_minimum.try_div(forum_question_bounty_minimum)?;
+    let question_bounty_rep = multiples_bounty_minimum.try_mul(bounty_contribution_rep)?;
 
-    // Update reputation score in supplementor profile
-    let supplementor_profile = &mut ctx.accounts.supplementor_profile;
-    supplementor_profile.reputation_score.try_add_assign(question_rep)?;
+    // Update reputation score in supplementor profile's state account
+    supplementor_profile.reputation_score.try_add_assign(question_bounty_rep)?;
 
-    // Update supplementor profile's most recent engagement
-    supplementor_profile.most_recent_engagement_ts = now_ts;
-
-    msg!("Supplemental bounty amount of {} added to question PDA account with address {}", supplemental_bounty_amount, ctx.accounts.question.key());
+    msg!("Question PDA account with address {} supplemented with bounty amount of {}",
+         ctx.accounts.question.key(), supplemental_bounty_amount);
     Ok(())
 }

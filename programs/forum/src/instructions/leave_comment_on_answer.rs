@@ -57,6 +57,7 @@ pub fn handler(ctx: Context<LeaveCommentOnAnswer>) -> Result<()> {
     comment.most_recent_engagement_ts = now_ts;
 
     comment.content_data_hash = ctx.accounts.content_data_hash.key();
+    comment.comment_rep = comment_rep;
 
     // Increment comment count in forum state's account
     let forum = &mut ctx.accounts.forum;

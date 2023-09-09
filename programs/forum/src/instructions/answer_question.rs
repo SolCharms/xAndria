@@ -23,6 +23,7 @@ pub struct AnswerQuestion<'info> {
     #[account(mut, has_one = forum)]
     pub question: Box<Account<'info, Question>>,
 
+    // Answer PDA account and seed
     #[account(init, seeds = [b"answer".as_ref(), forum.key().as_ref(), user_profile.key().as_ref(), answer_seed.key().as_ref()],
               bump, payer = profile_owner, space = 8 + std::mem::size_of::<Answer>())]
     pub answer: Box<Account<'info, Answer>>,
