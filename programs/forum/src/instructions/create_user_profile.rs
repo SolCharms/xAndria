@@ -63,13 +63,17 @@ pub fn handler(ctx: Context<CreateUserProfile>) -> Result<()> {
     user_profile.profile_created_ts = now_ts;
     user_profile.most_recent_engagement_ts = now_ts;
 
-    user_profile.big_notes_posted = 0;
-    user_profile.big_notes_contributions = 0;
+    user_profile.big_notes_created = 0;
+    user_profile.big_notes_contributions_proposed = 0;
+    user_profile.big_notes_contributions_accepted = 0;
+    user_profile.challenges_submitted = 0;
+    user_profile.challenges_completed = 0;
     user_profile.questions_asked = 0;
     user_profile.questions_answered = 0;
-    user_profile.comments_added = 0;
     user_profile.answers_accepted = 0;
-    user_profile.total_bounty_received = 0;
+    user_profile.comments_added = 0;
+    user_profile.total_bounty_contributed = 0;
+    user_profile.total_bounty_earned = 0;
     user_profile.reputation_score = 0;
 
     // user_profile.nft_pfp_token_mint = ;

@@ -32,7 +32,7 @@ pub fn handler(ctx: Context<EditAboutMe>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
-    // Update user about me account's most recent update timestamp and overwrite with the new content data hash
+    // Update about me account's most recent update timestamp and overwrite with the new content data hash
     let about_me = &mut ctx.accounts.about_me;
     about_me.most_recent_update_ts = now_ts;
     about_me.content_data_hash = ctx.accounts.new_content_data_hash.key();

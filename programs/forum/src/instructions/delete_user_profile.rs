@@ -19,6 +19,7 @@ pub struct DeleteUserProfile<'info> {
     pub user_profile: Box<Account<'info, UserProfile>>,
 
     /// CHECK:
+    #[account(mut)]
     pub receiver: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,

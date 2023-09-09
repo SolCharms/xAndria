@@ -23,6 +23,7 @@ pub struct DeleteUserProfileAndAboutMe<'info> {
     about_me: Box<Account<'info, AboutMe>>,
 
     /// CHECK:
+    #[account(mut)]
     pub receiver: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
