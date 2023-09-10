@@ -51,7 +51,8 @@ pub fn handler(ctx: Context<DeleteBigNoteModerator>) -> Result<()> {
     if !ctx.accounts.moderator_profile.is_moderator {
         return Err(error!(ErrorCode::ProfileIsNotModerator));
     }
-
+    
+    // If bounty is not yet awarded and there exist bounty contributions, then throw error
     if !is_bounty_awarded {
 
         let bounty_contributions: &Vec<BountyContribution> = &ctx.accounts.big_note.bounty_contributions;

@@ -47,7 +47,7 @@ pub struct EditBigNoteModerator<'info> {
 impl<'info> EditBigNoteModerator<'info> {
     fn pay_lamports_difference(&self, lamports: u64) -> Result<()> {
         invoke(
-            &system_instruction::transfer(self.profile_owner.key, &self.big_note.key(), lamports),
+            &system_instruction::transfer(self.moderator.key, &self.big_note.key(), lamports),
             &[
                 self.moderator.to_account_info(),
                 self.big_note.to_account_info(),

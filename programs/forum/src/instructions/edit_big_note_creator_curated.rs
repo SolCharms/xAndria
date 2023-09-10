@@ -136,7 +136,7 @@ pub fn handler(ctx: Context<EditBigNoteCreatorCurated>, new_tags: Vec<Tags>, new
     big_note.content_data_url = new_content_data_url;
     big_note.content_data_hash = ctx.accounts.new_content_data_hash.key();
 
-    // Update editor profile's most recent engagement
+    // Update user profile's most recent engagement
     let user_profile = &mut ctx.accounts.user_profile;
     user_profile.most_recent_engagement_ts = now_ts;
 
