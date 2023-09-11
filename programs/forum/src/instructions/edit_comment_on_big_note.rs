@@ -17,7 +17,7 @@ pub struct EditCommentOnBigNote<'info> {
               bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
-    // Question PDA account
+    // Big Note PDA account
     #[account(mut, has_one = forum)]
     pub big_note: Box<Account<'info, BigNote>>,
 

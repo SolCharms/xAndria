@@ -23,6 +23,7 @@ pub struct ProposeContribution<'info> {
     #[account(mut, has_one = forum)]
     pub big_note: Box<Account<'info, BigNote>>,
 
+    // Proposed Contribution PDA account and seed
     #[account(init, seeds = [b"proposed_contribution".as_ref(), forum.key().as_ref(), user_profile.key().as_ref(), proposed_contribution_seed.key().as_ref()],
               bump, payer = profile_owner, space = 8 + std::mem::size_of::<ProposedContribution>())]
     pub proposed_contribution: Box<Account<'info, ProposedContribution>>,
@@ -68,7 +69,7 @@ pub fn handler(ctx: Context<ProposeContribution>) -> Result<()> {
     user_profile.most_recent_engagement_ts = now_ts;
     user_profile.reputation_score.try_add_assign(proposed_contribution_rep)?;
 
-    // Update question account's most recent engagement timestamp
+    // Update big note account's most recent engagement timestamp
     let big_note = &mut ctx.accounts.big_note;
     big_note.most_recent_engagement_ts = now_ts;
 

@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Answer, Comment, Forum, Question, UserProfile};
+use crate::state::{BigNote, Comment, Forum, ProposedContribution, UserProfile};
 use prog_common::{now_ts, close_account, TrySub};
 
 #[derive(Accounts)]
@@ -18,17 +18,17 @@ pub struct DeleteCommentOnProposedContribution<'info> {
               bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
-    // Question PDA account
+    // Big Note PDA account
     #[account(mut, has_one = forum)]
-    pub question: Box<Account<'info, Question>>,
+    pub big_note: Box<Account<'info, BigNote>>,
 
-    // Answer PDA account
-    #[account(mut, has_one = question)]
-    pub answer: Box<Account<'info, Answer>>,
+    // Proposed Contribution PDA account
+    #[account(mut, has_one = big_note)]
+    pub proposed_contribution: Box<Account<'info, ProposedContribution>>,
 
     // Comment PDA account and seed
     #[account(mut, seeds = [b"comment".as_ref(), forum.key().as_ref(), user_profile.key().as_ref(), comment_seed.key().as_ref()],
-              bump = bump_comment, has_one = user_profile, has_one = comment_seed, constraint = comment.commented_on == answer.key())]
+              bump = bump_comment, has_one = user_profile, has_one = comment_seed, constraint = comment.commented_on == proposed_contribution.key())]
     pub comment: Box<Account<'info, Comment>>,
 
     /// CHECK: The seed address used for initialization of the comment PDA
@@ -64,13 +64,13 @@ pub fn handler(ctx: Context<DeleteCommentOnProposedContribution>) -> Result<()> 
     user_profile.reputation_score.try_sub_assign(comment_rep)?;
     user_profile.most_recent_engagement_ts = now_ts;
 
-    // Update answer account's most recent engagement timestamp
-    let answer = &mut ctx.accounts.answer;
-    answer.most_recent_engagement_ts = now_ts;
+    // Update Proposed Contribution account's most recent engagement timestamp
+    let proposed_contribution = &mut ctx.accounts.proposed_contribution;
+    proposed_contribution.most_recent_engagement_ts = now_ts;
 
-    // Update question account's most recent engagement timestamp
-    let question = &mut ctx.accounts.question;
-    question.most_recent_engagement_ts = now_ts;
+    // Update Big Note account's most recent engagement timestamp
+    let big_note = &mut ctx.accounts.big_note;
+    big_note.most_recent_engagement_ts = now_ts;
 
     msg!("Comment PDA account with address {} now closed", ctx.accounts.comment.key());
     Ok(())

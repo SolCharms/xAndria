@@ -30,7 +30,7 @@ pub struct EditProposedContribution<'info> {
     pub proposed_contribution_seed: AccountInfo<'info>,
 
     /// CHECK:
-    // The new content data hash of the answer struct
+    // The new content data hash of the proposed contribution struct
     pub new_content_data_hash: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,

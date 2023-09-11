@@ -30,7 +30,7 @@ pub struct DeleteCommentOnProposedContributionModerator<'info> {
     #[account(mut, has_one = forum)]
     pub big_note: Box<Account<'info, BigNote>>,
 
-    // Proposed_Contribution PDA account
+    // Proposed Contribution PDA account
     #[account(mut, has_one = big_note)]
     pub proposed_contribution: Box<Account<'info, ProposedContribution>>,
 
