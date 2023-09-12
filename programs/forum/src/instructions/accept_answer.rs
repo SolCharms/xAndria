@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Answer, BountyContribution, BountyContributionState, Forum, Question, UserProfile};
+use crate::state::{Answer, BountyContributionState, Forum, Question, UserProfile};
 use prog_common::{close_account, now_ts, TryAdd, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]

@@ -58,18 +58,6 @@ impl<'info> RefundQuestionBountyModerator<'info> {
         )
             .map_err(Into::into)
     }
-
-    // fn pay_lamports_difference(&self, lamports: u64) -> Result<()> {
-    //     invoke(
-    //         &system_instruction::transfer(&self.question.key(), self.profile_owner.key, lamports),
-    //         &[
-    //             self.question.to_account_info(),
-    //             self.profile_owner.to_account_info(),
-    //             self.system_program.to_account_info(),
-    //         ],
-    //     )
-    //         .map_err(Into::into)
-    // }
 }
 
 pub fn handler(ctx: Context<RefundQuestionBountyModerator>) -> Result<()> {
