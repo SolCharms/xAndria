@@ -234,9 +234,12 @@ pub fn handler(ctx: Context<AskQuestion>, tags: Vec<Tags>, title: String, conten
         user_profile.reputation_score.try_add_assign(question_bounty_rep)?;
         user_profile.most_recent_engagement_ts = now_ts;
 
+        msg!("Question PDA account with address {} now created", ctx.accounts.question.key());
+    }
+    else {
+        msg!("Question PDA account with address {} already exists", ctx.accounts.question.key());
     }
 
-    msg!("Question PDA account with address {} now created", ctx.accounts.question.key());
     Ok(())
 }
 

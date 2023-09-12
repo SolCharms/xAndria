@@ -202,9 +202,13 @@ pub fn handler(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, tags: Ve
         let user_profile = &mut ctx.accounts.user_profile;
         user_profile.most_recent_engagement_ts = now_ts;
         user_profile.reputation_score.try_add_assign(big_notes_rep)?;
+
+        msg!("Big Note PDA account with address {} now created", ctx.accounts.big_note.key());
+    }
+    else {
+        msg!("Big Note PDA account with address {} already exists", ctx.accounts.big_note.key());
     }
 
-    msg!("Big Note PDA account with address {} now created", ctx.accounts.big_note.key());
     Ok(())
 }
 
