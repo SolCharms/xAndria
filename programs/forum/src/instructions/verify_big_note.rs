@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{BigNote, Forum, UserProfile};
+use crate::state::{BigNote, BigNoteVerificationState, Forum, UserProfile};
 use prog_common::{now_ts, errors::ErrorCode};
 
 #[derive(Accounts)]
@@ -49,7 +49,7 @@ pub fn handler(ctx: Context<VerifyBigNote>) -> Result<()> {
     // Update big note account's most recent engagement timestamp and flip is verified boolean
     let big_note = &mut ctx.accounts.big_note;
     big_note.most_recent_engagement_ts = now_ts;
-    big_note.is_verified = true;
+    big_note.verification_state = BigNoteVerificationState::Verified;
 
     // Update moderator profile's most recent engagement
     let moderator_profile = &mut ctx.accounts.moderator_profile;

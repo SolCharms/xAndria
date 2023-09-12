@@ -81,6 +81,7 @@ pub fn handler(ctx: Context<EditBigNoteCreatorCurated>, new_tags: Vec<Tags>, new
     // Calculate data sizes and convert data to slice arrays
     let bounty_contributions = &ctx.accounts.big_note.bounty_contributions;
     let big_note_type = &ctx.accounts.big_note.big_note_type;
+    let verification_state = &ctx.accounts.big_note.verification_state;
 
     let mut contribution_buffer: Vec<u8> = Vec::new();
     bounty_contributions.serialize(&mut contribution_buffer).unwrap();
@@ -93,6 +94,12 @@ pub fn handler(ctx: Context<EditBigNoteCreatorCurated>, new_tags: Vec<Tags>, new
 
     let type_buffer_as_slice: &[u8] = type_buffer.as_slice();
     let type_buffer_slice_length: usize = type_buffer_as_slice.len();
+
+    let mut verification_buffer: Vec<u8> = Vec::new();
+    verification_state.serialize(&mut verification_buffer).unwrap();
+
+    let verification_buffer_as_slice: &[u8] = verification_buffer.as_slice();
+    let verification_buffer_slice_length: usize = verification_buffer_as_slice.len();
 
     let mut tag_buffer: Vec<u8> = Vec::new();
     new_tags.serialize(&mut tag_buffer).unwrap();
@@ -113,7 +120,7 @@ pub fn handler(ctx: Context<EditBigNoteCreatorCurated>, new_tags: Vec<Tags>, new
     let content_data_url_buffer_slice_length: usize = content_data_url_buffer_as_slice.len();
 
     // Calculate total space required for the addition of the new data
-    let new_data_bytes_amount: usize = 128 + contribution_buffer_slice_length + type_buffer_slice_length + tag_buffer_slice_length + title_buffer_slice_length + content_data_url_buffer_slice_length + 42;
+    let new_data_bytes_amount: usize = 8 + 120 + contribution_buffer_slice_length + type_buffer_slice_length + verification_buffer_slice_length + tag_buffer_slice_length + title_buffer_slice_length + content_data_url_buffer_slice_length + 42;
     let old_data_bytes_amount: usize = ctx.accounts.big_note.to_account_info().data_len();
 
     if new_data_bytes_amount > old_data_bytes_amount {

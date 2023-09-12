@@ -74,7 +74,6 @@ pub fn handler(ctx:Context<AcceptProposedContribution>) -> Result<()> {
     let big_note = &mut ctx.accounts.big_note;
     big_note.bounty_awarded = true;
     big_note.bounty_amount = 0;
-    big_note.content_data_hash = ctx.accounts.proposed_contribution.content_data_hash;
     big_note.most_recent_engagement_ts = now_ts;
 
     // Update bounty contributions in big note account's state

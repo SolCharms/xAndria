@@ -4,7 +4,7 @@ use anchor_lang::solana_program::hash::hash;
 use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::solana_program::system_instruction::{self, create_account};
 
-use crate::state::{BigNoteType, BountyContribution, Forum, Tags, UserProfile};
+use crate::state::{BigNoteType, BigNoteVerificationState, BountyContribution, Forum, Tags, UserProfile};
 use prog_common::{now_ts, TryAdd, errors::ErrorCode};
 
 #[derive(Accounts)]
@@ -65,7 +65,7 @@ pub fn handler(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, tags: Ve
     let now_ts: u64 = now_ts()?;
     let bounty_amount: u64 = 0;
     let bounty_awarded = false;
-    let is_verified = false;
+    let verification_state = BigNoteVerificationState::Unverified;
 
     let big_notes_rep = ctx.accounts.forum.reputation_matrix.create_big_notes_rep;
 
@@ -125,12 +125,19 @@ pub fn handler(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, tags: Ve
         let type_buffer_slice_length: usize = type_buffer_as_slice.len();
         let type_slice_end_byte = contribution_slice_end_byte + type_buffer_slice_length;
 
+        let mut verification_buffer: Vec<u8> = Vec::new();
+        verification_state.serialize(&mut verification_buffer).unwrap();
+
+        let verification_buffer_as_slice: &[u8] = verification_buffer.as_slice();
+        let verification_buffer_slice_length: usize = verification_buffer_as_slice.len();
+        let verification_slice_end_byte = type_slice_end_byte + verification_buffer_slice_length;
+
         let mut tag_buffer: Vec<u8> = Vec::new();
         tags.serialize(&mut tag_buffer).unwrap();
 
         let tag_buffer_as_slice: &[u8] = tag_buffer.as_slice();
         let tag_buffer_slice_length: usize = tag_buffer_as_slice.len();
-        let tag_slice_end_byte = type_slice_end_byte + tag_buffer_slice_length;
+        let tag_slice_end_byte = verification_slice_end_byte + tag_buffer_slice_length;
 
         let mut title_buffer: Vec<u8> = Vec::new();
         title.serialize(&mut title_buffer).unwrap();
@@ -155,7 +162,7 @@ pub fn handler(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, tags: Ve
                 &[bump],
             ],
             &ctx.accounts.big_note,
-            8 + 120 + contribution_buffer_slice_length + type_buffer_slice_length + tag_buffer_slice_length + title_buffer_slice_length + content_data_url_buffer_slice_length + 42,
+            8 + 120 + contribution_buffer_slice_length + type_buffer_slice_length + verification_buffer_slice_length + tag_buffer_slice_length + title_buffer_slice_length + content_data_url_buffer_slice_length + 41,
             ctx.program_id,
             &ctx.accounts.profile_owner.to_account_info(),
             &ctx.accounts.system_program.to_account_info(),
@@ -175,13 +182,13 @@ pub fn handler(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, tags: Ve
         big_note_account_raw[120..128].clone_from_slice(&bounty_amount.to_le_bytes());
         big_note_account_raw[128..contribution_slice_end_byte].clone_from_slice(contribution_buffer_as_slice);
         big_note_account_raw[contribution_slice_end_byte..type_slice_end_byte].clone_from_slice(type_buffer_as_slice);
-        big_note_account_raw[type_slice_end_byte..tag_slice_end_byte].clone_from_slice(tag_buffer_as_slice);
+        big_note_account_raw[type_slice_end_byte..verification_slice_end_byte].clone_from_slice(tag_buffer_as_slice);
+        big_note_account_raw[verification_slice_end_byte..tag_slice_end_byte].clone_from_slice(verification_buffer_as_slice);
         big_note_account_raw[tag_slice_end_byte..title_slice_end_byte].clone_from_slice(title_buffer_as_slice);
         big_note_account_raw[title_slice_end_byte..content_data_url_slice_end_byte].clone_from_slice(content_data_url_buffer_as_slice);
         big_note_account_raw[content_data_url_slice_end_byte..content_data_url_slice_end_byte+32].clone_from_slice(&ctx.accounts.content_data_hash.key().to_bytes());
-        big_note_account_raw[content_data_url_slice_end_byte+32..content_data_url_slice_end_byte+33].clone_from_slice(&(is_verified as u8).to_le_bytes());
-        big_note_account_raw[content_data_url_slice_end_byte+33..content_data_url_slice_end_byte+41].clone_from_slice(&big_notes_rep.to_le_bytes());
-        big_note_account_raw[content_data_url_slice_end_byte+41..content_data_url_slice_end_byte+42].clone_from_slice(&(bounty_awarded as u8).to_le_bytes());
+        big_note_account_raw[content_data_url_slice_end_byte+32..content_data_url_slice_end_byte+40].clone_from_slice(&big_notes_rep.to_le_bytes());
+        big_note_account_raw[content_data_url_slice_end_byte+40..content_data_url_slice_end_byte+41].clone_from_slice(&(bounty_awarded as u8).to_le_bytes());
 
         // Transfer fee for posting big_note
         let forum_big_notes_submission_fee = ctx.accounts.forum.forum_fees.forum_big_notes_submission_fee;
