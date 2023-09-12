@@ -1,5 +1,7 @@
 use anchor_lang::prelude::*;
 
+use crate::state::{BountyContributionState};
+
 #[proc_macros::assert_size(64)] //divisible by 8
 #[repr(C)]
 #[derive(Debug, Copy, Clone, AnchorSerialize, AnchorDeserialize)]
@@ -17,6 +19,6 @@ pub struct BountyContribution {
     // bounty contribution rep at time of contribution
     pub bounty_contribution_rep: u64,
 
-    // is bounty awarded
-    pub bounty_awarded: bool,
+    // bounty contribution state
+    pub bounty_contribution_state: BountyContributionState,
 }
