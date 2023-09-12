@@ -135,6 +135,7 @@ pub fn handler(ctx: Context<EditChallenge>, new_tags: Vec<Tags>, new_title: Stri
     let moderator_profile = &mut ctx.accounts.moderator_profile;
     moderator_profile.most_recent_engagement_ts = now_ts;
 
-    msg!("Challenge PDA account with address {} has been edited", ctx.accounts.challenge.key());
+    msg!("Challenge PDA account with address {} has been edited by moderator profile with pubkey {}",
+         ctx.accounts.challenge.key(), ctx.accounts.moderator_profile.key());
     Ok(())
 }
