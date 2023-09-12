@@ -84,7 +84,6 @@ pub fn handler(ctx:Context<AcceptProposedContribution>) -> Result<()> {
         }
     }
 
-
     // Update proposed contribution account's state
     let proposed_contribution = &mut ctx.accounts.proposed_contribution;
     proposed_contribution.proposed_contribution_state = ProposedContributionState::Accepted;
