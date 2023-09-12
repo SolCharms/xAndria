@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Answer, Forum, Question, UserProfile};
+use crate::state::{Answer, BountyContribution, BountyContributionState, Forum, Question, UserProfile};
 use prog_common::{close_account, now_ts, TryAdd, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
@@ -83,7 +83,9 @@ pub fn handler(ctx:Context<AcceptAnswer>) -> Result<()> {
 
     // Update bounty contributions in question account's state
     for index in 0..question.bounty_contributions.len() {
-        question.bounty_contributions[index].bounty_awarded = true;
+        if question.bounty_contributions[index].bounty_contribution_state == BountyContributionState::Available {
+            question.bounty_contributions[index].bounty_contribution_state = BountyContributionState::Awarded;
+        }
     }
 
     // Update answer account's state

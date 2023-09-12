@@ -4,7 +4,7 @@ use anchor_lang::solana_program::hash::hash;
 use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::solana_program::system_instruction::{self, create_account};
 
-use crate::state::{BountyContribution, Forum, Tags, UserProfile};
+use crate::state::{BountyContribution, BountyContributionState, Forum, Tags, UserProfile};
 use prog_common::{now_ts, TryAdd, TrySub, TryDiv, TryMul, errors::ErrorCode};
 
 #[derive(Accounts)]
@@ -131,7 +131,7 @@ pub fn handler(ctx: Context<AskQuestion>, tags: Vec<Tags>, title: String, conten
             bounty_amount: bounty_amount,
             forum_bounty_minimum: forum_question_bounty_minimum,
             bounty_contribution_rep: bounty_contribution_rep,
-            bounty_awarded: false,
+            bounty_contribution_state: BountyContributionState::Available,
         };
         bounty_contributions.push(bounty_contribution);
 

@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::{invoke};
 use anchor_lang::solana_program::system_instruction::{self};
 
-use crate::state::{BountyContribution, Forum, Question, UserProfile};
+use crate::state::{BountyContributionState, Forum, Question, UserProfile};
 use prog_common::{now_ts, TryAdd, TrySub, TryDiv, TryMul, errors::ErrorCode};
 
 #[derive(Accounts)]
@@ -59,17 +59,17 @@ impl<'info> RefundQuestionBountyModerator<'info> {
             .map_err(Into::into)
     }
 
-    fn pay_lamports_difference(&self, lamports: u64) -> Result<()> {
-        invoke(
-            &system_instruction::transfer(&self.question.key(), self.profile_owner.key, lamports),
-            &[
-                self.question.to_account_info(),
-                self.profile_owner.to_account_info(),
-                self.system_program.to_account_info(),
-            ],
-        )
-            .map_err(Into::into)
-    }
+    // fn pay_lamports_difference(&self, lamports: u64) -> Result<()> {
+    //     invoke(
+    //         &system_instruction::transfer(&self.question.key(), self.profile_owner.key, lamports),
+    //         &[
+    //             self.question.to_account_info(),
+    //             self.profile_owner.to_account_info(),
+    //             self.system_program.to_account_info(),
+    //         ],
+    //     )
+    //         .map_err(Into::into)
+    // }
 }
 
 pub fn handler(ctx: Context<RefundQuestionBountyModerator>) -> Result<()> {
@@ -99,25 +99,19 @@ pub fn handler(ctx: Context<RefundQuestionBountyModerator>) -> Result<()> {
 
     for index in indices {
 
+        // Ensure specific bounty has not yet been awarded or refunded
+        if ctx.accounts.question.bounty_contributions[index].bounty_contribution_state != BountyContributionState::Available {
+            continue;
+        }
+
         let refund_bounty_amount: u64 = ctx.accounts.question.bounty_contributions[index].bounty_amount;
         let forum_question_bounty_minimum: u64 = ctx.accounts.question.bounty_contributions[index].forum_bounty_minimum;
         let bounty_contribution_rep: u64 = ctx.accounts.question.bounty_contributions[index].bounty_contribution_rep;
 
-        // Transfer the bounty amount from the question's bounty pda account to the user profile's owner
-        ctx.accounts.transfer_bounty_ctx(refund_bounty_amount)?;
-
         // Decrement bounty amount and remove bounty contribution entry in question's state account
         let question = &mut ctx.accounts.question;
         question.bounty_amount.try_sub_assign(refund_bounty_amount)?;
-        question.bounty_contributions.remove(index);
-
-        // Calculate total space required for the new data
-        let new_data_bytes_amount: usize = ctx.accounts.question.to_account_info().data_len() - std::mem::size_of::<BountyContribution>();
-        let minimum_balance_for_rent_exemption: u64 = Rent::get()?.minimum_balance(new_data_bytes_amount);
-        let lamports_difference: u64 = ctx.accounts.question.to_account_info().lamports().try_sub(minimum_balance_for_rent_exemption)?;
-
-        // Transfer back the difference in Lamports no longer needed to accommodate the increase in space due to the bounty contribution entry
-        ctx.accounts.pay_lamports_difference(lamports_difference)?;
+        question.bounty_contributions[index].bounty_contribution_state = BountyContributionState::Refunded;
 
         // Calculate bounty contribution reputation score
         let bounty_amount_mod_minimum_remainder = refund_bounty_amount % forum_question_bounty_minimum;
@@ -132,6 +126,9 @@ pub fn handler(ctx: Context<RefundQuestionBountyModerator>) -> Result<()> {
 
         total_refund_bounty_amount.try_add_assign(refund_bounty_amount)?;
     }
+
+    // Transfer the bounty amount from the question's bounty pda account to the user profile's owner
+    ctx.accounts.transfer_bounty_ctx(total_refund_bounty_amount)?;
 
     // Update moderator profile's most recent engagement
     let moderator_profile = &mut ctx.accounts.moderator_profile;

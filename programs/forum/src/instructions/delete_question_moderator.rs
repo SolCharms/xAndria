@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{BountyContribution, Forum, Question, UserProfile};
+use crate::state::{BountyContribution, BountyContributionState, Forum, Question, UserProfile};
 use prog_common::{close_account, now_ts, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
@@ -45,18 +45,16 @@ pub fn handler(ctx: Context<DeleteQuestionModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
-    let is_bounty_awarded = &ctx.accounts.question.bounty_awarded;
     let question_rep = ctx.accounts.question.question_rep;
 
     if !ctx.accounts.moderator_profile.is_moderator {
         return Err(error!(ErrorCode::ProfileIsNotModerator));
     }
 
-    // If bounty is not yet awarded and there exist bounty contributions, then throw error
-    if !is_bounty_awarded {
-
-        let bounty_contributions: &Vec<BountyContribution> = &ctx.accounts.question.bounty_contributions;
-        if bounty_contributions.len() > 0 {
+    // If there are outstanding bounty contributions, then throw error
+    let bounty_contributions: &Vec<BountyContribution> = &ctx.accounts.question.bounty_contributions;
+    for bounty_contribution in bounty_contributions {
+        if bounty_contribution.bounty_contribution_state == BountyContributionState::Available {
             return Err(error!(ErrorCode::NotAllContributionsRefunded));
         }
     }
