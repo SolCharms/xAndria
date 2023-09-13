@@ -1,9 +1,7 @@
 import { BN } from '@coral-xyz/anchor';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 
 //todo need to write tests for functions in this file
-
-export type Numerical = BN | number;
 
 export function toBN(i: any): any {
     if (typeof i == 'number') {
@@ -30,19 +28,6 @@ export function toBN(i: any): any {
     }
 
     return i;
-}
-
-export function stringToBytes(str: string) {
-    const myBuffer = [];
-    const buffer = new Buffer(str);
-    for (let i = 0; i < buffer.length; i++) {
-        myBuffer.push(buffer[i]);
-    }
-    return myBuffer;
-}
-
-export function isKp(toCheck: PublicKey | Keypair) {
-    return typeof (<Keypair>toCheck).publicKey !== 'undefined';
 }
 
 export function isPk(obj: any): boolean {
