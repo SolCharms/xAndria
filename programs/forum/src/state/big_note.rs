@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{BigNoteType, BountyContribution, Tags};
+use crate::state::{BigNoteType, BigNoteVerificationState, BountyContribution, Tags};
 
 #[repr(C)]
 #[account]
@@ -29,6 +29,8 @@ pub struct BigNote {
     // ------------- Big note Info (Maximum number of tags/character strings set in forum_constants.rs)
     pub big_note_type: BigNoteType,
 
+    pub verification_state: BigNoteVerificationState,
+
     pub tags: Vec<Tags>,
 
     pub title: String,
@@ -36,8 +38,6 @@ pub struct BigNote {
     pub content_data_url: String,
 
     pub content_data_hash: Pubkey,
-
-    pub is_verified: bool,
 
     // ------------- Big Note reputation value
     pub big_note_rep: u64,

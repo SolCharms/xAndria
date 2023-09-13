@@ -24,7 +24,10 @@ pub struct PayoutFromTreasury<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<PayoutFromTreasury>, minimum_balance_for_rent_exemption: u64) -> Result<()> {
+pub fn handler(ctx: Context<PayoutFromTreasury>) -> Result<()> {
+
+    // Get minimum balance for rent exemption for size of 16 bytes
+    let minimum_balance_for_rent_exemption: u64 = Rent::get()?.minimum_balance(16);
 
     let treasury_account_info: &mut AccountInfo = &mut ctx.accounts.forum_treasury.to_account_info();
     let receiver_account_info: &mut AccountInfo = &mut ctx.accounts.receiver.to_account_info();

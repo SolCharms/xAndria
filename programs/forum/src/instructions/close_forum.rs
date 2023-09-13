@@ -1,8 +1,7 @@
 use anchor_lang::prelude::*;
 
 use crate::state::{Forum};
-use prog_common::errors::ErrorCode;
-use prog_common::{close_account};
+use prog_common::{close_account, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_treasury: u8)]
@@ -18,6 +17,7 @@ pub struct CloseForum<'info> {
     pub forum_treasury: AccountInfo<'info>,
 
     /// CHECK:
+    #[account(mut)]
     pub receiver: AccountInfo<'info>,
 
     // misc
@@ -30,7 +30,8 @@ pub fn handler(ctx: Context<CloseForum>) -> Result<()> {
     let forum_counts = &mut ctx.accounts.forum.forum_counts;
 
     // Ensure all PDAs associated to forum have already been closed
-    if (forum_counts.forum_profile_count > 0) || (forum_counts.forum_big_notes_count > 0) || (forum_counts.forum_question_count > 0) || (forum_counts.forum_answer_count > 0) || (forum_counts.forum_comment_count > 0) {
+    if (forum_counts.forum_profile_count > 0) || (forum_counts.forum_big_notes_count > 0) || (forum_counts.forum_proposed_contribution_count > 0) || (forum_counts.forum_challenge_count > 0)
+        || (forum_counts.forum_submission_count > 0) || (forum_counts.forum_question_count > 0) || (forum_counts.forum_answer_count > 0) || (forum_counts.forum_comment_count > 0) {
         return Err(error!(ErrorCode::NotAllForumPDAsClosed));
     }
 
