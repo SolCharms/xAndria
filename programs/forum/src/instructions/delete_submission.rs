@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Challenge, Forum, Submission, UserProfile};
-use prog_common::{now_ts, close_account, TrySub};
+use crate::state::{Challenge, Forum, Submission, SubmissionState, UserProfile};
+use prog_common::{now_ts, close_account, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_user_profile: u8, bump_challenge: u8, bump_submission: u8)]
@@ -11,7 +11,6 @@ pub struct DeleteSubmission<'info> {
     #[account(mut)]
     pub forum: Box<Account<'info, Forum>>,
 
-    #[account(mut)]
     pub profile_owner: Signer<'info>,
 
     // The user profile
@@ -41,6 +40,13 @@ pub struct DeleteSubmission<'info> {
 pub fn handler(ctx: Context<DeleteSubmission>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
+
+    let is_completed_challenge = ctx.accounts.submission.submission_state;
+
+    // Ensure submission is not an accepted submission
+    if is_completed_challenge == SubmissionState::Completed {
+        return Err(error!(ErrorCode::AccountCannotBeEdited));
+    }
 
     // Set the receiver of the lamports to be reclaimed from the rent of the accounts to be closed
     let receiver = &mut ctx.accounts.receiver;

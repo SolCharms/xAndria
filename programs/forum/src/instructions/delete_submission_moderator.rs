@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 use crate::state::{Challenge, Forum, Submission, UserProfile};
-use prog_common::{now_ts, close_account, TrySub};
+use prog_common::{now_ts, close_account, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_moderator_profile: u8, bump_user_profile: u8, bump_challenge: u8, bump_submission: u8)]
@@ -69,6 +69,7 @@ pub fn handler(ctx: Context<DeleteSubmission>) -> Result<()> {
     user_profile.challenges_submitted.try_sub_assign(1)?;
 
     // Update moderator profile's most recent engagement ts
+    let moderator_profile = &mut ctx.accounts.moderator_profile;
     moderator_profile.most_recent_engagement_ts = now_ts;
 
     msg!("Submission PDA account with address {} now closed", ctx.accounts.challenge.key());

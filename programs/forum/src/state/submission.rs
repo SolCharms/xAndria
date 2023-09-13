@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::state::{SubmissionState};
 
+#[proc_macros::assert_size(120)] // +7 to make it divisible by 8
 #[repr(C)]
 #[account]
 #[derive(Debug)]
@@ -18,9 +19,7 @@ pub struct Submission {
 
     pub most_recent_engagement_ts: u64,
 
-    // ------------- Answer Info
-
-    pub content_data_url: String,
+    // ------------- Submission Info
 
     pub content_data_hash: Pubkey,
 
