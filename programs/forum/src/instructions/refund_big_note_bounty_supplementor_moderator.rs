@@ -8,7 +8,7 @@ use prog_common::{now_ts, TryAdd, TrySub, TryDiv, TryMul, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_moderator_profile: u8, bump_user_profile: u8, bump_supplementor_profile: u8, bump_big_note: u8, bump_bounty_pda: u8)]
-pub struct RefundBigNoteBountySupplementor<'info> {
+pub struct RefundBigNoteBountySupplementorModerator<'info> {
 
     // Forum
     pub forum: Box<Account<'info, Forum>>,
@@ -53,7 +53,7 @@ pub struct RefundBigNoteBountySupplementor<'info> {
 
 }
 
-impl<'info> RefundBigNoteBountySupplementor<'info> {
+impl<'info> RefundBigNoteBountySupplementorModerator<'info> {
 
     fn transfer_bounty_ctx(&self, lamports: u64) -> Result<()> {
         invoke(
@@ -68,7 +68,7 @@ impl<'info> RefundBigNoteBountySupplementor<'info> {
     }
 }
 
-pub fn handler(ctx: Context<RefundBigNoteBountySupplementor>) -> Result<()> {
+pub fn handler(ctx: Context<RefundBigNoteBountySupplementorModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

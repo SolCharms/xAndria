@@ -41,34 +41,46 @@ pub enum ErrorCode {
     #[msg("all associated forum PDAs must be closed prior to closing forum state account")]
     NotAllForumPDAsClosed, //0x177B
 
-    #[msg("title is required to be a non-empty string")]
-    InvalidStringInput, //0x177C
-
-    #[msg("title cannot be more than 256 characters long")]
-    TitleTooLong, //0x177D
-
-    #[msg("every question asked must be accompanied by a minimum reward bounty of amount stated in forum's state account")]
-    InvalidBountyAmount, //0x177E
-
     #[msg("about me PDA must be closed prior to deleting user profile account")]
-    AboutMePDANotClosed, //0x177F
+    AboutMePDANotClosed, //0x177C
+
+    #[msg("tags is required to be a non-empty vector and not more than the maximum number of elements specified in forum constants")]
+    InvalidTagsVectorInput, //0x177D
+
+    #[msg("title is required to be a non-empty string and not longer than the maximum character length specified in forum constants")]
+    InvalidTitleStringInput, //0x177E
+
+    #[msg("content_data_url is required to be a non-empty string and not longer than the maximum character length specified in forum constants")]
+    InvalidUrlStringInput, //0x177F
+
+    #[msg("every question/big note contribution must be supplemented by a minimum reward bounty of amount specified in forum constants")]
+    InvalidBountyAmount, //0x1780
+
+    #[msg("questions with accepted answers, accepted answers, completed challenge submissions, and accepted contribution proposals can only be
+edited by moderators once their bounty/reputation is awarded")]
+    AccountCannotBeEdited, //0x1781
 
     #[msg("the provided profile must have moderator privileges")]
-    ProfileIsNotModerator, //0x1780
-
-    #[msg("comments can only be added to either a question or an answer account")]
-    InvalidAccountDiscriminator, //0x1781
+    ProfileIsNotModerator, //0x1782
 
     #[msg("the bounty has already been awarded")]
-    BountyAlreadyAwarded, //0x1782
+    BountyAlreadyAwarded, //0x1783
 
-    Reserved19, //0x1783
-    Reserved20, //0x1784
+    #[msg("all bounty contributions must be refunded before question can be closed")]
+    NotAllContributionsRefunded, //0x1784
 
-    Reserved21, //0x1785
-    Reserved22, //0x1786
-    Reserved23, //0x1787
-    Reserved24, //0x1788
+    #[msg("the user profile given as supplementor profile is not a bounty contributor for this question")]
+    NotABountyContributor, //0x1785
+
+    #[msg("the big note account provided is not of type 'open contribution'")]
+    NotOpenContribution, //0x1786
+
+    #[msg("challenge expiry timestamp must be greater than now_ts")]
+    InvalidExpiryTs, //0x1787
+
+    #[msg("challenge has expired")]
+    ChallengeExpired, //0x1788
+
     Reserved25, //0x1789
     Reserved26, //0x178A
     Reserved27, //0x178B

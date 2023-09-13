@@ -5,7 +5,7 @@ use prog_common::{now_ts, close_account, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_moderator_profile: u8, bump_user_profile: u8, bump_challenge: u8, bump_submission: u8)]
-pub struct DeleteSubmission<'info> {
+pub struct DeleteSubmissionModerator<'info> {
 
     // Forum
     #[account(mut)]
@@ -45,7 +45,7 @@ pub struct DeleteSubmission<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteSubmission>) -> Result<()> {
+pub fn handler(ctx: Context<DeleteSubmissionModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
