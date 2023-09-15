@@ -65,7 +65,6 @@ pub mod forum {
 
     pub fn create_user_profile(
         ctx: Context<CreateUserProfile>,
-        _bump_forum_auth: u8,
         _bump_treasury: u8,
     ) -> Result<()> {
         msg!("creating user profile");

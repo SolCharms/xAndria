@@ -44,6 +44,5 @@ pub fn handler(ctx: Context<DeleteUserProfile>) -> Result<()> {
 
     msg!("User profile with address {} now closed", ctx.accounts.user_profile.key());
     msg!("Forum {} now has {} user profiles", ctx.accounts.forum.key(), ctx.accounts.forum.forum_counts.forum_profile_count);
-
     Ok(())
 }

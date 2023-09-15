@@ -54,7 +54,7 @@ pub fn handler(ctx: Context<CreateChallenge>, tags: Vec<Tags>, title: String, co
     let max_title_length = ctx.accounts.forum.forum_constants.max_title_length;
     let max_url_length = ctx.accounts.forum.forum_constants.max_url_length;
 
-    // Ensure that the length of new tags vector is non-zero and not greater than max_tags_length
+    // Ensure that the length of tags vector is non-zero and not greater than max_tags_length
     if (tags_length == 0) || (tags_length > max_tags_length){
         return Err(error!(ErrorCode::InvalidTagsVectorInput));
     }

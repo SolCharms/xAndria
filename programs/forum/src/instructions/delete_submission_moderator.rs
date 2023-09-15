@@ -72,6 +72,7 @@ pub fn handler(ctx: Context<DeleteSubmissionModerator>) -> Result<()> {
     let moderator_profile = &mut ctx.accounts.moderator_profile;
     moderator_profile.most_recent_engagement_ts = now_ts;
 
-    msg!("Submission PDA account with address {} now closed", ctx.accounts.challenge.key());
+    msg!("Submission PDA account with address {} has been closed by moderator profile with pubkey {}",
+         ctx.accounts.submission.key(), ctx.accounts.moderator_profile.key());
     Ok(())
 }

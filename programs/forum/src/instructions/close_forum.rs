@@ -47,6 +47,5 @@ pub fn handler(ctx: Context<CloseForum>) -> Result<()> {
     close_account(forum_account_info, receiver)?;
 
     msg!("forum account with pubkey {} now closed", ctx.accounts.forum.key());
-
     Ok(())
 }

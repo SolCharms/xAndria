@@ -28,10 +28,9 @@ pub fn handler(ctx: Context<EditUserProfile>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 
+    // Update user profile account's pfp and most recent engagement timestamp
     let user_profile = &mut ctx.accounts.user_profile;
     user_profile.nft_pfp_token_mint = ctx.accounts.nft_pfp_token_mint.key();
-
-    // Update user profile account's most recent engagement timestamp
     user_profile.most_recent_engagement_ts = now_ts;
 
     msg!("NFT PFP of user profile {} updated to token mint with account address {}",

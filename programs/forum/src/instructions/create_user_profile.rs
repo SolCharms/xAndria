@@ -5,16 +5,12 @@ use crate::state::{Forum, UserProfile};
 use prog_common::{now_ts, TryAdd};
 
 #[derive(Accounts)]
-#[instruction(bump_forum_auth: u8, bump_treasury: u8)]
+#[instruction(bump_treasury: u8)]
 pub struct CreateUserProfile<'info> {
 
     // Forum
-    #[account(mut, has_one = forum_authority, has_one = forum_treasury)]
+    #[account(mut, has_one = forum_treasury)]
     pub forum: Box<Account<'info, Forum>>,
-
-    /// CHECK:
-    #[account(seeds = [forum.key().as_ref()], bump = bump_forum_auth)]
-    pub forum_authority: AccountInfo<'info>,
 
     /// CHECK:
     #[account(mut, seeds = [b"treasury".as_ref(), forum.key().as_ref()], bump = bump_treasury)]
@@ -55,9 +51,8 @@ pub fn handler(ctx: Context<CreateUserProfile>) -> Result<()> {
         ctx.accounts.transfer_payment_ctx(forum_profile_fee)?;
     }
 
-    let user_profile = &mut ctx.accounts.user_profile;
-
     // Record User Profile's State
+    let user_profile = &mut ctx.accounts.user_profile;
     user_profile.profile_owner = ctx.accounts.profile_owner.key();
     user_profile.forum = ctx.accounts.forum.key();
     user_profile.profile_created_ts = now_ts;
