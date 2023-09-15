@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use instructions::*;
-use crate::state::{BigNoteType, ForumConstants, ForumFees, ReputationMatrix, Tags};
+use crate::state::{BigNoteType, ForumConstants, ForumFees, ReputationMatrix, SubmissionState, Tags};
 
 declare_id!("FoRUMvAQAPBBJhMvw2UAc1Yx67rxQf9eao87b75GJ857");
 
@@ -783,17 +783,24 @@ pub mod forum {
         _bump_challenge: u8,
         _bump_submission: u8,
     ) -> Result<()> {
-        msg!("deleting submission");
+        msg!("moderator deleting submission");
         instructions::delete_submission_moderator::handler(ctx)
     }
 
-    // pub fn evaluate_submission(
-    //     ctx: Context<EvaluateSubmission>,
-
-    // ) -> Result<()> {
-    //     msg!("moderator evaluating submission");
-    //     instructions::evaluate_submission::handler(ctx)
-    // }
+    pub fn evaluate_submission(
+        ctx: Context<EvaluateSubmission>,
+        _bump_moderator_profile: u8,
+        _bump_user_profile: u8,
+        _bump_challenge: u8,
+        _bump_submission: u8,
+        submission_state: SubmissionState,
+    ) -> Result<()> {
+        msg!("moderator evaluating submission");
+        instructions::evaluate_submission::handler(
+            ctx,
+            submission_state
+        )
+    }
 
 ///////////////////////////////////////////////////////////////////////////
 
