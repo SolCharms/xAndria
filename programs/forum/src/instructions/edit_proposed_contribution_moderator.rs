@@ -44,7 +44,7 @@ pub struct EditProposedContributionModerator<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<EditProposedContributionModerator>) -> Result<()> {
+pub fn edit_proposed_contribution_moderator(ctx: Context<EditProposedContributionModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

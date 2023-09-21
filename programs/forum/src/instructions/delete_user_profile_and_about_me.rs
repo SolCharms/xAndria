@@ -29,7 +29,7 @@ pub struct DeleteUserProfileAndAboutMe<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteUserProfileAndAboutMe>) -> Result<()> {
+pub fn delete_user_profile_and_about_me(ctx: Context<DeleteUserProfileAndAboutMe>) -> Result<()> {
 
     // Set the receiver of the lamports to be reclaimed from the rent of the accounts to be closed
     let receiver = &mut ctx.accounts.receiver;

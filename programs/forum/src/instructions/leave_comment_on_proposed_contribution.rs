@@ -42,7 +42,7 @@ pub struct LeaveCommentOnProposedContribution<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<LeaveCommentOnProposedContribution>) -> Result<()> {
+pub fn leave_comment_on_proposed_contribution(ctx: Context<LeaveCommentOnProposedContribution>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
     let comment_rep = ctx.accounts.forum.reputation_matrix.comment_rep;

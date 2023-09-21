@@ -22,7 +22,7 @@ pub struct AddModerator<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<AddModerator>) -> Result<()> {
+pub fn add_moderator(ctx: Context<AddModerator>) -> Result<()> {
 
     let user_profile = &mut ctx.accounts.user_profile;
     user_profile.is_moderator = true;

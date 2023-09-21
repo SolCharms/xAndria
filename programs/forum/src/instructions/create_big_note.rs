@@ -60,7 +60,7 @@ impl<'info> CreateBigNote<'info> {
     }
 }
 
-pub fn handler(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, tags: Vec<Tags>, title: String, content_data_url: String) -> Result<()> {
+pub fn create_big_note(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, tags: Vec<Tags>, title: String, content_data_url: String) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
     let bounty_amount: u64 = 0;

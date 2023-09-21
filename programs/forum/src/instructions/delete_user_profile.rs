@@ -25,7 +25,7 @@ pub struct DeleteUserProfile<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteUserProfile>) -> Result<()> {
+pub fn delete_user_profile(ctx: Context<DeleteUserProfile>) -> Result<()> {
 
     if ctx.accounts.user_profile.has_about_me {
         return Err(error!(ErrorCode::AboutMePDANotClosed));

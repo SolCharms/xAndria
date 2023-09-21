@@ -61,7 +61,7 @@ impl<'info> CreateSubmission<'info> {
     }
 }
 
-pub fn handler(ctx: Context<CreateSubmission>) -> Result<()> {
+pub fn create_submission(ctx: Context<CreateSubmission>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

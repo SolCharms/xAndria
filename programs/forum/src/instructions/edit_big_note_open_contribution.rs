@@ -58,7 +58,7 @@ impl<'info> EditBigNoteOpenContribution<'info> {
     }
 }
 
-pub fn handler(ctx: Context<EditBigNoteOpenContribution>, new_tags: Vec<Tags>, new_title: String, new_content_data_url: String) -> Result<()> {
+pub fn edit_big_note_open_contribution(ctx: Context<EditBigNoteOpenContribution>, new_tags: Vec<Tags>, new_title: String, new_content_data_url: String) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

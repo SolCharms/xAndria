@@ -41,7 +41,7 @@ pub struct DeleteCommentOnProposedContribution<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteCommentOnProposedContribution>) -> Result<()> {
+pub fn delete_comment_on_proposed_contribution(ctx: Context<DeleteCommentOnProposedContribution>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

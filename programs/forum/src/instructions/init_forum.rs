@@ -27,7 +27,7 @@ pub struct InitForum<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<InitForum>, forum_fees: ForumFees, forum_constants: ForumConstants, reputation_matrix: ReputationMatrix) -> Result<()> {
+pub fn init_forum(ctx: Context<InitForum>, forum_fees: ForumFees, forum_constants: ForumConstants, reputation_matrix: ReputationMatrix) -> Result<()> {
 
     let forum = &mut ctx.accounts.forum;
 

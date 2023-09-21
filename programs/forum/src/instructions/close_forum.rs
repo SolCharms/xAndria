@@ -25,7 +25,7 @@ pub struct CloseForum<'info> {
 
 }
 
-pub fn handler(ctx: Context<CloseForum>) -> Result<()> {
+pub fn close_forum(ctx: Context<CloseForum>) -> Result<()> {
 
     let forum_counts = &mut ctx.accounts.forum.forum_counts;
 

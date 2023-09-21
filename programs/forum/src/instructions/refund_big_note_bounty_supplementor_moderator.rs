@@ -68,7 +68,7 @@ impl<'info> RefundBigNoteBountySupplementorModerator<'info> {
     }
 }
 
-pub fn handler(ctx: Context<RefundBigNoteBountySupplementorModerator>) -> Result<()> {
+pub fn refund_big_note_bounty_supplementor_moderator(ctx: Context<RefundBigNoteBountySupplementorModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

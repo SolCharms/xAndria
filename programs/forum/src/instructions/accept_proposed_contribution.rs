@@ -53,7 +53,7 @@ pub struct AcceptProposedContribution<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx:Context<AcceptProposedContribution>) -> Result<()> {
+pub fn accept_proposed_contribution(ctx:Context<AcceptProposedContribution>) -> Result<()> {
 
     let now_ts = now_ts()?;
 

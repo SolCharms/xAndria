@@ -29,7 +29,7 @@ pub struct CreateAboutMe<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<CreateAboutMe>) -> Result<()> {
+pub fn create_about_me(ctx: Context<CreateAboutMe>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

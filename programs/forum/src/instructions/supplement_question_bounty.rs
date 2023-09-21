@@ -88,7 +88,7 @@ impl<'info> SupplementQuestionBounty<'info> {
     }
 }
 
-pub fn handler(ctx: Context<SupplementQuestionBounty>, supplemental_bounty_amount: u64) -> Result<()> {
+pub fn supplement_question_bounty(ctx: Context<SupplementQuestionBounty>, supplemental_bounty_amount: u64) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

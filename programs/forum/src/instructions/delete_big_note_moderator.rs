@@ -41,7 +41,7 @@ pub struct DeleteBigNoteModerator<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteBigNoteModerator>) -> Result<()> {
+pub fn delete_big_note_moderator(ctx: Context<DeleteBigNoteModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

@@ -28,7 +28,7 @@ pub struct DeleteAboutMe<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteAboutMe>) -> Result<()> {
+pub fn delete_about_me(ctx: Context<DeleteAboutMe>) -> Result<()> {
 
     let now_ts = now_ts()?;
 

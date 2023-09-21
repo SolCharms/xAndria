@@ -37,7 +37,7 @@ pub struct CreateChallenge<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<CreateChallenge>, tags: Vec<Tags>, title: String, content_data_url: String, challenge_expires_ts: u64, reputation: u64) -> Result<()> {
+pub fn create_challenge(ctx: Context<CreateChallenge>, tags: Vec<Tags>, title: String, content_data_url: String, challenge_expires_ts: u64, reputation: u64) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

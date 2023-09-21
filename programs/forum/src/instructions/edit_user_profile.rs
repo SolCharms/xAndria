@@ -24,7 +24,7 @@ pub struct EditUserProfile<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<EditUserProfile>) -> Result<()> {
+pub fn edit_user_profile(ctx: Context<EditUserProfile>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

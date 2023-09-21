@@ -45,7 +45,7 @@ pub struct DeleteAnswerModerator<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteAnswerModerator>) -> Result<()> {
+pub fn delete_answer_moderator(ctx: Context<DeleteAnswerModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

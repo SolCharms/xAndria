@@ -44,7 +44,7 @@ pub struct RejectProposedContribution<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx:Context<RejectProposedContribution>) -> Result<()> {
+pub fn reject_proposed_contribution(ctx:Context<RejectProposedContribution>) -> Result<()> {
 
     let now_ts = now_ts()?;
 

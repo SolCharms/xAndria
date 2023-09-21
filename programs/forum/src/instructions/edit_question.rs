@@ -50,7 +50,7 @@ impl<'info> EditQuestion<'info> {
     }
 }
 
-pub fn handler(ctx: Context<EditQuestion>, new_tags: Vec<Tags>, new_title: String, new_content_data_url: String) -> Result<()> {
+pub fn edit_question(ctx: Context<EditQuestion>, new_tags: Vec<Tags>, new_title: String, new_content_data_url: String) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

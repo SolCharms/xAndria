@@ -68,7 +68,7 @@ impl<'info> RefundQuestionBountySupplementorModerator<'info> {
     }
 }
 
-pub fn handler(ctx: Context<RefundQuestionBountySupplementorModerator>) -> Result<()> {
+pub fn refund_question_bounty_supplementor_moderator(ctx: Context<RefundQuestionBountySupplementorModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

@@ -28,7 +28,7 @@ pub struct EditAboutMe<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<EditAboutMe>) -> Result<()> {
+pub fn edit_about_me(ctx: Context<EditAboutMe>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

@@ -38,7 +38,7 @@ pub struct ProposeContribution<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<ProposeContribution>) -> Result<()> {
+pub fn propose_contribution(ctx: Context<ProposeContribution>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
     let proposed_contribution_rep = ctx.accounts.forum.reputation_matrix.proposed_big_notes_contribution_rep;

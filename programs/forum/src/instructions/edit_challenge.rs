@@ -50,7 +50,7 @@ impl<'info> EditChallenge<'info> {
     }
 }
 
-pub fn handler(ctx: Context<EditChallenge>, new_tags: Vec<Tags>, new_title: String, new_content_data_url: String, new_challenge_expires_ts: u64, new_reputation: u64) -> Result<()> {
+pub fn edit_challenge(ctx: Context<EditChallenge>, new_tags: Vec<Tags>, new_title: String, new_content_data_url: String, new_challenge_expires_ts: u64, new_reputation: u64) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

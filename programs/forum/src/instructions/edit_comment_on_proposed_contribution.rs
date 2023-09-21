@@ -40,7 +40,7 @@ pub struct EditCommentOnProposedContribution<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<EditCommentOnProposedContribution>) -> Result<()> {
+pub fn edit_comment_on_proposed_contribution(ctx: Context<EditCommentOnProposedContribution>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

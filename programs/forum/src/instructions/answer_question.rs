@@ -38,7 +38,7 @@ pub struct AnswerQuestion<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<AnswerQuestion>) -> Result<()> {
+pub fn answer_question(ctx: Context<AnswerQuestion>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
     let answer_rep = ctx.accounts.forum.reputation_matrix.answer_rep;

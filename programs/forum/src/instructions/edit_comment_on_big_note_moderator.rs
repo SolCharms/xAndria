@@ -44,7 +44,7 @@ pub struct EditCommentOnBigNoteModerator<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<EditCommentOnBigNoteModerator>) -> Result<()> {
+pub fn edit_comment_on_big_note_moderator(ctx: Context<EditCommentOnBigNoteModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

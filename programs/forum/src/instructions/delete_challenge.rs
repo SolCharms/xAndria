@@ -33,7 +33,7 @@ pub struct DeleteChallenge<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteChallenge>) -> Result<()> {
+pub fn delete_challenge(ctx: Context<DeleteChallenge>) -> Result<()> {
 
     let now_ts = now_ts()?;
 

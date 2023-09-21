@@ -42,7 +42,7 @@ impl<'info> CreateUserProfile<'info> {
     }
 }
 
-pub fn handler(ctx: Context<CreateUserProfile>) -> Result<()> {
+pub fn create_user_profile(ctx: Context<CreateUserProfile>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
     let forum_profile_fee = ctx.accounts.forum.forum_fees.forum_profile_fee;

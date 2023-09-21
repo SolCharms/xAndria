@@ -72,7 +72,7 @@ impl<'info> AskQuestion<'info> {
     }
 }
 
-pub fn handler(ctx: Context<AskQuestion>, tags: Vec<Tags>, title: String, content_data_url: String, bounty_amount: u64) -> Result<()> {
+pub fn ask_question(ctx: Context<AskQuestion>, tags: Vec<Tags>, title: String, content_data_url: String, bounty_amount: u64) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
     let bounty_awarded = false;

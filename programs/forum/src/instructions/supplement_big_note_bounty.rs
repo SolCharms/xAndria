@@ -88,7 +88,7 @@ impl<'info> SupplementBigNoteBounty<'info> {
     }
 }
 
-pub fn handler(ctx: Context<SupplementBigNoteBounty>, supplemental_bounty_amount: u64) -> Result<()> {
+pub fn supplement_big_note_bounty(ctx: Context<SupplementBigNoteBounty>, supplemental_bounty_amount: u64) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

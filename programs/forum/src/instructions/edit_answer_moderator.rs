@@ -44,7 +44,7 @@ pub struct EditAnswerModerator<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<EditAnswerModerator>) -> Result<()> {
+pub fn edit_answer_moderator(ctx: Context<EditAnswerModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

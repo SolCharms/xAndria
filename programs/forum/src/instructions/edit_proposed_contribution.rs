@@ -36,7 +36,7 @@ pub struct EditProposedContribution<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<EditProposedContribution>) -> Result<()> {
+pub fn edit_proposed_contribution(ctx: Context<EditProposedContribution>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

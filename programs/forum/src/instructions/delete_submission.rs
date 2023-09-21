@@ -37,7 +37,7 @@ pub struct DeleteSubmission<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<DeleteSubmission>) -> Result<()> {
+pub fn delete_submission(ctx: Context<DeleteSubmission>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

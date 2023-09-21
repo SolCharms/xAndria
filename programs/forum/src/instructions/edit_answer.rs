@@ -36,7 +36,7 @@ pub struct EditAnswer<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<EditAnswer>) -> Result<()> {
+pub fn edit_answer(ctx: Context<EditAnswer>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
 

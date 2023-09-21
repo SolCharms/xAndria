@@ -53,7 +53,7 @@ pub struct AcceptAnswer<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx:Context<AcceptAnswer>) -> Result<()> {
+pub fn accept_answer(ctx:Context<AcceptAnswer>) -> Result<()> {
 
     let now_ts = now_ts()?;
 

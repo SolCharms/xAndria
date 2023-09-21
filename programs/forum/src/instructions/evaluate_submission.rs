@@ -41,7 +41,7 @@ pub struct EvaluateSubmission<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<EvaluateSubmission>, submission_state: SubmissionState) -> Result<()> {
+pub fn evaluate_submission(ctx: Context<EvaluateSubmission>, submission_state: SubmissionState) -> Result<()> {
 
     let now_ts = now_ts()?;
     let reputation = ctx.accounts.challenge.reputation;
