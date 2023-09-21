@@ -7,7 +7,6 @@ declare_id!("FoRUMvAQAPBBJhMvw2UAc1Yx67rxQf9eao87b75GJ857");
 pub mod instructions;
 pub mod state;
 
-#[program]
 pub mod forum {
     use super::*;
 
@@ -22,7 +21,7 @@ pub mod forum {
         reputation_matrix: ReputationMatrix,
     ) -> Result<()> {
         msg!("initializing forum");
-        instructions::init_forum::handler(
+        instructions::init_forum::init_forum(
             ctx,
             forum_fees,
             forum_constants,
@@ -37,7 +36,7 @@ pub mod forum {
         new_reputation_matrix: ReputationMatrix,
     ) -> Result<()> {
         msg!("updating forum parameters");
-        instructions::update_forum_params::handler(
+        instructions::update_forum_params::update_forum_params(
             ctx,
             new_forum_fees,
             new_forum_constants,
@@ -50,7 +49,7 @@ pub mod forum {
         _bump_forum_treasury: u8,
     ) -> Result<()> {
         msg!("paying out funds from treasury");
-        instructions::payout_from_treasury::handler(ctx)
+        instructions::payout_from_treasury::payout_from_treasury(ctx)
     }
 
     pub fn close_forum(
@@ -58,7 +57,7 @@ pub mod forum {
         _bump_forum_treasury: u8,
     ) -> Result<()> {
         msg!("closing forum");
-        instructions::close_forum::handler(ctx)
+        instructions::close_forum::close_forum(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -68,7 +67,7 @@ pub mod forum {
         _bump_treasury: u8,
     ) -> Result<()> {
         msg!("creating user profile");
-        instructions::create_user_profile::handler(ctx)
+        instructions::create_user_profile::create_user_profile(ctx)
     }
 
     pub fn edit_user_profile(
@@ -76,7 +75,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("editing user profile");
-        instructions::edit_user_profile::handler(ctx)
+        instructions::edit_user_profile::edit_user_profile(ctx)
     }
 
     pub fn delete_user_profile(
@@ -84,7 +83,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("deleting user profile");
-        instructions::delete_user_profile::handler(ctx)
+        instructions::delete_user_profile::delete_user_profile(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -94,7 +93,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("creating user about me");
-        instructions::create_about_me::handler(ctx)
+        instructions::create_about_me::create_about_me(ctx)
     }
 
     pub fn edit_about_me(
@@ -103,7 +102,7 @@ pub mod forum {
         _bump_about_me: u8,
     ) -> Result<()> {
         msg!("editing user about me");
-        instructions::edit_about_me::handler(ctx)
+        instructions::edit_about_me::edit_about_me(ctx)
     }
 
     pub fn delete_about_me(
@@ -112,7 +111,7 @@ pub mod forum {
         _bump_about_me: u8,
     ) -> Result<()> {
         msg!("deleting user about me");
-        instructions::delete_about_me::handler(ctx)
+        instructions::delete_about_me::delete_about_me(ctx)
     }
 
     pub fn delete_user_profile_and_about_me(
@@ -121,7 +120,7 @@ pub mod forum {
         _bump_about_me: u8,
     ) -> Result<()>{
         msg!("deleting user profile and about me");
-        instructions::delete_user_profile_and_about_me::handler(ctx)
+        instructions::delete_user_profile_and_about_me::delete_user_profile_and_about_me(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -131,7 +130,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("adding moderator");
-        instructions::add_moderator::handler(ctx)
+        instructions::add_moderator::add_moderator(ctx)
     }
 
     pub fn remove_moderator(
@@ -139,7 +138,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("removing moderator");
-        instructions::remove_moderator::handler(ctx)
+        instructions::remove_moderator::remove_moderator(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -154,7 +153,7 @@ pub mod forum {
         bounty_amount: u64
     ) -> Result<()> {
         msg!("asking question");
-        instructions::ask_question::handler(
+        instructions::ask_question::ask_question(
             ctx,
             tags,
             title,
@@ -172,7 +171,7 @@ pub mod forum {
         new_content_data_url: String
     ) -> Result<()> {
         msg!("editing question");
-        instructions::edit_question::handler(
+        instructions::edit_question::edit_question(
             ctx,
             new_tags,
             new_title,
@@ -190,7 +189,7 @@ pub mod forum {
         new_content_data_url: String
     ) -> Result<()> {
         msg!("moderator editing question");
-        instructions::edit_question_moderator::handler(
+        instructions::edit_question_moderator::edit_question_moderator(
             ctx,
             new_tags,
             new_title,
@@ -205,7 +204,7 @@ pub mod forum {
         _bump_question: u8,
     ) -> Result<()> {
         msg!("moderator deleting question");
-        instructions::delete_question_moderator::handler(ctx)
+        instructions::delete_question_moderator::delete_question_moderator(ctx)
     }
 
     pub fn supplement_question_bounty(
@@ -218,7 +217,7 @@ pub mod forum {
         supplemental_bounty_amount: u64,
     ) -> Result<()> {
         msg!("supplementing question bounty");
-        instructions::supplement_question_bounty::handler(
+        instructions::supplement_question_bounty::supplement_question_bounty(
             ctx,
             supplemental_bounty_amount
         )
@@ -233,7 +232,7 @@ pub mod forum {
         _bump_bounty_pda: u8,
     ) -> Result<()>{
         msg!("moderator refunding question bounty supplementor");
-        instructions::refund_question_bounty_supplementor_moderator::handler(ctx)
+        instructions::refund_question_bounty_supplementor_moderator::refund_question_bounty_supplementor_moderator(ctx)
     }
 
     pub fn accept_answer(
@@ -245,7 +244,7 @@ pub mod forum {
         _bump_answer: u8,
     ) -> Result<()> {
         msg!("accepting answer");
-        instructions::accept_answer::handler(ctx)
+        instructions::accept_answer::accept_answer(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -255,7 +254,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("answering question");
-        instructions::answer_question::handler(ctx)
+        instructions::answer_question::answer_question(ctx)
     }
 
     pub fn edit_answer(
@@ -264,7 +263,7 @@ pub mod forum {
         _bump_answer: u8,
     ) -> Result<()> {
         msg!("editing answer");
-        instructions::edit_answer::handler(ctx)
+        instructions::edit_answer::edit_answer(ctx)
     }
 
     pub fn edit_answer_moderator(
@@ -274,7 +273,7 @@ pub mod forum {
         _bump_answer: u8,
     ) -> Result<()> {
         msg!("moderator editing answer");
-        instructions::edit_answer_moderator::handler(ctx)
+        instructions::edit_answer_moderator::edit_answer_moderator(ctx)
     }
 
     pub fn delete_answer(
@@ -283,7 +282,7 @@ pub mod forum {
         _bump_answer: u8,
     ) -> Result<()> {
         msg!("deleting answer");
-        instructions::delete_answer::handler(ctx)
+        instructions::delete_answer::delete_answer(ctx)
     }
 
     pub fn delete_answer_moderator(
@@ -293,7 +292,7 @@ pub mod forum {
         _bump_answer: u8,
     ) -> Result<()> {
         msg!("moderator deleting answer");
-        instructions::delete_answer_moderator::handler(ctx)
+        instructions::delete_answer_moderator::delete_answer_moderator(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -303,7 +302,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("leaving comment on question");
-        instructions::leave_comment_on_question::handler(ctx)
+        instructions::leave_comment_on_question::leave_comment_on_question(ctx)
     }
 
     pub fn edit_comment_on_question(
@@ -312,7 +311,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("editing comment on question");
-        instructions::edit_comment_on_question::handler(ctx)
+        instructions::edit_comment_on_question::edit_comment_on_question(ctx)
     }
 
     pub fn edit_comment_on_question_moderator(
@@ -322,7 +321,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("moderator editing comment on question");
-        instructions::edit_comment_on_question_moderator::handler(ctx)
+        instructions::edit_comment_on_question_moderator::edit_comment_on_question_moderator(ctx)
     }
 
     pub fn delete_comment_on_question(
@@ -331,7 +330,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("deleting comment on question");
-        instructions::delete_comment_on_question::handler(ctx)
+        instructions::delete_comment_on_question::delete_comment_on_question(ctx)
     }
 
     pub fn delete_comment_on_question_moderator(
@@ -341,7 +340,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("moderator deleting comment on question");
-        instructions::delete_comment_on_question_moderator::handler(ctx)
+        instructions::delete_comment_on_question_moderator::delete_comment_on_question_moderator(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -351,7 +350,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("leaving comment on answer");
-        instructions::leave_comment_on_answer::handler(ctx)
+        instructions::leave_comment_on_answer::leave_comment_on_answer(ctx)
     }
 
     pub fn edit_comment_on_answer(
@@ -360,7 +359,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("editing comment on answer");
-        instructions::edit_comment_on_answer::handler(ctx)
+        instructions::edit_comment_on_answer::edit_comment_on_answer(ctx)
     }
 
     pub fn edit_comment_on_answer_moderator(
@@ -370,7 +369,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("moderator editing comment on answer");
-        instructions::edit_comment_on_answer_moderator::handler(ctx)
+        instructions::edit_comment_on_answer_moderator::edit_comment_on_answer_moderator(ctx)
     }
 
     pub fn delete_comment_on_answer(
@@ -379,7 +378,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("deleting comment on answer");
-        instructions::delete_comment_on_answer::handler(ctx)
+        instructions::delete_comment_on_answer::delete_comment_on_answer(ctx)
     }
 
     pub fn delete_comment_on_answer_moderator(
@@ -389,7 +388,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("moderator deleting comment on answer");
-        instructions::delete_comment_on_answer_moderator::handler(ctx)
+        instructions::delete_comment_on_answer_moderator::delete_comment_on_answer_moderator(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -404,7 +403,7 @@ pub mod forum {
         content_data_url: String,
     ) -> Result<()> {
         msg!("creating big note");
-        instructions::create_big_note::handler(
+        instructions::create_big_note::create_big_note(
             ctx,
             big_note_type,
             tags,
@@ -423,7 +422,7 @@ pub mod forum {
         new_content_data_url: String,
     ) -> Result<()> {
         msg!("editing big note");
-        instructions::edit_big_note_open_contribution::handler(
+        instructions::edit_big_note_open_contribution::edit_big_note_open_contribution(
             ctx,
             new_tags,
             new_title,
@@ -440,7 +439,7 @@ pub mod forum {
         new_content_data_url: String,
     ) -> Result<()> {
         msg!("editing big note");
-        instructions::edit_big_note_creator_curated::handler(
+        instructions::edit_big_note_creator_curated::edit_big_note_creator_curated(
             ctx,
             new_tags,
             new_title,
@@ -458,7 +457,7 @@ pub mod forum {
         new_content_data_url: String,
     ) -> Result<()> {
         msg!("moderator editing big note");
-        instructions::edit_big_note_moderator::handler(
+        instructions::edit_big_note_moderator::edit_big_note_moderator(
             ctx,
             new_tags,
             new_title,
@@ -473,7 +472,7 @@ pub mod forum {
         _bump_big_note: u8,
     ) -> Result<()> {
         msg!("moderator deleting big note");
-        instructions::delete_big_note_moderator::handler(ctx)
+        instructions::delete_big_note_moderator::delete_big_note_moderator(ctx)
     }
 
     pub fn supplement_big_note_bounty(
@@ -486,7 +485,7 @@ pub mod forum {
         supplemental_bounty_amount: u64
     ) -> Result<()> {
         msg!("supplementing big note bounty");
-        instructions::supplement_big_note_bounty::handler(
+        instructions::supplement_big_note_bounty::supplement_big_note_bounty(
             ctx,
             supplemental_bounty_amount
         )
@@ -501,7 +500,7 @@ pub mod forum {
         _bump_bounty_pda: u8
     ) -> Result<()> {
         msg!("moderator refunding big note bounty supplementor");
-        instructions::refund_big_note_bounty_supplementor_moderator::handler(ctx)
+        instructions::refund_big_note_bounty_supplementor_moderator::refund_big_note_bounty_supplementor_moderator(ctx)
     }
 
     pub fn accept_proposed_contribution(
@@ -513,7 +512,7 @@ pub mod forum {
         _bump_proposed_contribution: u8
     ) -> Result<()> {
         msg!("accepting proposed contribution");
-        instructions::accept_proposed_contribution::handler(ctx)
+        instructions::accept_proposed_contribution::accept_proposed_contribution(ctx)
     }
 
     pub fn reject_proposed_contribution(
@@ -524,7 +523,7 @@ pub mod forum {
         _bump_proposed_contribution: u8
     ) -> Result<()> {
         msg!("rejecting proposed contribution");
-        instructions::reject_proposed_contribution::handler(ctx)
+        instructions::reject_proposed_contribution::reject_proposed_contribution(ctx)
     }
 
     pub fn verify_big_note(
@@ -534,7 +533,7 @@ pub mod forum {
         _bump_big_note: u8,
     ) -> Result<()> {
         msg!("verifying big note");
-        instructions::verify_big_note::handler(ctx)
+        instructions::verify_big_note::verify_big_note(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -544,7 +543,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("proposing contribution");
-        instructions::propose_contribution::handler(ctx)
+        instructions::propose_contribution::propose_contribution(ctx)
     }
 
     pub fn edit_proposed_contribution(
@@ -553,7 +552,7 @@ pub mod forum {
         _bump_proposed_contribution: u8,
     ) -> Result<()> {
         msg!("editing proposed contribution");
-        instructions::edit_proposed_contribution::handler(ctx)
+        instructions::edit_proposed_contribution::edit_proposed_contribution(ctx)
     }
 
     pub fn edit_proposed_contribution_moderator(
@@ -563,7 +562,7 @@ pub mod forum {
         _bump_proposed_contribution: u8,
     ) -> Result<()> {
         msg!("moderator editing proposed contribution");
-        instructions::edit_proposed_contribution_moderator::handler(ctx)
+        instructions::edit_proposed_contribution_moderator::edit_proposed_contribution_moderator(ctx)
     }
 
     pub fn delete_proposed_contribution(
@@ -572,7 +571,7 @@ pub mod forum {
         _bump_proposed_contribution: u8,
     ) -> Result<()> {
         msg!("deleting proposed contribution");
-        instructions::delete_proposed_contribution::handler(ctx)
+        instructions::delete_proposed_contribution::delete_proposed_contribution(ctx)
     }
 
     pub fn delete_proposed_contribution_moderator(
@@ -582,7 +581,7 @@ pub mod forum {
         _bump_proposed_contribution: u8,
     ) -> Result<()> {
         msg!("moderator deleting proposed contribution");
-        instructions::delete_proposed_contribution_moderator::handler(ctx)
+        instructions::delete_proposed_contribution_moderator::delete_proposed_contribution_moderator(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -592,7 +591,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("leaving comment on big note");
-        instructions::leave_comment_on_big_note::handler(ctx)
+        instructions::leave_comment_on_big_note::leave_comment_on_big_note(ctx)
     }
 
     pub fn edit_comment_on_big_note(
@@ -601,7 +600,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("editing comment on big note");
-        instructions::edit_comment_on_big_note::handler(ctx)
+        instructions::edit_comment_on_big_note::edit_comment_on_big_note(ctx)
     }
 
     pub fn edit_comment_on_big_note_moderator(
@@ -611,7 +610,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("moderator editing comment on big note");
-        instructions::edit_comment_on_big_note_moderator::handler(ctx)
+        instructions::edit_comment_on_big_note_moderator::edit_comment_on_big_note_moderator(ctx)
     }
 
     pub fn delete_comment_on_big_note(
@@ -620,7 +619,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("deleting comment on big note");
-        instructions::delete_comment_on_big_note::handler(ctx)
+        instructions::delete_comment_on_big_note::delete_comment_on_big_note(ctx)
     }
 
     pub fn delete_comment_on_big_note_moderator(
@@ -630,7 +629,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("moderator deleting comment on big note");
-        instructions::delete_comment_on_big_note_moderator::handler(ctx)
+        instructions::delete_comment_on_big_note_moderator::delete_comment_on_big_note_moderator(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -640,7 +639,7 @@ pub mod forum {
         _bump_user_profile: u8,
     ) -> Result<()> {
         msg!("leaving comment on proposed contribution");
-        instructions::leave_comment_on_proposed_contribution::handler(ctx)
+        instructions::leave_comment_on_proposed_contribution::leave_comment_on_proposed_contribution(ctx)
     }
 
     pub fn edit_comment_on_proposed_contribution(
@@ -649,7 +648,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("editing comment on proposed contribution");
-        instructions::edit_comment_on_proposed_contribution::handler(ctx)
+        instructions::edit_comment_on_proposed_contribution::edit_comment_on_proposed_contribution(ctx)
     }
 
     pub fn edit_comment_on_proposed_contribution_moderator(
@@ -659,7 +658,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("moderator editing comment on proposed contribution");
-        instructions::edit_comment_on_proposed_contribution_moderator::handler(ctx)
+        instructions::edit_comment_on_proposed_contribution_moderator::edit_comment_on_proposed_contribution_moderator(ctx)
     }
 
     pub fn delete_comment_on_proposed_contribution(
@@ -668,7 +667,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("deleting comment on proposed contribution");
-        instructions::delete_comment_on_proposed_contribution::handler(ctx)
+        instructions::delete_comment_on_proposed_contribution::delete_comment_on_proposed_contribution(ctx)
     }
 
     pub fn delete_comment_on_proposed_contribution_moderator(
@@ -678,7 +677,7 @@ pub mod forum {
         _bump_comment: u8,
     ) -> Result<()> {
         msg!("moderator deleting comment on proposed contribution");
-        instructions::delete_comment_on_proposed_contribution_moderator::handler(ctx)
+        instructions::delete_comment_on_proposed_contribution_moderator::delete_comment_on_proposed_contribution_moderator(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -693,7 +692,7 @@ pub mod forum {
         reputation: u64,
     ) -> Result<()> {
         msg!("moderator creating challenge");
-        instructions::create_challenge::handler(
+        instructions::create_challenge::create_challenge(
             ctx,
             tags,
             title,
@@ -714,7 +713,7 @@ pub mod forum {
         new_reputation: u64,
     ) -> Result<()> {
         msg!("moderator editing challenge");
-        instructions::edit_challenge::handler(
+        instructions::edit_challenge::edit_challenge(
             ctx,
             new_tags,
             new_title,
@@ -730,7 +729,7 @@ pub mod forum {
         _bump_challenge: u8,
     ) -> Result<()> {
         msg!("moderator deleting challenge");
-        instructions::delete_challenge::handler(ctx)
+        instructions::delete_challenge::delete_challenge(ctx)
     }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -742,7 +741,7 @@ pub mod forum {
         _bump_challenge: u8,
     ) -> Result<()> {
         msg!("creating submission");
-        instructions::create_submission::handler(ctx)
+        instructions::create_submission::create_submission(ctx)
     }
 
     pub fn edit_submission(
@@ -752,7 +751,7 @@ pub mod forum {
         _bump_submission: u8,
     ) -> Result<()> {
         msg!("editing submission");
-        instructions::edit_submission::handler(ctx)
+        instructions::edit_submission::edit_submission(ctx)
     }
 
     pub fn edit_submission_moderator(
@@ -763,7 +762,7 @@ pub mod forum {
         _bump_submission: u8,
     ) -> Result<()> {
         msg!("moderator editing submission");
-        instructions::edit_submission_moderator::handler(ctx)
+        instructions::edit_submission_moderator::edit_submission_moderator(ctx)
     }
 
     pub fn delete_submission(
@@ -773,7 +772,7 @@ pub mod forum {
         _bump_submission: u8,
     ) -> Result<()> {
         msg!("deleting submission");
-        instructions::delete_submission::handler(ctx)
+        instructions::delete_submission::delete_submission(ctx)
     }
 
     pub fn delete_submission_moderator(
@@ -784,7 +783,7 @@ pub mod forum {
         _bump_submission: u8,
     ) -> Result<()> {
         msg!("moderator deleting submission");
-        instructions::delete_submission_moderator::handler(ctx)
+        instructions::delete_submission_moderator::delete_submission_moderator(ctx)
     }
 
     pub fn evaluate_submission(
@@ -796,7 +795,7 @@ pub mod forum {
         submission_state: SubmissionState,
     ) -> Result<()> {
         msg!("moderator evaluating submission");
-        instructions::evaluate_submission::handler(
+        instructions::evaluate_submission::evaluate_submission(
             ctx,
             submission_state
         )

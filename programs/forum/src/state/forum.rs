@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 pub const LATEST_FORUM_VERSION: u16 = 0;
 pub use crate::state::{ForumConstants, ForumCounts, ForumFees, ReputationMatrix};
 
-#[proc_macros::assert_size(360)] // +5 to make it divisible by 8
+#[proc_macros::assert_size(368)] // +5 to make it divisible by 8
 #[repr(C)]
 #[account]
 #[derive(Debug)]

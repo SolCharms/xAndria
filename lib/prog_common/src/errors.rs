@@ -56,8 +56,7 @@ pub enum ErrorCode {
     #[msg("every question/big note contribution must be supplemented by a minimum reward bounty of amount specified in forum constants")]
     InvalidBountyAmount, //0x1780
 
-    #[msg("questions with accepted answers, accepted answers, completed challenge submissions, and accepted contribution proposals can only be
-edited by moderators once their bounty/reputation is awarded")]
+    #[msg("questions with accepted answers, accepted answers, completed challenge submissions, and accepted contribution proposals can only be edited by moderators once their bounty/reputation is awarded")]
     AccountCannotBeEdited, //0x1781
 
     #[msg("the provided profile must have moderator privileges")]
@@ -81,8 +80,12 @@ edited by moderators once their bounty/reputation is awarded")]
     #[msg("challenge has expired")]
     ChallengeExpired, //0x1788
 
-    Reserved25, //0x1789
-    Reserved26, //0x178A
+    #[msg("Big note is either already verified or an application for verification has already been submitted")]
+    BigNoteNotUnverified, //0x1789
+
+    #[msg("Big note is either already verified or no application for verification has been submitted")]
+    BigNoteNotAppliedForVerification, //0x178A
+
     Reserved27, //0x178B
     Reserved28, //0x178C
     Reserved29, //0x178D
