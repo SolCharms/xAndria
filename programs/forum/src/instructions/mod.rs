@@ -71,7 +71,6 @@ pub mod remove_moderator;
 pub mod supplement_big_note_bounty;
 pub mod supplement_question_bounty;
 pub mod update_forum_params;
-pub mod verify_big_note;
 
 pub use accept_answer::*;
 pub use accept_big_note_verification_application::*;
@@ -146,4 +145,3 @@ pub use remove_moderator::*;
 pub use supplement_big_note_bounty::*;
 pub use supplement_question_bounty::*;
 pub use update_forum_params::*;
-pub use verify_big_note::*;

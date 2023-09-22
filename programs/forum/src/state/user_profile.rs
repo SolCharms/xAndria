@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-#[proc_macros::assert_size(216)] // +5 to make it divisible by 8
+#[proc_macros::assert_size(224)] // +5 to make it divisible by 8
 #[repr(C)]
 #[account]
 #[derive(Debug)]
@@ -21,6 +21,8 @@ pub struct UserProfile {
     // ------------- user engagement counters
 
     pub big_notes_created: u64,
+
+    pub big_notes_verified: u64,
 
     pub big_notes_contributions_proposed: u64,
 

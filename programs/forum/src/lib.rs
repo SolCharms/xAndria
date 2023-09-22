@@ -526,15 +526,15 @@ pub mod forum {
         instructions::reject_proposed_contribution::reject_proposed_contribution(ctx)
     }
 
-    pub fn verify_big_note(
-        ctx: Context<VerifyBigNote>,
-        _bump_moderator_profile: u8,
-        _bump_user_profile: u8,
-        _bump_big_note: u8,
-    ) -> Result<()> {
-        msg!("verifying big note");
-        instructions::verify_big_note::verify_big_note(ctx)
-    }
+    // pub fn verify_big_note(
+    //     ctx: Context<VerifyBigNote>,
+    //     _bump_moderator_profile: u8,
+    //     _bump_user_profile: u8,
+    //     _bump_big_note: u8,
+    // ) -> Result<()> {
+    //     msg!("verifying big note");
+    //     instructions::verify_big_note::verify_big_note(ctx)
+    // }
 
 ///////////////////////////////////////////////////////////////////////////
 

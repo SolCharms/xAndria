@@ -66,6 +66,7 @@ pub fn create_big_note(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, 
     let bounty_amount: u64 = 0;
     let bounty_awarded = false;
     let verification_state = BigNoteVerificationState::Unverified;
+    let big_notes_verification_rep: u64 = 0;
 
     let big_notes_rep = ctx.accounts.forum.reputation_matrix.create_big_notes_rep;
 
@@ -162,7 +163,7 @@ pub fn create_big_note(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, 
                 &[bump],
             ],
             &ctx.accounts.big_note,
-            8 + 120 + contribution_buffer_slice_length + type_buffer_slice_length + verification_buffer_slice_length + tag_buffer_slice_length + title_buffer_slice_length + content_data_url_buffer_slice_length + 41,
+            8 + 120 + contribution_buffer_slice_length + type_buffer_slice_length + verification_buffer_slice_length + tag_buffer_slice_length + title_buffer_slice_length + content_data_url_buffer_slice_length + 49,
             ctx.program_id,
             &ctx.accounts.profile_owner.to_account_info(),
             &ctx.accounts.system_program.to_account_info(),
@@ -188,7 +189,8 @@ pub fn create_big_note(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, 
         big_note_account_raw[title_slice_end_byte..content_data_url_slice_end_byte].clone_from_slice(content_data_url_buffer_as_slice);
         big_note_account_raw[content_data_url_slice_end_byte..content_data_url_slice_end_byte+32].clone_from_slice(&ctx.accounts.content_data_hash.key().to_bytes());
         big_note_account_raw[content_data_url_slice_end_byte+32..content_data_url_slice_end_byte+40].clone_from_slice(&big_notes_rep.to_le_bytes());
-        big_note_account_raw[content_data_url_slice_end_byte+40..content_data_url_slice_end_byte+41].clone_from_slice(&(bounty_awarded as u8).to_le_bytes());
+        big_note_account_raw[content_data_url_slice_end_byte+40..content_data_url_slice_end_byte+48].clone_from_slice(&big_notes_verification_rep.to_le_bytes());
+        big_note_account_raw[content_data_url_slice_end_byte+48..content_data_url_slice_end_byte+49].clone_from_slice(&(bounty_awarded as u8).to_le_bytes());
 
         // Transfer fee for posting big_note
         let forum_big_notes_submission_fee = ctx.accounts.forum.forum_fees.forum_big_notes_submission_fee;

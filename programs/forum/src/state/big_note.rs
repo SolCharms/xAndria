@@ -42,6 +42,8 @@ pub struct BigNote {
     // ------------- Big Note reputation value
     pub big_note_rep: u64,
 
+    pub big_note_verification_rep: u64,
+
     // Is Bounty Awarded
     pub bounty_awarded: bool,
 

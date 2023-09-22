@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::{invoke};
 use anchor_lang::solana_program::system_instruction;
 
-use crate::state::{BigNote, Forum, Tags, UserProfile};
+use crate::state::{BigNote, BigNoteVerificationState, Forum, Tags, UserProfile};
 use prog_common::{now_ts, TrySub, errors::ErrorCode};
 
 #[derive(Accounts)]
@@ -93,7 +93,7 @@ pub fn edit_big_note_moderator(ctx: Context<EditBigNoteModerator>, new_tags: Vec
     // Calculate data sizes and convert data to slice arrays
     let bounty_contributions = &ctx.accounts.big_note.bounty_contributions;
     let big_note_type = &ctx.accounts.big_note.big_note_type;
-    let verification_state = &ctx.accounts.big_note.verification_state;
+    let verification_state = BigNoteVerificationState::Unverified;
 
     let mut contribution_buffer: Vec<u8> = Vec::new();
     bounty_contributions.serialize(&mut contribution_buffer).unwrap();
@@ -132,7 +132,7 @@ pub fn edit_big_note_moderator(ctx: Context<EditBigNoteModerator>, new_tags: Vec
     let content_data_url_buffer_slice_length: usize = content_data_url_buffer_as_slice.len();
 
     // Calculate total space required for the addition of the new data
-    let new_data_bytes_amount: usize = 8 + 120 + contribution_buffer_slice_length + type_buffer_slice_length + verification_buffer_slice_length + tag_buffer_slice_length + title_buffer_slice_length + content_data_url_buffer_slice_length + 41;
+    let new_data_bytes_amount: usize = 8 + 120 + contribution_buffer_slice_length + type_buffer_slice_length + verification_buffer_slice_length + tag_buffer_slice_length + title_buffer_slice_length + content_data_url_buffer_slice_length + 49;
     let old_data_bytes_amount: usize = ctx.accounts.big_note.to_account_info().data_len();
 
     if new_data_bytes_amount > old_data_bytes_amount {
@@ -150,6 +150,7 @@ pub fn edit_big_note_moderator(ctx: Context<EditBigNoteModerator>, new_tags: Vec
     // Update big note account's most recent engagement timestamp and overwrite with the new content and data hash
     let big_note = &mut ctx.accounts.big_note;
     big_note.most_recent_engagement_ts = now_ts;
+    big_note.verification_state = verification_state;
     big_note.tags = new_tags;
     big_note.title = new_title;
     big_note.content_data_url = new_content_data_url;

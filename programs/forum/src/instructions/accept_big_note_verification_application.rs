@@ -4,7 +4,7 @@ use anchor_lang::solana_program::program::{invoke};
 use anchor_lang::solana_program::system_instruction;
 
 use crate::state::{BigNote, BigNoteVerificationApplication, BigNoteVerificationState, Forum, UserProfile};
-use prog_common::{close_account, now_ts, errors::ErrorCode};
+use prog_common::{close_account, now_ts, TryAdd, errors::ErrorCode};
 
 #[derive(Accounts)]
 #[instruction(bump_treasury: u8, bump_moderator_profile: u8, bump_user_profile: u8, bump_big_note: u8, bump_verification_application: u8, bump_verification_pda: u8)]
@@ -30,7 +30,7 @@ pub struct AcceptBigNoteVerificationApplication<'info> {
     pub profile_owner: AccountInfo<'info>,
 
     // The user profile
-    #[account(seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
               bump = bump_user_profile, has_one = forum, has_one = profile_owner)]
     pub user_profile: Box<Account<'info, UserProfile>>,
 
@@ -72,6 +72,7 @@ impl<'info> AcceptBigNoteVerificationApplication<'info> {
 pub fn accept_big_note_verification_application(ctx: Context<AcceptBigNoteVerificationApplication>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
+    let big_notes_verification_rep = ctx.accounts.forum.reputation_matrix.big_notes_verification_rep;
 
     if !ctx.accounts.moderator_profile.is_moderator {
         return Err(error!(ErrorCode::ProfileIsNotModerator));
@@ -101,10 +102,17 @@ pub fn accept_big_note_verification_application(ctx: Context<AcceptBigNoteVerifi
     let big_note = &mut ctx.accounts.big_note;
     big_note.most_recent_engagement_ts = now_ts;
     big_note.verification_state = BigNoteVerificationState::Verified;
+    big_note.big_note_verification_rep = big_notes_verification_rep;
 
     // Update moderator profile account's most recent engagement timestamp
     let moderator_profile = &mut ctx.accounts.moderator_profile;
     moderator_profile.most_recent_engagement_ts = now_ts;
+
+    // Update answer user profile's state
+    let user_profile = &mut ctx.accounts.user_profile;
+    user_profile.most_recent_engagement_ts = now_ts;
+    user_profile.big_notes_verified.try_add_assign(1)?;
+    user_profile.reputation_score.try_add_assign(big_notes_verification_rep)?;
 
     msg!("Big Note PDA account with address {} now verified", ctx.accounts.big_note.key());
     Ok(())

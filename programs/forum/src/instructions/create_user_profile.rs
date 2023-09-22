@@ -59,6 +59,7 @@ pub fn create_user_profile(ctx: Context<CreateUserProfile>) -> Result<()> {
     user_profile.most_recent_engagement_ts = now_ts;
 
     user_profile.big_notes_created = 0;
+    user_profile.big_notes_verified = 0;
     user_profile.big_notes_contributions_proposed = 0;
     user_profile.big_notes_contributions_accepted = 0;
     user_profile.challenges_submitted = 0;
