@@ -526,16 +526,50 @@ pub mod forum {
         instructions::reject_proposed_contribution::reject_proposed_contribution(ctx)
     }
 
-    // pub fn verify_big_note(
-    //     ctx: Context<VerifyBigNote>,
-    //     _bump_moderator_profile: u8,
-    //     _bump_user_profile: u8,
-    //     _bump_big_note: u8,
-    // ) -> Result<()> {
-    //     msg!("verifying big note");
-    //     instructions::verify_big_note::verify_big_note(ctx)
-    // }
+    pub fn apply_for_big_note_verification(
+        ctx: Context<ApplyForBigNoteVerification>,
+        _bump_user_profile: u8,
+        _bump_big_note: u8,
+    ) -> Result<()> {
+        msg!("applying for big note verification");
+        instructions::apply_for_big_note_verification::apply_for_big_note_verification(ctx)
+    }
 
+    pub fn accept_big_note_verification_application(
+        ctx: Context<AcceptBigNoteVerificationApplication>,
+        _bump_treasury: u8,
+        _bump_moderator_profile: u8,
+        _bump_user_profile: u8,
+        _bump_big_note: u8,
+        _bump_verification_application: u8,
+        _bump_verification_fee_pda: u8
+    ) -> Result<()> {
+        msg!("accepting big note verification application");
+        instructions::accept_big_note_verification_application::accept_big_note_verification_application(ctx)
+    }
+
+    pub fn reject_big_note_verification_application(
+        ctx: Context<RejectBigNoteVerificationApplication>,
+        _bump_moderator_profile: u8,
+        _bump_user_profile: u8,
+        _bump_big_note: u8,
+        _bump_verification_application: u8,
+        _bump_verification_fee_pda: u8
+    ) -> Result<()> {
+        msg!("rejecting big note verification application");
+        instructions::reject_big_note_verification_application::reject_big_note_verification_application(ctx)
+    }
+
+    pub fn delete_big_note_verification_application(
+        ctx: Context<DeleteBigNoteVerificationApplication>,
+        _bump_user_profile: u8,
+        _bump_big_note: u8,
+        _bump_verification_application: u8,
+        _bump_verification_fee_pda: u8
+    ) -> Result<()> {
+        msg!("deleting big note verification application");
+        instructions::delete_big_note_verification_application::delete_big_note_verification_application(ctx)
+    }
 ///////////////////////////////////////////////////////////////////////////
 
     pub fn propose_contribution(

@@ -7,7 +7,7 @@ use crate::state::{BigNote, BigNoteVerificationApplication, BigNoteVerificationS
 use prog_common::{close_account, now_ts, TryAdd, errors::ErrorCode};
 
 #[derive(Accounts)]
-#[instruction(bump_treasury: u8, bump_moderator_profile: u8, bump_user_profile: u8, bump_big_note: u8, bump_verification_application: u8, bump_verification_pda: u8)]
+#[instruction(bump_treasury: u8, bump_moderator_profile: u8, bump_user_profile: u8, bump_big_note: u8, bump_verification_application: u8, bump_verification_fee_pda: u8)]
 pub struct AcceptBigNoteVerificationApplication<'info> {
 
     // Forum
@@ -48,7 +48,7 @@ pub struct AcceptBigNoteVerificationApplication<'info> {
     pub verification_application: Box<Account<'info, BigNoteVerificationApplication>>,
 
     /// CHECK:
-    #[account(mut, seeds = [b"verification_fee_pda".as_ref(), big_note.key().as_ref()], bump = bump_verification_pda)]
+    #[account(mut, seeds = [b"verification_fee_pda".as_ref(), big_note.key().as_ref()], bump = bump_verification_fee_pda)]
     pub verification_fee_pda: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
