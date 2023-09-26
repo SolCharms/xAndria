@@ -7,6 +7,7 @@ declare_id!("FoRUMvAQAPBBJhMvw2UAc1Yx67rxQf9eao87b75GJ857");
 pub mod instructions;
 pub mod state;
 
+#[program]
 pub mod forum {
     use super::*;
 
@@ -535,6 +536,19 @@ pub mod forum {
         instructions::apply_for_big_note_verification::apply_for_big_note_verification(ctx)
     }
 
+    pub fn delete_big_note_verification_application(
+        ctx: Context<DeleteBigNoteVerificationApplication>,
+        _bump_user_profile: u8,
+        _bump_big_note: u8,
+        _bump_verification_application: u8,
+        _bump_verification_fee_pda: u8
+    ) -> Result<()> {
+        msg!("deleting big note verification application");
+        instructions::delete_big_note_verification_application::delete_big_note_verification_application(ctx)
+    }
+
+///////////////////////////////////////////////////////////////////////////
+
     pub fn accept_big_note_verification_application(
         ctx: Context<AcceptBigNoteVerificationApplication>,
         _bump_treasury: u8,
@@ -560,16 +574,6 @@ pub mod forum {
         instructions::reject_big_note_verification_application::reject_big_note_verification_application(ctx)
     }
 
-    pub fn delete_big_note_verification_application(
-        ctx: Context<DeleteBigNoteVerificationApplication>,
-        _bump_user_profile: u8,
-        _bump_big_note: u8,
-        _bump_verification_application: u8,
-        _bump_verification_fee_pda: u8
-    ) -> Result<()> {
-        msg!("deleting big note verification application");
-        instructions::delete_big_note_verification_application::delete_big_note_verification_application(ctx)
-    }
 ///////////////////////////////////////////////////////////////////////////
 
     pub fn propose_contribution(
