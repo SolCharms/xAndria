@@ -1,13 +1,12 @@
-#!/bin/bash
+# From root directory of program
+cd ./target/types
 
-# ------- copy IDLs into apps or run this script from directory 'core' with command ./scripts/cp_idl.sh
-# bank
-#cp ./target/idl/gem_bank.json ./app/gem-bank/public/
-# farm
-#cp ./target/idl/gem_bank.json ./app/gem-farm/public/
-# cp ./target/idl/gem_farm.json ./app/gem-farm/public/
+for FILENAME in *.ts
 
-# ------- copy types into SDK
-cp -r ./target/types ./src/
+do 
+	NAME="${FILENAME%.*}"
+	
+	cp -r ${FILENAME} ../../src/${NAME}.types.ts
+done
 
 echo IDLs and Types copied!

@@ -5,7 +5,9 @@ target/bpfel-unknown-unknown
 target/debug
 target/deploy
 target/release
+target/sbf-solana-solana/
 target/CACHEDIR.TAG
 target/.rustc_info.json
+test-ledger/
 **/*.rs.bk
 node_modules

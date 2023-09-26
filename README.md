@@ -1,6 +1,6 @@
 # xAndria SDK
 
-### A Decentralized Educational Information and Tooling (hence the name DeEdIT) Protocol codenamed and marketed as "xAndria".
+### A Decentralized Educational Information and Tooling protocol (hence the name DeEdIT) codenamed and marketed as "xAndria".
 
 This README is intended to cater to experienced developers with a focus on protocol level program interactions. To simply use the protocol as an end-user, visit https://xandriaonchain.vercel.app/forum where you will be greeted with nice graphical interfaces and buttons which do things. 
 
@@ -14,15 +14,15 @@ Furthermore, any speculative positions in this demo are purely hypothetical and 
 
 ## Prelude
 
-Open the terminal and cd into the desired working directory (For me it's ~/Development/Solana/SDKs ).
+Open the terminal and cd into the desired working directory (For me it's ~/Development/Solana/SDKs).
 
 Clone the Repository using the command 'git clone'. You should now have a local copy of the project as something like ~/Development/Solana/SDKs/DeEdIT_SDK/
 
 To conveniently use the program's CLI functionality from any directory without having to account for relative paths or typing out the absolute path to the CLI's directory every time, we will create a shorthand path alias. Open your .bashrc file (located in the Home directory) and add the following line at the bottom of the textfile:
 
-    alias forum-cli='ts-node ~/Development/Solana/SDKs/DeEdIT_SDK/src/cli/forum-cli.ts'
+    alias forum-cli='ts-node ~/Development/Solana/SDKs/DeEdIT_SDK/src/forum.cli.ts'
 
-accounting for the fact that your path to the forum-cli.ts file may be slightly different depending on where you put the cloned repository.
+accounting for the fact that your path to the forum.cli.ts file may be slightly different depending on where you put the cloned repository.
 
 The remainder of this demonstration assumes a familiarity with Solana's CLI. You will need to create filesystem wallet keypairs and airdrop yourself some Solana to follow along with the demo.
 
