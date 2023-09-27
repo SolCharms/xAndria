@@ -93,7 +93,8 @@ pub fn edit_big_note_moderator(ctx: Context<EditBigNoteModerator>, new_tags: Vec
     // Calculate data sizes and convert data to slice arrays
     let bounty_contributions = &ctx.accounts.big_note.bounty_contributions;
     let big_note_type = &ctx.accounts.big_note.big_note_type;
-    let verification_state = BigNoteVerificationState::Unverified;
+    let old_verification_state = ctx.accounts.big_note.verification_state;
+    let new_verification_state = BigNoteVerificationState::Unverified;
 
     let mut contribution_buffer: Vec<u8> = Vec::new();
     bounty_contributions.serialize(&mut contribution_buffer).unwrap();
@@ -108,7 +109,7 @@ pub fn edit_big_note_moderator(ctx: Context<EditBigNoteModerator>, new_tags: Vec
     let type_buffer_slice_length: usize = type_buffer_as_slice.len();
 
     let mut verification_buffer: Vec<u8> = Vec::new();
-    verification_state.serialize(&mut verification_buffer).unwrap();
+    new_verification_state.serialize(&mut verification_buffer).unwrap();
 
     let verification_buffer_as_slice: &[u8] = verification_buffer.as_slice();
     let verification_buffer_slice_length: usize = verification_buffer_as_slice.len();
@@ -147,14 +148,22 @@ pub fn edit_big_note_moderator(ctx: Context<EditBigNoteModerator>, new_tags: Vec
         ctx.accounts.big_note.to_account_info().realloc(new_data_bytes_amount, false)?;
     }
 
+    if old_verification_state == BigNoteVerificationState::Verified {
+        let big_note_verification_rep: u64 = ctx.accounts.big_note.big_note_verification_rep;
+        let user_profile = &mut ctx.accounts.user_profile;
+        user_profile.big_notes_verified.try_sub_assign(1)?;
+        user_profile.reputation_score.try_sub_assign(big_note_verification_rep)?;
+    }
+
     // Update big note account's most recent engagement timestamp and overwrite with the new content and data hash
     let big_note = &mut ctx.accounts.big_note;
     big_note.most_recent_engagement_ts = now_ts;
-    big_note.verification_state = verification_state;
+    big_note.verification_state = new_verification_state;
     big_note.tags = new_tags;
     big_note.title = new_title;
     big_note.content_data_url = new_content_data_url;
     big_note.content_data_hash = ctx.accounts.new_content_data_hash.key();
+    big_note.big_note_verification_rep = 0;
 
     // Update moderator profile's most recent engagement
     let moderator_profile = &mut ctx.accounts.moderator_profile;

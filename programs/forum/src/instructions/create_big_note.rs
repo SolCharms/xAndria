@@ -66,9 +66,8 @@ pub fn create_big_note(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, 
     let bounty_amount: u64 = 0;
     let bounty_awarded = false;
     let verification_state = BigNoteVerificationState::Unverified;
-    let big_notes_verification_rep: u64 = 0;
-
-    let big_notes_rep = ctx.accounts.forum.reputation_matrix.create_big_notes_rep;
+    let big_note_creation_rep = ctx.accounts.forum.reputation_matrix.create_big_notes_rep;
+    let big_note_verification_rep: u64 = 0;
 
     // Record vector length of tags and character lengths of title and content_data_url to be added
     let tags_length: u64 = tags.len() as u64;
@@ -188,8 +187,8 @@ pub fn create_big_note(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, 
         big_note_account_raw[tag_slice_end_byte..title_slice_end_byte].clone_from_slice(title_buffer_as_slice);
         big_note_account_raw[title_slice_end_byte..content_data_url_slice_end_byte].clone_from_slice(content_data_url_buffer_as_slice);
         big_note_account_raw[content_data_url_slice_end_byte..content_data_url_slice_end_byte+32].clone_from_slice(&ctx.accounts.content_data_hash.key().to_bytes());
-        big_note_account_raw[content_data_url_slice_end_byte+32..content_data_url_slice_end_byte+40].clone_from_slice(&big_notes_rep.to_le_bytes());
-        big_note_account_raw[content_data_url_slice_end_byte+40..content_data_url_slice_end_byte+48].clone_from_slice(&big_notes_verification_rep.to_le_bytes());
+        big_note_account_raw[content_data_url_slice_end_byte+32..content_data_url_slice_end_byte+40].clone_from_slice(&big_note_creation_rep.to_le_bytes());
+        big_note_account_raw[content_data_url_slice_end_byte+40..content_data_url_slice_end_byte+48].clone_from_slice(&big_note_verification_rep.to_le_bytes());
         big_note_account_raw[content_data_url_slice_end_byte+48..content_data_url_slice_end_byte+49].clone_from_slice(&(bounty_awarded as u8).to_le_bytes());
 
         // Transfer fee for posting big_note
@@ -210,7 +209,7 @@ pub fn create_big_note(ctx: Context<CreateBigNote>, big_note_type: BigNoteType, 
         // Update user profile's most recent engagement timestamp and reputation score
         let user_profile = &mut ctx.accounts.user_profile;
         user_profile.most_recent_engagement_ts = now_ts;
-        user_profile.reputation_score.try_add_assign(big_notes_rep)?;
+        user_profile.reputation_score.try_add_assign(big_note_creation_rep)?;
 
         msg!("Big Note PDA account with address {} now created", ctx.accounts.big_note.key());
     }

@@ -40,7 +40,7 @@ pub struct BigNote {
     pub content_data_hash: Pubkey,
 
     // ------------- Big Note reputation value
-    pub big_note_rep: u64,
+    pub big_note_creation_rep: u64,
 
     pub big_note_verification_rep: u64,
 

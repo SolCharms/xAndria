@@ -45,7 +45,7 @@ pub fn delete_big_note_moderator(ctx: Context<DeleteBigNoteModerator>) -> Result
 
     let now_ts: u64 = now_ts()?;
 
-    let big_note_rep = ctx.accounts.big_note.big_note_rep;
+    let big_note_creation_rep = ctx.accounts.big_note.big_note_creation_rep;
     let big_note_verification_state = ctx.accounts.big_note.verification_state;
 
     if !ctx.accounts.moderator_profile.is_moderator {
@@ -74,7 +74,7 @@ pub fn delete_big_note_moderator(ctx: Context<DeleteBigNoteModerator>) -> Result
     // Decrement big notes created and reputation score in user profile's state account
     let user_profile = &mut ctx.accounts.user_profile;
     user_profile.big_notes_created.try_sub_assign(1)?;
-    user_profile.reputation_score.try_sub_assign(big_note_rep)?;
+    user_profile.reputation_score.try_sub_assign(big_note_creation_rep)?;
 
     if big_note_verification_state == BigNoteVerificationState::Verified {
         let big_note_verification_rep = ctx.accounts.big_note.big_note_verification_rep;
