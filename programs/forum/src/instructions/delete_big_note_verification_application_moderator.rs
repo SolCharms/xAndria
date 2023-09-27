@@ -7,14 +7,21 @@ use crate::state::{BigNote, BigNoteVerificationApplication, BigNoteVerificationS
 use prog_common::{close_account, now_ts, errors::ErrorCode};
 
 #[derive(Accounts)]
-#[instruction(bump_user_profile: u8, bump_big_note: u8, bump_verification_application: u8, bump_verification_fee_pda: u8)]
-pub struct DeleteBigNoteVerificationApplication<'info> {
+#[instruction(bump_moderator_profile: u8, bump_user_profile: u8, bump_big_note: u8, bump_verification_application: u8, bump_verification_fee_pda: u8)]
+pub struct DeleteBigNoteVerificationApplicationModerator<'info> {
 
     // Forum
     pub forum: Box<Account<'info, Forum>>,
 
+    pub moderator: Signer<'info>,
+
+    // The moderator profile
+    #[account(mut, seeds = [b"user_profile".as_ref(), forum.key().as_ref(), moderator.key().as_ref()],
+              bump = bump_moderator_profile, has_one = forum, constraint = moderator_profile.profile_owner == moderator.key())]
+    pub moderator_profile: Box<Account<'info, UserProfile>>,
+
     #[account(mut)]
-    pub profile_owner: Signer<'info>,
+    pub profile_owner: AccountInfo<'info>,
 
     // The user profile
     #[account(seeds = [b"user_profile".as_ref(), forum.key().as_ref(), profile_owner.key().as_ref()],
@@ -41,7 +48,7 @@ pub struct DeleteBigNoteVerificationApplication<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> DeleteBigNoteVerificationApplication<'info> {
+impl<'info> DeleteBigNoteVerificationApplicationModerator<'info> {
 
     fn transfer_fee_ctx(&self, lamports: u64) -> Result<()> {
         invoke(
@@ -56,9 +63,13 @@ impl<'info> DeleteBigNoteVerificationApplication<'info> {
     }
 }
 
-pub fn delete_big_note_verification_application(ctx: Context<DeleteBigNoteVerificationApplication>) -> Result<()> {
+pub fn delete_big_note_verification_application_moderator(ctx: Context<DeleteBigNoteVerificationApplicationModerator>) -> Result<()> {
 
     let now_ts: u64 = now_ts()?;
+
+    if !ctx.accounts.moderator_profile.is_moderator {
+        return Err(error!(ErrorCode::ProfileIsNotModerator));
+    }
 
     // Ensure that big note account's verification state is 'AppliedForVerification'
     if !(ctx.accounts.big_note.verification_state == BigNoteVerificationState::AppliedForVerification) {
@@ -85,10 +96,11 @@ pub fn delete_big_note_verification_application(ctx: Context<DeleteBigNoteVerifi
     big_note.most_recent_engagement_ts = now_ts;
     big_note.verification_state = BigNoteVerificationState::Unverified;
 
-    // Update user profile account's most recent engagement timestamp
-    let user_profile = &mut ctx.accounts.user_profile;
-    user_profile.most_recent_engagement_ts = now_ts;
+    // Update moderator profile account's most recent engagement timestamp
+    let moderator_profile = &mut ctx.accounts.moderator_profile;
+    moderator_profile.most_recent_engagement_ts = now_ts;
 
-    msg!("Big Note Verification Application PDA account with address {} now closed", ctx.accounts.verification_application.key());
+    msg!("Big Note Verification Application PDA account with address {} has been closed by moderator profile with pubkey {}",
+         ctx.accounts.verification_application.key(), ctx.accounts.moderator_profile.key());
     Ok(())
 }
