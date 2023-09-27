@@ -2952,7 +2952,7 @@ export class ForumClient {
         const signers = [];
         if (isKp(profileOwner)) signers.push(<Keypair>profileOwner);
 
-        console.log('accepting proposed contribution with pubkey: ', proposedContribution.toBase58());
+        console.log('rejecting proposed contribution with pubkey: ', proposedContribution.toBase58());
 
         // Transaction
         const txSig = await this.forumProgram.methods
