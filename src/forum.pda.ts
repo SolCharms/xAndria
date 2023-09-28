@@ -87,14 +87,14 @@ export const findSubmissionPDA = async (challenge: PublicKey, userProfile: Publi
 
 export const findQuestionBountyPDA = async (question: PublicKey) => {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from('bounty_pda'), question.toBytes()],
+        [Buffer.from('question_bounty_pda'), question.toBytes()],
         FORUM_PROG_ID
     );
 };
 
 export const findBigNoteBountyPDA = async (bigNote: PublicKey) => {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from('bounty_pda'), bigNote.toBytes()],
+        [Buffer.from('bignote_bounty_pda'), bigNote.toBytes()],
         FORUM_PROG_ID
     );
 };

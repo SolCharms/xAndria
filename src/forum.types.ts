@@ -2098,7 +2098,7 @@ export type Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -2756,6 +2756,79 @@ export type Forum = {
         },
         {
           "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "verificationApplication",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "verificationFeePda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        },
+        {
+          "name": "bumpVerificationApplication",
+          "type": "u8"
+        },
+        {
+          "name": "bumpVerificationFeePda",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "deleteBigNoteVerificationApplicationModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
           "isMut": false,
           "isSigner": false
         },
@@ -2786,6 +2859,10 @@ export type Forum = {
         }
       ],
       "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
         {
           "name": "bumpUserProfile",
           "type": "u8"
@@ -4666,7 +4743,7 @@ export type Forum = {
             "type": "publicKey"
           },
           {
-            "name": "bigNoteRep",
+            "name": "bigNoteCreationRep",
             "type": "u64"
           },
           {
@@ -7472,7 +7549,7 @@ export const IDL: Forum = {
         },
         {
           "name": "userProfile",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -8130,6 +8207,79 @@ export const IDL: Forum = {
         },
         {
           "name": "userProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bigNoteSeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "verificationApplication",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "verificationFeePda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpUserProfile",
+          "type": "u8"
+        },
+        {
+          "name": "bumpBigNote",
+          "type": "u8"
+        },
+        {
+          "name": "bumpVerificationApplication",
+          "type": "u8"
+        },
+        {
+          "name": "bumpVerificationFeePda",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "deleteBigNoteVerificationApplicationModerator",
+      "accounts": [
+        {
+          "name": "forum",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "moderator",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "moderatorProfile",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "profileOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userProfile",
           "isMut": false,
           "isSigner": false
         },
@@ -8160,6 +8310,10 @@ export const IDL: Forum = {
         }
       ],
       "args": [
+        {
+          "name": "bumpModeratorProfile",
+          "type": "u8"
+        },
         {
           "name": "bumpUserProfile",
           "type": "u8"
@@ -10040,7 +10194,7 @@ export const IDL: Forum = {
             "type": "publicKey"
           },
           {
-            "name": "bigNoteRep",
+            "name": "bigNoteCreationRep",
             "type": "u64"
           },
           {

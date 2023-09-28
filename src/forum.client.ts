@@ -3100,6 +3100,72 @@ export class ForumClient {
         }
     }
 
+    async deleteBigNoteVerificationApplicationModerator(
+        bigNote: PublicKey,
+        moderator: PublicKey | Keypair,
+    ) {
+        const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
+
+        const bigNoteAcct = await this.fetchBigNoteAccount(bigNote);
+        const forum = bigNoteAcct.forum;
+        const userProfile = bigNoteAcct.userProfile;
+        const bigNoteSeed = bigNoteAcct.bigNoteSeed;
+
+        const userProfileAcct = await this.fetchUserProfileAccount(userProfile);
+        const profileOwner = userProfileAcct.profileOwner;
+
+        // Derive PDAs
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfileKey, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
+        const [bigNoteKey, bigNoteBump] = await findBigNotePDA(forum, userProfile, bigNoteSeed);
+        const [verificationApplication, verificationApplicationBump] = await findBigNoteVerificationApplicationPDA(bigNote);
+        const [verificationFeePda, verificationFeePdaBump] = await findVerificationFeePDA(bigNote);
+
+        // Create Signers Array
+        const signers = [];
+        if (isKp(moderator)) signers.push(<Keypair>moderator);
+
+        console.log('deleting verification application for big note with pubkey: ', bigNote.toBase58());
+
+        // Transaction
+        const txSig = await this.forumProgram.methods
+            .deleteBigNoteVerificationApplicationModerator(
+                moderatorProfileBump,
+                userProfileBump,
+                bigNoteBump,
+                verificationApplicationBump,
+                verificationFeePdaBump,
+            )
+            .accounts({
+                forum: forum,
+                moderator: isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator,
+                moderatorProfile: moderatorProfile,
+                profileOwner: profileOwner,
+                userProfile: userProfile,
+                bigNote: bigNote,
+                bigNoteSeed: bigNoteSeed,
+                verificationApplication: verificationApplication,
+                verificationFeePda: verificationFeePda,
+                systemProgram: SystemProgram.programId,
+            })
+            .signers(signers)
+            .rpc();
+
+        return {
+            moderatorProfile,
+            moderatorProfileBump,
+            userProfileKey,
+            userProfileBump,
+            bigNoteKey,
+            bigNoteBump,
+            verificationApplication,
+            verificationApplicationBump,
+            verificationFeePda,
+            verificationFeePdaBump,
+            txSig
+        }
+    }
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     async acceptBigNoteVerificationApplication(
@@ -4579,6 +4645,72 @@ export class ForumClient {
                 challengeSeed: challengeSeed,
                 submission: submission,
                 receiver: receiver,
+                systemProgram: SystemProgram.programId,
+            })
+            .signers(signers)
+            .rpc();
+
+        return {
+            moderatorProfile,
+            moderatorProfileBump,
+            userProfileKey,
+            userProfileBump,
+            challengeKey,
+            challengeBump,
+            submissionKey,
+            submissionBump,
+            txSig
+        }
+    }
+
+    async evaluateSubmission(
+        submission: PublicKey,
+        moderator: PublicKey | Keypair,
+        submissionState: SubmissionState,
+    ) {
+        const moderatorKey = isKp(moderator) ? (<Keypair>moderator).publicKey : <PublicKey>moderator;
+
+        const submissionAcct = await this.fetchSubmissionAccount(submission);
+        const userProfile = submissionAcct.userProfile;
+        const challenge = submissionAcct.challenge;
+
+        const challengeAcct = await this.fetchChallengeAccount(challenge);
+        const forum = challengeAcct.forum;
+        const challengeSeed = challengeAcct.challengeSeed;
+
+        const userProfileAcct = await this.fetchUserProfileAccount(userProfile);
+        const profileOwner = userProfileAcct.profileOwner;
+
+        // Derive PDAs
+        const [moderatorProfile, moderatorProfileBump] = await findUserProfilePDA(forum, moderatorKey);
+        const [userProfileKey, userProfileBump] = await findUserProfilePDA(forum, profileOwner);
+        const [challengeKey, challengeBump] = await findChallengePDA(forum, challengeSeed);
+        const [submissionKey, submissionBump] = await findSubmissionPDA(challenge, userProfile);
+
+        // Create Signers Array
+        const signers = [];
+        if (isKp(moderator)) signers.push(<Keypair>moderator);
+
+        console.log('moderator evaluating submission with pubkey: ', submission.toBase58());
+
+        // Transaction
+        const txSig = await this.forumProgram.methods
+            .evaluateSubmission(
+                moderatorProfileBump,
+                userProfileBump,
+                challengeBump,
+                submissionBump,
+                submissionState,
+            )
+            .accounts({
+                forum: forum,
+                moderator: isKp(moderator)? (<Keypair>moderator).publicKey : <PublicKey>moderator,
+                moderatorProfile: moderatorProfile,
+                profileOwner: profileOwner,
+                userProfile: userProfile,
+                challenge: challenge,
+                challengeSeed: challengeSeed,
+                submission: submission,
                 systemProgram: SystemProgram.programId,
             })
             .signers(signers)

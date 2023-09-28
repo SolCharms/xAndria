@@ -547,6 +547,18 @@ pub mod forum {
         instructions::delete_big_note_verification_application::delete_big_note_verification_application(ctx)
     }
 
+    pub fn delete_big_note_verification_application_moderator(
+        ctx: Context<DeleteBigNoteVerificationApplicationModerator>,
+        _bump_moderator_profile: u8,
+        _bump_user_profile: u8,
+        _bump_big_note: u8,
+        _bump_verification_application: u8,
+        _bump_verification_fee_pda: u8
+    ) -> Result<()> {
+        msg!("moderator deleting big note verification application");
+        instructions::delete_big_note_verification_application_moderator::delete_big_note_verification_application_moderator(ctx)
+    }
+
 ///////////////////////////////////////////////////////////////////////////
 
     pub fn accept_big_note_verification_application(

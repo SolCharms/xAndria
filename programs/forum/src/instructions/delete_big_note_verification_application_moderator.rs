@@ -20,6 +20,7 @@ pub struct DeleteBigNoteVerificationApplicationModerator<'info> {
               bump = bump_moderator_profile, has_one = forum, constraint = moderator_profile.profile_owner == moderator.key())]
     pub moderator_profile: Box<Account<'info, UserProfile>>,
 
+    /// CHECK: Used for seed verification of user profile pda account
     #[account(mut)]
     pub profile_owner: AccountInfo<'info>,
 
