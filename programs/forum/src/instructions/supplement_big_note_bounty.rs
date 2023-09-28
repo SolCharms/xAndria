@@ -43,7 +43,7 @@ pub struct SupplementBigNoteBounty<'info> {
     pub big_note_seed: AccountInfo<'info>,
 
     /// CHECK:
-    #[account(mut, seeds = [b"bounty_pda".as_ref(), big_note.key().as_ref()], bump = bump_bounty_pda)]
+    #[account(mut, seeds = [b"bignote_bounty_pda".as_ref(), big_note.key().as_ref()], bump = bump_bounty_pda)]
     pub bounty_pda: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,

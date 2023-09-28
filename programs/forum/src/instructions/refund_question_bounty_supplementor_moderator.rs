@@ -46,7 +46,7 @@ pub struct RefundQuestionBountySupplementorModerator<'info> {
     pub question_seed: AccountInfo<'info>,
 
     /// CHECK: The question bounty pda account
-    #[account(mut, seeds = [b"bounty_pda".as_ref(), question.key().as_ref()], bump = bump_bounty_pda)]
+    #[account(mut, seeds = [b"question_bounty_pda".as_ref(), question.key().as_ref()], bump = bump_bounty_pda)]
     pub bounty_pda: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,

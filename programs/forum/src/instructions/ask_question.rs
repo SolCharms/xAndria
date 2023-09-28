@@ -39,7 +39,7 @@ pub struct AskQuestion<'info> {
     pub content_data_hash: AccountInfo<'info>,
 
     /// CHECK:
-    #[account(init, seeds = [b"bounty_pda".as_ref(), question.key().as_ref()], bump, payer = profile_owner, space = 8)]
+    #[account(init, seeds = [b"question_bounty_pda".as_ref(), question.key().as_ref()], bump, payer = profile_owner, space = 8)]
     pub bounty_pda: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
