@@ -1926,6 +1926,40 @@ const parser = yargs(process.argv.slice(2)).options({
 
 
 
+// Delete big note verification application (signer required: moderator)
+    .command('delete-bignote-verification-application-moderator', 'Moderator delete big note verification application', {
+        bigNotePubkey: {
+            alias: 'b',
+            type: 'string',
+            demandOption: true,
+            description: 'big note account pubkey'
+        }
+    },
+             async (argv) => {
+                 const rpcConn = new Connection(networkConfig.clusterApiUrl, { confirmTransactionInitialTimeout: 91000 });
+                 const wallet: anchor.Wallet = new anchor.Wallet(await loadWallet(networkConfig.signerKeypair));
+                 const forumClient: ForumClient = new ForumClient(
+                     rpcConn,
+                     wallet,
+                     ForumIDL,
+                     FORUM_PROG_ID,
+                 );
+
+                 const bigNoteKey = new PublicKey(argv.bigNotePubkey);
+
+                 if (!argv.dryRun) {
+                     const deleteBigNoteVerificationApplicationModeratorInstance = await forumClient.deleteBigNoteVerificationApplicationModerator(
+                         bigNoteKey,
+                         wallet.payer,
+                     );
+                     console.log(stringifyPKsAndBNs(deleteBigNoteVerificationApplicationModeratorInstance));
+                 } else {
+                     console.log('Delete verification application for big note account with address', bigNoteKey.toBase58());
+                 }
+             })
+
+
+
 // -------------------------------------------------- Close Account IX -----------------------------------------------------------
 
 

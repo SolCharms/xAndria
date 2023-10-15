@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "outDir": "./dist"
   },
-  "include": ["src/*", "src/cli/forum-cli.ts"]
+  "include": ["src/*", "src/forum.cli.ts"]
 }

@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use instructions::*;
 use crate::state::{BigNoteType, ForumConstants, ForumFees, ReputationMatrix, SubmissionState, Tags};
 
-declare_id!("FoRUMvAQAPBBJhMvw2UAc1Yx67rxQf9eao87b75GJ857");
+declare_id!("FoRUMwAz6uhSqf8uvG94nkeYdKM326mKzZazrh2Z4sZS");
 
 pub mod instructions;
 pub mod state;
