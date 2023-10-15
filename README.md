@@ -105,11 +105,11 @@ and running the command (with the -f option necessary and being the forum pubkey
 
     forum-cli update-forum-params -f DW54MCjXco2rJEJdkCUV1JsZJyQykgoKCtgm6E49dbDg
 
-A successful transaction outputs
+A successful transaction outputs the transaction signature
 
 ![Screenshot from 2023-10-15 19-28-18](https://github.com/SolCharms/xAndria/assets/97003046/94c3e544-1538-4d4a-be0d-4d717d4100f8)
 
-and running the command
+and subsequently running the command
 
     forum-cli fetch-forum-by-key -k DW54MCjXco2rJEJdkCUV1JsZJyQykgoKCtgm6E49dbDg
 
