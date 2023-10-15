@@ -75,7 +75,7 @@ Here's what mine looks like:
 
 The forum is where all the business takes place. It is an account that stores all the data needed protocol-wide including managerial pubkeys, protocol fees, reputation points for various actions, and account field size constraints. To initialize a forum account, one must decide on all the protocol fees and all the ways reputation can be earned. To configure a forum, we need to input all the required parameters into the config file (../cli_configs/devnet/forumConfig-devnet.ts). Here's mine:
 
-![Screenshot from 2023-03-13 21-43-54](https://user-images.githubusercontent.com/97003046/224870596-d38aac72-eb85-43e8-a994-1cb2b8f77327.png)
+![Screenshot from 2023-10-15 19-09-10](https://github.com/SolCharms/xAndria/assets/97003046/a28afaeb-9892-4cad-8476-3094247ea4e9)
 
 Notice that all quantities of Sol are entered in terms of Lamports (the conversion is 1 Sol = 10^9 Lamports). This holds true for any SPL-Tokens as well. That is, as integer multiples of their respective smallest denomination and their conversion follows 10^n where n is the token's number of decimals.  
 
@@ -85,7 +85,7 @@ Once this file is configured, we will run the command
 
 The output to the terminal, upon successful transaction, should appear as:
 
-![Screenshot from 2023-03-13 21-53-41](https://user-images.githubusercontent.com/97003046/224871935-519e4e92-c59f-4f00-85ef-a04c47e3fe6f.png)
+![Screenshot from 2023-10-15 19-09-44](https://github.com/SolCharms/xAndria/assets/97003046/b3a7f3cd-dde6-4ced-a294-48f246ead9e2)
 
 We can view all the forums associated to this manager's pubkey by running
 
