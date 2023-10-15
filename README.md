@@ -93,29 +93,29 @@ We can view all the forums associated to this manager's pubkey by running
 
 which produces an output as:
 
-![Screenshot from 2023-03-13 21-59-22](https://user-images.githubusercontent.com/97003046/224872762-a02d50c7-4011-4726-bfb6-0ee7aaff8056.png)
+![Screenshot from 2023-10-15 19-22-16](https://github.com/SolCharms/xAndria/assets/97003046/b32ea95f-b41f-42f1-80b8-631b75a4bf30)
 
-where mine correctly states that there are 2 forum accounts (one from prior testing). We see all chosen fee and reputation parameters reflected in the account's data. 
+where we can see all chosen fee and reputation parameters reflected in the account's data. 
 
-Suppose however, that we wanted to change some of the parameters (say, answer repuatation to 25, comment reputation to 5 and forum big notes bounty minimum to 2.5 Sol). Updating the config file to reflect the changes
+Suppose however, that we wanted to change some of the parameters (say, big note verification repuatation to 100 and forum big notes submission fee to 0.05 Sol). Updating the config file to reflect the changes
 
-![Screenshot from 2023-03-13 22-14-24](https://user-images.githubusercontent.com/97003046/224875189-141fc4e8-199f-4b19-9815-f7fd97af489d.png)
+![Screenshot from 2023-10-15 19-26-42](https://github.com/SolCharms/xAndria/assets/97003046/0e096b80-8cff-40f7-822a-6230cf2d6c71)
 
 and running the command (with the -f option necessary and being the forum pubkey)
 
-    forum-cli update-forum-params -f 5CL3JJC156CrDGvQfWpCcmdW3v2HJQYs6bYe3FhzAJts
+    forum-cli update-forum-params -f DW54MCjXco2rJEJdkCUV1JsZJyQykgoKCtgm6E49dbDg
 
 A successful transaction outputs
 
-![Screenshot from 2023-03-13 22-18-35](https://user-images.githubusercontent.com/97003046/224875790-29c74012-5398-435c-bc6b-50f0f437d72f.png)
+![Screenshot from 2023-10-15 19-28-18](https://github.com/SolCharms/xAndria/assets/97003046/94c3e544-1538-4d4a-be0d-4d717d4100f8)
 
 and running the command
 
-    forum-cli fetch-forum-by-key -k 5CL3JJC156CrDGvQfWpCcmdW3v2HJQYs6bYe3FhzAJts
+    forum-cli fetch-forum-by-key -k DW54MCjXco2rJEJdkCUV1JsZJyQykgoKCtgm6E49dbDg
 
 displays the changes reflected:
 
-![Screenshot from 2023-03-13 22-20-25](https://user-images.githubusercontent.com/97003046/224876071-c4c82635-6705-41b3-9455-815ecc610d31.png)
+![Screenshot from 2023-10-15 19-29-23](https://github.com/SolCharms/xAndria/assets/97003046/c4698a59-5c52-4803-816c-72e86e129902)
 
 ## Creating a User Profile
 
@@ -125,7 +125,7 @@ To create a user profile, we will change the network config's signer keypair as 
 
 Running the command
 
-    forum-cli create-profile -f 5CL3JJC156CrDGvQfWpCcmdW3v2HJQYs6bYe3FhzAJts
+    forum-cli create-profile -f DW54MCjXco2rJEJdkCUV1JsZJyQykgoKCtgm6E49dbDg
 
 the output to the terminal should appear as something like 
 
