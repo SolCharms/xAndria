@@ -4,11 +4,15 @@
 
 This README is intended to cater to experienced developers with a focus on protocol level program interactions. To simply use the protocol as an end-user, visit https://xandriaonchain.vercel.app/forum where you will be greeted with nice graphical interfaces and buttons which do things. 
 
+## Deployments
+
+Devnet: FoRUMwAz6uhSqf8uvG94nkeYdKM326mKzZazrh2Z4sZS
+
 ## Disclaimer 
 
 October 15 2023:
 
-The project, codenamed xAndria, is still un-audited open-source software. As it stands, the program has only been deployed to devnet. As such, no harm can result from it's use. However, any use of this software via a Mainnet deploy is done so at your own risk and the developer induces zero liabilty in doing so. (Edit: Indeed, see the Program Improvements / Debugging section at the end of this readme to grasp how much was learned just in the process of this demonstration and how much is left to do to have a fully 'fleshed-out' product).
+The project, codenamed xAndria, is still un-audited open-source software. As it stands, the program has only been deployed to devnet. As such, no real harm can result from it's use. However, any use of this software via a Mainnet deploy is done so at your own risk and the developer induces zero liabilty in doing so. (Edit: Indeed, see the Program Improvements / Debugging section at the end of this readme to grasp how much was learned just in the process of this demonstration and how much is left to do to have a fully 'fleshed-out' product).
 
 Furthermore, any speculative positions in this demo are purely hypothetical and intended for use as educational tools only. They are not to be construed as having any financial relevance whatsoever, nor insight into the financial markets, nor financial advice.
 
@@ -22,13 +26,13 @@ To conveniently use the program's CLI functionality from any directory without h
 
     alias forum-cli='ts-node ~/Development/Solana/SDKs/xAndria/src/forum.cli.ts'
 
-accounting for the fact that your path to the forum.cli.ts file may be slightly different depending on where you put the cloned repository.
+accounting for the fact that your path to the forum.cli.ts file may be slightly different depending on where in your filesystem you put the cloned repository.
 
 The remainder of this demonstration assumes a familiarity with Solana's CLI. You will need to create filesystem wallet keypairs and airdrop yourself some Solana to follow along with the demo.
 
 ## Configuration
 
-In order to use the program we need to create some filesystem wallets and then configure the .ts files in ../src/cli/config_devnet/
+In order to use the program we need to create some filesystem wallets and then configure the .ts files in ../xAndria/src/cli-configs/devnet/
 
 To make filesystem wallets run the Solana CLI command:
 
@@ -43,19 +47,22 @@ I've gone ahead and created 6 wallets and airdropped each of them about 5-10 Sol
 - ...
 - /home/SolCharms/.config/solana/devnet-forum/user_5.json
 
-There are 7 configuration files and we will edit them as needed throughout the demonstration. They are:
+There are 10 configuration files and we will edit them as needed throughout the demonstration. They are:
 
    - the network configuration
    - the forum configuration
    - the about me configuration
-   - the bigNotes configuration
    - the question configuration
    - the answer configuration
    - the comment configuration
+   - the big note configuration
+   - the proposed contribution configuration
+   - the challenge configuration
+   - the submission configuration
    
-The choice for using configuration files was two-fold. For one, since there are multiple public keys / numerical values required for many of the commands, and users can have a multitude of accounts of each type, storage files would be necessary anyways. And secondly, entering multiple options in the process of a command would require a tedious copying/pasting process which configuration files ultimately forego. Nonetheless, the command line interface built here tries to be as flexible as possible, forcing you to use configuration files when it is absolutely in your best interest and otherwise giving you the flexibility to enter options manually.
+The choice for using configuration files, at least from a protocol management perspective, was two-fold. For one, since there are often multiple public keys / numerical values required by many of the commands, and managers can have a multitude of accounts of each type, storage files would be necessary anyways. And secondly, entering multiple options in the process of a command would require a tedious copying/pasting process which configuration files ultimately forego. Nonetheless, the command line interface built here tries to be as flexible as possible, forcing you to use configuration files when it is absolutely in your best interest and otherwise giving you the flexibility to enter options manually.
 
-The network configuration (../config_devnet/networkConfig-devnet.ts) is necessary right away. We will first set up the configuration from the perspective of someone who will initialize and manage a forum (later we will also do it from the perspective of other users). Two inputs are required:
+The network configuration (../cli_configs/devnet/networkConfig-devnet.ts) is necessary right away. We will first set up the configuration from the perspective of someone who will initialize and manage a forum, i.e the forum manager. (Later we will also do it from the perspective of other users including protocol moderators). Two inputs are required:
 
     the clusterApiUrl
     the signerKeypair
@@ -66,7 +73,7 @@ Here's what mine looks like:
 
 ## Initializing a Forum
 
-The forum is where all the business takes place. It is an account that stores all the data needed protocol-wide. To initialize a forum account, one must decide on all the protocol fees and all the ways reputation can be earned. To configure a forum, we need to input all the required parameters into the config file (../config_devnet/forumConfig-devnet.ts). Here's mine:
+The forum is where all the business takes place. It is an account that stores all the data needed protocol-wide including managerial pubkeys, protocol fees, reputation points for various actions, and account field size constraints. To initialize a forum account, one must decide on all the protocol fees and all the ways reputation can be earned. To configure a forum, we need to input all the required parameters into the config file (../cli_configs/devnet/forumConfig-devnet.ts). Here's mine:
 
 ![Screenshot from 2023-03-13 21-43-54](https://user-images.githubusercontent.com/97003046/224870596-d38aac72-eb85-43e8-a994-1cb2b8f77327.png)
 
