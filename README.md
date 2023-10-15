@@ -1,14 +1,14 @@
 # xAndria SDK
 
-### A Decentralized Educational Information and Tooling protocol (hence the name DeEdIT) codenamed and marketed as "xAndria".
+### Decentralized Educational Information and Tooling - DeEdIT - codenamed and marketed as "xAndria".
 
 This README is intended to cater to experienced developers with a focus on protocol level program interactions. To simply use the protocol as an end-user, visit https://xandriaonchain.vercel.app/forum where you will be greeted with nice graphical interfaces and buttons which do things. 
 
 ## Disclaimer 
 
-March 13 2023:
+October 15 2023:
 
-The project, codenamed xAndria is un-audited open-source software. It was built from the ground up by a single developer over a 30 day period (Feb 14 2023 - March 13 2023) for submission in Solana's Grizzlython hackathon. Any use of this software is done so at your own risk and the developer induces zero liabilty in doing so. (Edit: Indeed, see the Program Improvements / Debugging section at the end of this readme to grasp how much was learned just in the process of this demonstration and how much is left to do to have a fully 'fleshed-out' product).
+The project, codenamed xAndria, is still un-audited open-source software. As it stands, the program has only been deployed to devnet. As such, no harm can result from it's use. However, any use of this software via a Mainnet deploy is done so at your own risk and the developer induces zero liabilty in doing so. (Edit: Indeed, see the Program Improvements / Debugging section at the end of this readme to grasp how much was learned just in the process of this demonstration and how much is left to do to have a fully 'fleshed-out' product).
 
 Furthermore, any speculative positions in this demo are purely hypothetical and intended for use as educational tools only. They are not to be construed as having any financial relevance whatsoever, nor insight into the financial markets, nor financial advice.
 
@@ -16,11 +16,11 @@ Furthermore, any speculative positions in this demo are purely hypothetical and 
 
 Open the terminal and cd into the desired working directory (For me it's ~/Development/Solana/SDKs).
 
-Clone the Repository using the command 'git clone'. You should now have a local copy of the project as something like ~/Development/Solana/SDKs/DeEdIT_SDK/
+Clone the Repository using the command 'git clone'. You should now have a local copy of the project as something like ~/Development/Solana/SDKs/xAndria/
 
 To conveniently use the program's CLI functionality from any directory without having to account for relative paths or typing out the absolute path to the CLI's directory every time, we will create a shorthand path alias. Open your .bashrc file (located in the Home directory) and add the following line at the bottom of the textfile:
 
-    alias forum-cli='ts-node ~/Development/Solana/SDKs/DeEdIT_SDK/src/forum.cli.ts'
+    alias forum-cli='ts-node ~/Development/Solana/SDKs/xAndria/src/forum.cli.ts'
 
 accounting for the fact that your path to the forum.cli.ts file may be slightly different depending on where you put the cloned repository.
 
