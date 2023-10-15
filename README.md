@@ -129,7 +129,7 @@ Running the command
 
 the output to the terminal should appear as something like 
 
-![Screenshot from 2023-03-14 01-05-22](https://user-images.githubusercontent.com/97003046/224898780-4806119b-7a53-4ba7-b9bf-89f6ed5955f0.png)
+![Screenshot from 2023-10-15 19-34-53](https://github.com/SolCharms/xAndria/assets/97003046/1d289b12-b2d0-4f40-ada0-0e20c855adce)
 
 We can fetch the user profile by running the command
 
@@ -137,13 +137,13 @@ We can fetch the user profile by running the command
 
 which displays the user profile state account to the terminal as something like
 
-![Screenshot from 2023-03-14 01-06-52](https://user-images.githubusercontent.com/97003046/224899211-c7bc15b7-b421-4a5b-a3c7-488834b046ff.png)
+![Screenshot from 2023-10-15 19-35-31](https://github.com/SolCharms/xAndria/assets/97003046/4ec2830f-a557-4a52-b038-2350bd9549a4)
 
 Fetching the forum account, we see that there is now 1 forum profile account present:
 
-![Screenshot from 2023-03-14 01-08-12](https://user-images.githubusercontent.com/97003046/224899679-0feb98df-65ae-4a17-9139-588255ed2703.png)
+![Screenshot from 2023-10-15 19-36-22](https://github.com/SolCharms/xAndria/assets/97003046/5ef927b2-2674-40f4-95c5-aa9682acfc1b)
 
-The next step after a user's profile has been created is to create an 'about me'. This first requires configuring the file (../config_devnet/aboutMeConfig-devnet.ts) to add the necessary about me text
+The next step after a user's profile has been created is to create an 'about me'. This first requires configuring the file (../cli_configs/devnet/aboutMeConfig-devnet.ts) to add the necessary about me text
 
 ![Screenshot from 2023-03-14 01-09-39](https://user-images.githubusercontent.com/97003046/224900169-90315480-421b-4d88-9926-b5fdf067200b.png)
 
