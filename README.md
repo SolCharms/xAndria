@@ -2,7 +2,7 @@
 
 ### Decentralized Educational Information and Tooling - DeEdIT - codenamed and marketed as "xAndria".
 
-This README is intended to cater to experienced developers with a focus on protocol level program interactions. To simply use the protocol as an end-user, visit https://xandriaonchain.vercel.app/forum where you will be greeted with nice graphical interfaces and buttons which do things. 
+This README is intended to cater to experienced developers with a focus on protocol level program interactions. As the front end application is still under construction, end users will have to wait until it is completed to try our product.
 
 ## Deployments
 
