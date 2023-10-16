@@ -161,7 +161,7 @@ Fetching the user profile
 
 we now see that the user profile has an about me and has earned 100 reputation!
 
-We can also view the about me state account by running the command
+We can also view the about me state account by running the command (with the -u option necessary and being the pubkey of the user profile state account)
 
     forum-cli fetch-about-me-by-profile -u G59DTTBjKtmBD47ibjNDDfDPutb4xqD4NSZuL1pFVUUY
 
@@ -175,13 +175,21 @@ To edit the about me, change the content in the config file and execute
 
 I'll later create the remaining user profiles, as necessary. Let's do one last thing before moving on. Since user 1 now has the most reputation of any user on the protocol (by default), let's give user 1 moderator privileges. 
 
-First, set the network config so that the signer is again the forum manager's keypair filepath since only the forum manager has the authority to assign user's the moderator role. Running the command (with the -u option necessary and being the pubkey of the user profile state account)
+First, set the network config so that the signer is again the forum manager's keypair filepath since only the forum manager has the authority to assign user's the moderator role. Run the command 
 
     forum-cli add-moderator -u G59DTTBjKtmBD47ibjNDDfDPutb4xqD4NSZuL1pFVUUY
 
 Upon transaction success, one should observe an output to the terminal similar to:
 
 ![Screenshot from 2023-10-15 21-50-56](https://github.com/SolCharms/xAndria/assets/97003046/a78269ac-48f9-4ec3-b791-e0c389f6b963)
+
+Fetching the user profile state account again with
+
+    forum-cli fetch-profile-by-key -k G59DTTBjKtmBD47ibjNDDfDPutb4xqD4NSZuL1pFVUUY 
+
+we see that the user profile has indeed been given moderator privileges
+
+![Screenshot from 2023-10-15 22-25-18](https://github.com/SolCharms/xAndria/assets/97003046/f9221c77-3fdc-4108-8ea5-3b1f75a8f85e)
 
 ## Asking a Question, Providing an Answer, or Leaving a Comment
 
