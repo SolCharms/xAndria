@@ -133,7 +133,7 @@ the output to the terminal should appear as something like
 
 We can fetch the user profile by running the command
 
-    forum-cli fetch-profile-by-key -k FNdJSvCWraqKrELHFdvaHuQHqKNCYKLw1JbbKNdBDHPA
+    forum-cli fetch-profile-by-key -k G59DTTBjKtmBD47ibjNDDfDPutb4xqD4NSZuL1pFVUUY
 
 which displays the user profile state account to the terminal as something like
 
