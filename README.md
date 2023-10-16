@@ -145,7 +145,7 @@ Fetching the forum account, we see that there is now 1 forum profile account pre
 
 The next step after a user's profile has been created is to create an 'about me'. This first requires configuring the file (../cli_configs/devnet/aboutMeConfig-devnet.ts) to add the necessary about me text
 
-![Screenshot from 2023-03-14 01-09-39](https://user-images.githubusercontent.com/97003046/224900169-90315480-421b-4d88-9926-b5fdf067200b.png)
+![Screenshot from 2023-10-15 21-23-47](https://github.com/SolCharms/xAndria/assets/97003046/2cc840f6-82d4-48c7-a494-bd66711de942)
 
 and then by running the command
 
@@ -153,35 +153,35 @@ and then by running the command
 
 obtaining an output similar to
 
-![Screenshot from 2023-03-14 01-10-32](https://user-images.githubusercontent.com/97003046/224900477-04ee15f7-5c8a-4721-bc29-caa97f2c6dee.png)
+![Screenshot from 2023-10-15 21-25-44](https://github.com/SolCharms/xAndria/assets/97003046/0deede49-687c-4042-b93d-f4ffb3069bcd)
 
 Fetching the user profile
 
-![Screenshot from 2023-03-14 01-11-19](https://user-images.githubusercontent.com/97003046/224900698-9a291078-7a5b-4309-8003-57764aa7fada.png)
+![Screenshot from 2023-10-15 21-26-34](https://github.com/SolCharms/xAndria/assets/97003046/15a4a854-2a7e-4777-a1f0-8a923ea899f1)
 
 we now see that the user profile has an about me and has earned 100 reputation!
 
 We can also view the about me state account by running the command
 
-    forum-cli fetch-about-me-by-profile -p FNdJSvCWraqKrELHFdvaHuQHqKNCYKLw1JbbKNdBDHPA
+    forum-cli fetch-about-me-by-profile -u G59DTTBjKtmBD47ibjNDDfDPutb4xqD4NSZuL1pFVUUY
 
 which displays the following output to the terminal
 
-![Screenshot from 2023-03-14 01-12-26](https://user-images.githubusercontent.com/97003046/224901086-cb85b6d0-98d8-4bc4-abde-cc98373d0838.png)
+![Screenshot from 2023-10-15 21-29-43](https://github.com/SolCharms/xAndria/assets/97003046/f3100d9e-e905-4eb7-a9e0-762b9cb3a6a6)
 
 To edit the about me, change the content in the config file and execute
 
     forum-cli edit-about-me
 
-A successful transaction outputs
+I'll later create the remaining user profiles, as necessary. Let's do one last thing before moving on. Since user 1 now has the most reputation of any user on the protocol (by default), let's give user 1 moderator privileges. 
 
-![Screenshot from 2023-03-14 01-13-45](https://user-images.githubusercontent.com/97003046/224901506-bda215a6-55c4-4cce-a0c2-d2a31387ee4f.png)
+First, set the network config so that the signer is again the forum manager's keypair filepath since only the forum manager has the authority to assign user's the moderator role. Running the command (with the -u option necessary and being the pubkey of the user profile state account)
 
-and the about me account is updated to reflect the changes
+    forum-cli add-moderator -u G59DTTBjKtmBD47ibjNDDfDPutb4xqD4NSZuL1pFVUUY
 
-![Screenshot from 2023-03-14 01-14-26](https://user-images.githubusercontent.com/97003046/224901690-c5b9235c-5ae9-4dfa-b795-2ad9f983069c.png)
+Upon transaction success, one should observe an output to the terminal similar to:
 
-I'll later create the remaining user profiles, as necessary.
+![Screenshot from 2023-10-15 21-50-56](https://github.com/SolCharms/xAndria/assets/97003046/a78269ac-48f9-4ec3-b791-e0c389f6b963)
 
 ## Asking a Question, Providing an Answer, or Leaving a Comment
 
