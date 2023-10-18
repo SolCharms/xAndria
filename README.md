@@ -8,6 +8,8 @@ This README is intended to cater to experienced developers with a focus on proto
 
 Devnet: FoRUMwAz6uhSqf8uvG94nkeYdKM326mKzZazrh2Z4sZS
 
+One component of xAndria - The Gauntlet - has been split off and deployed on mainnet to demonstrate proof of concept. It's on chain deployment address on mainnet is: CRuXQ86F4m6VfRHa7VACNbQKJoSioG3gcpui9BH2YNWa and one can interact with the protocol at https://thegauntlet.xyz/
+
 ## Disclaimer 
 
 October 15 2023:
